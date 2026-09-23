@@ -95,7 +95,7 @@ class Stock extends CI_Controller {
         $this->session->set_flashdata('success', 'Stock adjustment saved: ' . $result['transaction_no']);
         redirect('stock/adjustments');
     }
-    // Function to check if the user has the required permission and display the stock adjustments history
+    // Function to check if the user has the required permission and display the Stocks adjustments list with limit and paginations default at 20
     public function adjustments() {
         $this->require_permission('manage_adjustments');
 
@@ -109,7 +109,7 @@ class Stock extends CI_Controller {
         $this->load->view('stock/adjustments', $data);
         $this->load->view('templates/footer');
     }
-    // Function to check if the user has the required permission and display details of a specific stock adjustment
+    // Function to check if the user has the required permission and display low stock monitoring
     public function low_stock() {
         $this->require_permission('view_dashboard');
 
@@ -119,7 +119,7 @@ class Stock extends CI_Controller {
         $this->load->view('stock/low_stock', $data);
         $this->load->view('templates/footer');
     }
-    // Function to check if the user has the required permission and display details of a specific stock adjustment
+    // this is for transaction form with validations which create a transaction stock in or stock out
     private function transaction_form($type) {
         $this->form_validation->set_rules('product_id[]', 'Product', 'required|integer');
         $this->form_validation->set_rules('quantity[]', 'Quantity', 'required|integer|greater_than[0]');
