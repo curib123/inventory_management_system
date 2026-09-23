@@ -74,4 +74,43 @@ class Role_model extends CI_Model {
     public function has_users($role_id) {
         return $this->db->where('role_id', (int) $role_id)->count_all_results('users') > 0;
     }
+
+    public function count_all() {
+        return $this->db->count_all('roles');
+    }
+
+    public function get_datatable($start, $length, $search, $order_column, $order_dir) {
+        $this->db->select('r.id, r.role_name, r.description, r.status, COUNT(DISTINCT u.id) AS user_count');
+        $this->db->from('roles r');
+        $this->db->join('users u', 'u.role_id = r.id', 'left');
+        $this->apply_datatable_search($search);
+        $this->db->group_by('r.id');
+        if ($order_column) {
+            $this->db->order_by($order_column, $order_dir);
+        }
+        $this->db->limit((int) $length, (int) $start);
+        return $this->db->get()->result();
+    }
+
+    public function count_datatable_filtered($search) {
+        $this->db->from('roles r');
+        $this->apply_datatable_search($search);
+        return $this->db->count_all_results();
+    }
+
+    private function apply_datatable_search($search) {
+        if ($search === '') {
+            return;
+        }
+
+        $this->db->group_start();
+        $this->db->like('r.role_name', $search);
+        $this->db->or_like('r.description', $search);
+        if (strcasecmp($search, 'active') === 0) {
+            $this->db->or_where('r.status', 1);
+        } elseif (strcasecmp($search, 'inactive') === 0) {
+            $this->db->or_where('r.status', 0);
+        }
+        $this->db->group_end();
+    }
 }

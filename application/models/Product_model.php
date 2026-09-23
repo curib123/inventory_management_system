@@ -91,4 +91,40 @@ class Product_model extends CI_Model {
         $this->db->order_by('p.stock', 'ASC');
         return $this->db->get()->result();
     }
+
+    public function get_datatable($start, $length, $search, $order_column, $order_dir) {
+        $this->build_datatable_query($search);
+        $this->db->select('p.id, p.product_code, p.product_name, c.category_name, s.supplier_name, p.stock, p.selling_price, p.status');
+        if ($order_column) {
+            $this->db->order_by($order_column, $order_dir);
+        }
+        $this->db->limit((int) $length, (int) $start);
+        return $this->db->get()->result();
+    }
+
+    public function count_datatable_filtered($search) {
+        $this->build_datatable_query($search);
+        return $this->db->count_all_results();
+    }
+
+    private function build_datatable_query($search) {
+        $this->db->from('products p');
+        $this->db->join('categories c', 'c.id = p.category_id', 'left');
+        $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
+
+        if ($search !== '') {
+            $this->db->group_start();
+            $this->db->like('p.product_code', $search);
+            $this->db->or_like('p.product_name', $search);
+            $this->db->or_like('c.category_name', $search);
+            $this->db->or_like('s.supplier_name', $search);
+            $this->db->or_like('p.unit', $search);
+            if (strcasecmp($search, 'active') === 0) {
+                $this->db->or_where('p.status', 1);
+            } elseif (strcasecmp($search, 'inactive') === 0) {
+                $this->db->or_where('p.status', 0);
+            }
+            $this->db->group_end();
+        }
+    }
 }

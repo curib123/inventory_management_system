@@ -109,4 +109,41 @@ class User_model extends CI_Model {
         $result = $this->db->get()->row();
         return $result && (int) $result->total > 0;
     }
+
+    public function count_all() {
+        return $this->db->count_all('users');
+    }
+
+    public function get_datatable($start, $length, $search, $order_column, $order_dir) {
+        $this->build_datatable_query($search);
+        $this->db->select('u.id, u.username, u.status, u.created_at, r.role_name');
+        if ($order_column) {
+            $this->db->order_by($order_column, $order_dir);
+        }
+        $this->db->limit((int) $length, (int) $start);
+        return $this->db->get()->result();
+    }
+
+    public function count_datatable_filtered($search) {
+        $this->build_datatable_query($search);
+        return $this->db->count_all_results();
+    }
+
+    private function build_datatable_query($search) {
+        $this->db->from('users u');
+        $this->db->join('roles r', 'r.id = u.role_id', 'left');
+
+        if ($search !== '') {
+            $this->db->group_start();
+            $this->db->like('u.username', $search);
+            $this->db->or_like('r.role_name', $search);
+            $this->db->or_like('u.created_at', $search);
+            if (strcasecmp($search, 'active') === 0) {
+                $this->db->or_where('u.status', 1);
+            } elseif (strcasecmp($search, 'inactive') === 0) {
+                $this->db->or_where('u.status', 0);
+            }
+            $this->db->group_end();
+        }
+    }
 }

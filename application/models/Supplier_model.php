@@ -38,4 +38,43 @@ class Supplier_model extends CI_Model {
         $this->db->order_by('p.product_name', 'ASC');
         return $this->db->get()->result();
     }
+
+    public function count_all() {
+        return $this->db->count_all('suppliers');
+    }
+
+    public function get_datatable($start, $length, $search, $order_column, $order_dir) {
+        $this->db->select('s.id, s.supplier_name, s.contact_person, s.phone, s.address, s.status');
+        $this->db->from('suppliers s');
+        $this->apply_datatable_search($search);
+        if ($order_column) {
+            $this->db->order_by($order_column, $order_dir);
+        }
+        $this->db->limit((int) $length, (int) $start);
+        return $this->db->get()->result();
+    }
+
+    public function count_datatable_filtered($search) {
+        $this->db->from('suppliers s');
+        $this->apply_datatable_search($search);
+        return $this->db->count_all_results();
+    }
+
+    private function apply_datatable_search($search) {
+        if ($search === '') {
+            return;
+        }
+
+        $this->db->group_start();
+        $this->db->like('s.supplier_name', $search);
+        $this->db->or_like('s.contact_person', $search);
+        $this->db->or_like('s.phone', $search);
+        $this->db->or_like('s.address', $search);
+        if (strcasecmp($search, 'active') === 0) {
+            $this->db->or_where('s.status', 1);
+        } elseif (strcasecmp($search, 'inactive') === 0) {
+            $this->db->or_where('s.status', 0);
+        }
+        $this->db->group_end();
+    }
 }

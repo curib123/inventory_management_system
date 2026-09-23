@@ -50,4 +50,38 @@ class Category_model extends CI_Model {
         $this->db->where('category_id', (int) $category_id);
         return $this->db->count_all_results('products');
     }
+
+    public function get_datatable($start, $length, $search, $order_column, $order_dir) {
+        $this->db->select('c.id, c.category_name, c.status, COUNT(p.id) AS product_count');
+        $this->db->from('categories c');
+        $this->db->join('products p', 'p.category_id = c.id', 'left');
+        $this->apply_datatable_search($search, 'c');
+        $this->db->group_by('c.id');
+        if ($order_column) {
+            $this->db->order_by($order_column, $order_dir);
+        }
+        $this->db->limit((int) $length, (int) $start);
+        return $this->db->get()->result();
+    }
+
+    public function count_datatable_filtered($search) {
+        $this->db->from('categories c');
+        $this->apply_datatable_search($search, 'c');
+        return $this->db->count_all_results();
+    }
+
+    private function apply_datatable_search($search, $alias) {
+        if ($search === '') {
+            return;
+        }
+
+        $this->db->group_start();
+        $this->db->like($alias . '.category_name', $search);
+        if (strcasecmp($search, 'active') === 0) {
+            $this->db->or_where($alias . '.status', 1);
+        } elseif (strcasecmp($search, 'inactive') === 0) {
+            $this->db->or_where($alias . '.status', 0);
+        }
+        $this->db->group_end();
+    }
 }

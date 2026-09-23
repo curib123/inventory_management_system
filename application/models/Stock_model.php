@@ -266,4 +266,98 @@ class Stock_model extends CI_Model {
             'ip_address' => $this->input->ip_address()
         ));
     }
+
+    public function get_transactions_datatable($start, $length, $search, $order_column, $order_dir) {
+        $this->build_transactions_datatable_query($search);
+        $this->db->select('t.id, t.transaction_no, t.type, t.created_at, u.username, s.supplier_name');
+        if ($order_column) {
+            $this->db->order_by($order_column, $order_dir);
+        }
+        $this->db->order_by('t.id', 'DESC');
+        $this->db->limit((int) $length, (int) $start);
+        return $this->db->get()->result();
+    }
+
+    public function count_transactions_filtered($search) {
+        $this->build_transactions_datatable_query($search);
+        return $this->db->count_all_results();
+    }
+
+    public function get_adjustments_datatable($start, $length, $search, $order_column, $order_dir) {
+        $this->build_adjustments_datatable_query($search);
+        $this->db->select('a.id, a.system_stock, a.actual_stock, a.difference, a.reason, a.created_at, p.product_code, p.product_name, u.username');
+        if ($order_column) {
+            $this->db->order_by($order_column, $order_dir);
+        }
+        $this->db->order_by('a.id', 'DESC');
+        $this->db->limit((int) $length, (int) $start);
+        return $this->db->get()->result();
+    }
+
+    public function count_adjustments_filtered($search) {
+        $this->build_adjustments_datatable_query($search);
+        return $this->db->count_all_results();
+    }
+
+    public function get_low_stock_datatable($start, $length, $search, $order_column, $order_dir) {
+        $this->build_low_stock_datatable_query($search);
+        $this->db->select('p.product_code, p.product_name, p.stock, p.reorder_level, p.unit');
+        if ($order_column) {
+            $this->db->order_by($order_column, $order_dir);
+        }
+        $this->db->limit((int) $length, (int) $start);
+        return $this->db->get()->result();
+    }
+
+    public function count_low_stock_filtered($search) {
+        $this->build_low_stock_datatable_query($search);
+        return $this->db->count_all_results();
+    }
+
+    private function build_transactions_datatable_query($search) {
+        $this->db->from('stock_transactions t');
+        $this->db->join('users u', 'u.id = t.created_by');
+        $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
+
+        if ($search !== '') {
+            $this->db->group_start();
+            $this->db->like('t.transaction_no', $search);
+            $this->db->or_like('t.type', $search);
+            $this->db->or_like('s.supplier_name', $search);
+            $this->db->or_like('u.username', $search);
+            $this->db->or_like('t.created_at', $search);
+            $this->db->or_like('t.remarks', $search);
+            $this->db->group_end();
+        }
+    }
+
+    private function build_adjustments_datatable_query($search) {
+        $this->db->from('stock_adjustments a');
+        $this->db->join('products p', 'p.id = a.product_id');
+        $this->db->join('users u', 'u.id = a.created_by');
+
+        if ($search !== '') {
+            $this->db->group_start();
+            $this->db->like('p.product_code', $search);
+            $this->db->or_like('p.product_name', $search);
+            $this->db->or_like('a.reason', $search);
+            $this->db->or_like('u.username', $search);
+            $this->db->or_like('a.created_at', $search);
+            $this->db->group_end();
+        }
+    }
+
+    private function build_low_stock_datatable_query($search) {
+        $this->db->from('products p');
+        $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
+        $this->db->where('p.status', 1);
+
+        if ($search !== '') {
+            $this->db->group_start();
+            $this->db->like('p.product_code', $search);
+            $this->db->or_like('p.product_name', $search);
+            $this->db->or_like('p.unit', $search);
+            $this->db->group_end();
+        }
+    }
 }
