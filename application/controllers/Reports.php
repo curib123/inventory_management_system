@@ -4,14 +4,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Reports extends CI_Controller {
 
-    private $report_definitions = array(
-        'inventory' => array('title' => 'Inventory Report', 'method' => 'get_inventory_report'),
-        'stock-in' => array('title' => 'Stock-In Report', 'method' => 'get_stock_movement_report', 'type' => 'stock_in'),
-        'stock-out' => array('title' => 'Stock-Out Report', 'method' => 'get_stock_movement_report', 'type' => 'stock_out'),
-        'movement' => array('title' => 'Stock Movement Report', 'method' => 'get_stock_movement_report'),
-        'low-stock' => array('title' => 'Low-Stock Report', 'method' => 'get_low_stock_report'),
-        'valuation' => array('title' => 'Inventory Valuation', 'method' => 'get_inventory_report')
-    );
 
     public function __construct() {
         parent::__construct();
@@ -204,11 +196,6 @@ class Reports extends CI_Controller {
             show_404();
             exit;
         }
-        if (!isset($this->report_definitions[$report])) {
-            show_404();
-            exit;
-        }
-        $definition['method'] = $this->report_definitions[$report]['method'];
         return $definition;
     }
 
