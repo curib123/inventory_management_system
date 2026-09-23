@@ -152,14 +152,16 @@ class Stock_model extends CI_Model {
         return array('success' => TRUE, 'transaction_no' => $transaction_no);
     }
 
-    public function get_transactions($limit = 20, $offset = 0) {
+    public function get_transactions($limit = NULL, $offset = 0) {
         $this->db->select('t.*, u.username, s.supplier_name');
         $this->db->from('stock_transactions t');
         $this->db->join('users u', 'u.id = t.created_by');
         $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
         $this->db->order_by('t.created_at', 'DESC');
         $this->db->order_by('t.id', 'DESC');
-        $this->db->limit((int) $limit, (int) $offset);
+        if ($limit !== NULL) {
+            $this->db->limit((int) $limit, (int) $offset);
+        }
         return $this->db->get()->result();
     }
 
@@ -184,14 +186,16 @@ class Stock_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function get_adjustments($limit = 20, $offset = 0) {
+    public function get_adjustments($limit = NULL, $offset = 0) {
         $this->db->select('a.*, p.product_name, p.product_code, u.username');
         $this->db->from('stock_adjustments a');
         $this->db->join('products p', 'p.id = a.product_id');
         $this->db->join('users u', 'u.id = a.created_by');
         $this->db->order_by('a.created_at', 'DESC');
         $this->db->order_by('a.id', 'DESC');
-        $this->db->limit((int) $limit, (int) $offset);
+        if ($limit !== NULL) {
+            $this->db->limit((int) $limit, (int) $offset);
+        }
         return $this->db->get()->result();
     }
 

@@ -9,13 +9,15 @@ class Product_model extends CI_Model {
         $this->load->database();
     }
 
-    public function get_all($limit = 10, $offset = 0) {
+    public function get_all($limit = NULL, $offset = 0) {
         $this->db->select('p.*, c.category_name, s.supplier_name');
         $this->db->from('products p');
         $this->db->join('categories c', 'c.id = p.category_id', 'left');
         $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
         $this->db->order_by('p.product_name', 'ASC');
-        $this->db->limit((int) $limit, (int) $offset);
+        if ($limit !== NULL) {
+            $this->db->limit((int) $limit, (int) $offset);
+        }
         return $this->db->get()->result();
     }
 

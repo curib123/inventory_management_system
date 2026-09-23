@@ -9,9 +9,11 @@ class Category_model extends CI_Model {
         $this->load->database();
     }
 
-    public function get_all($limit = 10, $offset = 0) {
+    public function get_all($limit = NULL, $offset = 0) {
         $this->db->order_by('category_name', 'ASC');
-        $this->db->limit((int) $limit, (int) $offset);
+        if ($limit !== NULL) {
+            $this->db->limit((int) $limit, (int) $offset);
+        }
         return $this->db->get('categories')->result();
     }
 

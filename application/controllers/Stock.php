@@ -21,10 +21,7 @@ class Stock extends CI_Controller {
 
     public function history() {
         $this->require_permission('view_reports');
-        $limit = 20;
-        $page = max(1, (int) $this->input->get('per_page', TRUE));
-        $data['transactions'] = $this->Stock_model->get_transactions($limit, ($page - 1) * $limit);
-        $data['pagination'] = $this->paginate($this->Stock_model->count_transactions(), $limit, 'stock/history');
+        $data['transactions'] = $this->Stock_model->get_transactions();
         $data['page_title'] = 'Stock Movement History';
         $this->load->view('templates/header', $data);
         $this->load->view('stock/history', $data);
@@ -86,10 +83,7 @@ class Stock extends CI_Controller {
 
     public function adjustments() {
         $this->require_permission('manage_adjustments');
-        $limit = 20;
-        $page = max(1, (int) $this->input->get('per_page', TRUE));
-        $data['adjustments'] = $this->Stock_model->get_adjustments($limit, ($page - 1) * $limit);
-        $data['pagination'] = $this->paginate($this->Stock_model->count_adjustments(), $limit, 'stock/adjustments');
+        $data['adjustments'] = $this->Stock_model->get_adjustments();
         $data['page_title'] = 'Stock Adjustments';
         $this->load->view('templates/header', $data);
         $this->load->view('stock/adjustments', $data);
@@ -161,18 +155,6 @@ class Stock extends CI_Controller {
         }
         $this->session->set_flashdata('success', 'Stock transaction saved: ' . $result['transaction_no']);
         redirect('stock/history');
-    }
-
-    private function paginate($total_rows, $limit, $base_url) {
-        $this->load->library('pagination');
-        $config['base_url'] = site_url($base_url);
-        $config['total_rows'] = (int) $total_rows;
-        $config['per_page'] = (int) $limit;
-        $config['use_page_numbers'] = TRUE;
-        $config['page_query_string'] = TRUE;
-        $config['query_string_segment'] = 'per_page';
-        $this->pagination->initialize($config);
-        return $this->pagination->create_links();
     }
 
     private function require_permission($permission_name) {

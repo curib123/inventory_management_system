@@ -25,4 +25,3 @@
     </tbody>
 </table>
 
-<?php if (!empty($pagination)): ?><p><?php echo $pagination; ?></p><?php endif; ?>

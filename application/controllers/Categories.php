@@ -17,11 +17,8 @@ class Categories extends CI_Controller {
 
     public function index() {
         $this->require_permission('manage_products');
-        $limit = 10;
-        $page = max(1, (int) $this->input->get('per_page', TRUE));
-        $data['categories'] = $this->Category_model->get_all($limit, ($page - 1) * $limit);
+        $data['categories'] = $this->Category_model->get_all();
         $data['page_title'] = 'Categories';
-        $data['pagination'] = $this->paginate($this->Category_model->count_all(), $limit, 'categories');
         $this->load->view('templates/header', $data);
         $this->load->view('categories/index', $data);
         $this->load->view('templates/footer');
@@ -83,18 +80,6 @@ class Categories extends CI_Controller {
             show_error('The category could not be saved.', 500, 'Category Not Saved');
         }
         redirect('categories');
-    }
-
-    private function paginate($total_rows, $limit, $base_url) {
-        $this->load->library('pagination');
-        $config['base_url'] = site_url($base_url);
-        $config['total_rows'] = (int) $total_rows;
-        $config['per_page'] = (int) $limit;
-        $config['use_page_numbers'] = TRUE;
-        $config['page_query_string'] = TRUE;
-        $config['query_string_segment'] = 'per_page';
-        $this->pagination->initialize($config);
-        return $this->pagination->create_links();
     }
 
     private function require_permission($permission_name) {
