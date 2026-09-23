@@ -128,7 +128,7 @@ class Products extends CI_Controller {
         if ($this->form_validation->run() === FALSE) {
             $data['product'] = $product;
             $data['suppliers'] = $this->Supplier_model->get_all();
-            $data['categories'] = $this->Category_model->get_all(10000, 0);
+            $data['categories'] = $this->Category_model->get_all();
             $data['page_title'] = $id === NULL ? 'Add Product' : 'Edit Product';
             $this->load->view('templates/header', $data);
             $this->load->view('products/form', $data);
