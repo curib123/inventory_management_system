@@ -127,6 +127,14 @@
             <a href="<?php echo site_url('products'); ?>">Products</a>
             <a href="<?php echo site_url('categories'); ?>">Categories</a>
             <a href="<?php echo site_url('suppliers'); ?>">Suppliers</a>
+            <?php if ($this->session->userdata('user_id')): ?>
+                <a href="<?php echo site_url('stock'); ?>">Stock History</a>
+                <a href="<?php echo site_url('stock/low-stock'); ?>">Low Stock</a>
+                <a href="<?php echo site_url('reports'); ?>">Reports</a>
+            <?php endif; ?>
+            <?php if ($this->session->userdata('user_id') && $this->User_model->has_permission($this->session->userdata('user_id'), 'manage_users')): ?>
+                <a href="<?php echo site_url('roles'); ?>">Roles</a>
+            <?php endif; ?>
             <a href="<?php echo site_url('logout'); ?>">Logout</a>
         </div>
     </div>

@@ -207,15 +207,16 @@ inventory_management_system/
 - PHP 7.4 or newer
 - MySQL or MariaDB
 - Apache or Nginx
-- Composer (optional, if needed)
+- Composer
 
 ### Setup Steps
 1. Clone the repository.
 2. Import the database schema into MySQL.
-3. Configure the database connection in the CodeIgniter settings.
-4. Set the application base URL.
-5. Ensure writable folders have the proper permissions.
-6. Run the project in a browser.
+3. Run `composer install` to install PHPSpreadsheet and Dompdf.
+4. Configure the database connection in the CodeIgniter settings.
+5. Set the application base URL.
+6. Ensure writable folders have the proper permissions.
+7. Run the project in a browser.
 
 ## Security Best Practices
 

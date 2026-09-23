@@ -19,7 +19,6 @@ class Product_model extends CI_Model {
         $this->db->limit($limit, $offset);
         return $this->db->get()->result();
     }
-
     public function count_all() {
         return $this->db->count_all('products');
     }

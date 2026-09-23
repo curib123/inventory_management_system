@@ -118,7 +118,7 @@ class Products extends CI_Controller {
         $this->Product_model->delete($id);
         redirect('products');
     }
-
+    // Function to paginate the products list
     private function paginate($total_rows, $limit, $base_url) {
         $this->load->library('pagination');
 
@@ -138,7 +138,6 @@ class Products extends CI_Controller {
         $this->pagination->initialize($config);
         return $this->pagination->create_links();
     }
-
     // Function to check if the user has the required permission
     private function require_permission($permission_name) {
         $user_id = $this->session->userdata('user_id');
