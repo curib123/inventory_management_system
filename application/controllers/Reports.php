@@ -13,7 +13,6 @@ class Reports extends CI_Controller {
         'low-stock' => array('title' => 'Low-Stock Report', 'method' => 'get_low_stock_report'),
         'valuation' => array('title' => 'Inventory Valuation', 'method' => 'get_inventory_report')
     );
-
     // Function to initialize the controller, load necessary libraries, helpers, and models, and check if the user is logged in
     public function __construct() {
         parent::__construct();
@@ -28,35 +27,35 @@ class Reports extends CI_Controller {
         $this->require_permission('view_reports');
         $this->load->model('Report_model');
     }
-
+    // Function to check if the user has the required permission in the index root level
     public function index() {
         $this->show_report('inventory');
     }
-
+    // display the inventory report
     public function inventory() {
         $this->show_report('inventory');
     }
-
+    // display the stock-in report
     public function stock_in() {
         $this->show_report('stock-in');
     }
-
+    // display the stock-out report
     public function stock_out() {
         $this->show_report('stock-out');
     }
-
+    // display the stock movement report
     public function movement() {
         $this->show_report('movement');
     }
-
+    //  display the low stock movement report
     public function low_stock() {
         $this->show_report('low-stock');
     }
-
+    //  display the valuation report
     public function valuation() {
         $this->show_report('valuation');
     }
-
+    // export the csv format report
     public function export($report, $format = 'csv') {
         $definition = $this->get_definition($report);
         $rows = $this->get_rows($definition);
@@ -72,7 +71,7 @@ class Reports extends CI_Controller {
             show_error('Unsupported export format.', 400, 'Export Error');
         }
     }
-
+    //  to show /display report
     private function show_report($report) {
         $definition = $this->get_definition($report);
         $data['report_title'] = $definition['title'];
@@ -84,7 +83,7 @@ class Reports extends CI_Controller {
         $this->load->view('reports/index', $data);
         $this->load->view('templates/footer');
     }
-
+    // to  get report definations
     private function get_definition($report) {
         if (!isset($this->report_definitions[$report])) {
             show_404();
@@ -92,12 +91,12 @@ class Reports extends CI_Controller {
 
         return $this->report_definitions[$report];
     }
-
+    // to get the rows in report model
     private function get_rows($definition) {
         $type = isset($definition['type']) ? $definition['type'] : NULL;
         return $this->Report_model->{$definition['method']}($type);
     }
-
+    //to export the report in csv format
     private function export_csv($title, $rows) {
         $filename = url_title($title, '-', TRUE) . '-' . date('Y-m-d') . '.csv';
         $this->output->set_content_type('text/csv');
@@ -113,7 +112,7 @@ class Reports extends CI_Controller {
         fclose($handle);
         exit;
     }
-
+    //to export the report in excel format using PhpSpreadsheet
     private function export_xlsx($title, $rows) {
         $autoload = FCPATH . 'vendor/autoload.php';
         if (!is_file($autoload)) {
@@ -149,7 +148,7 @@ class Reports extends CI_Controller {
         (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output');
         exit;
     }
-
+    //to export the report in pdf using  Dompdf
     private function export_pdf($title, $rows) {
         $autoload = FCPATH . 'vendor/autoload.php';
         if (!is_file($autoload)) {
@@ -168,7 +167,7 @@ class Reports extends CI_Controller {
         $dompdf->stream(url_title($title, '-', TRUE) . '-' . date('Y-m-d') . '.pdf', array('Attachment' => TRUE));
         exit;
     }
-
+    // fucntion to for checking require permission
     private function require_permission($permission_name) {
         $user_id = $this->session->userdata('user_id');
         if (!$user_id || !$this->User_model->has_permission($user_id, $permission_name)) {
