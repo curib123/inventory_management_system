@@ -13,7 +13,7 @@ class Role_model extends CI_Model {
         $this->db->select('r.*, COUNT(DISTINCT u.id) AS user_count');
         $this->db->from('roles r');
         $this->db->join('users u', 'u.role_id = r.id', 'left');
-        $this->db->group_by('r.id');
+        $this->db->group_by(array('r.id', 'r.role_name', 'r.description', 'r.status'));
         $this->db->order_by('r.role_name', 'ASC');
         return $this->db->get()->result();
     }
