@@ -30,6 +30,7 @@ $route['suppliers/delete/(:num)'] = 'suppliers/delete/$1';
 $route['users'] = 'users';
 $route['users/datatable'] = 'users/datatable';
 $route['users/add'] = 'users/add';
+$route['users/view/(:num)'] = 'users/view/$1';
 $route['users/edit/(:num)'] = 'users/edit/$1';
 $route['users/delete/(:num)'] = 'users/delete/$1';
 

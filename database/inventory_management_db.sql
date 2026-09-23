@@ -61,6 +61,9 @@ CREATE TABLE role_permissions (
 -- -------------------------------------------------------------------
 CREATE TABLE users (
     id INT NOT NULL AUTO_INCREMENT,
+    first_name VARCHAR(100) NOT NULL,
+    middle_name VARCHAR(100) DEFAULT NULL,
+    last_name VARCHAR(100) NOT NULL,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
     role_id INT NOT NULL,
@@ -270,8 +273,8 @@ ON DUPLICATE KEY UPDATE role_id = role_id;
 -- -------------------------------------------------------------------
 -- Default Admin User (example credential)
 -- -------------------------------------------------------------------
-INSERT INTO users (username, password, role_id, status)
-SELECT 'admin', '$2y$12$sDusIfJlzofgxJf6D7cAbetKPOSUzw.CpIxK/kVxXLSWESpynCEtm', r.id, 1
+INSERT INTO users (first_name, middle_name, last_name, username, password, role_id, status)
+SELECT 'System', NULL, 'Administrator', 'admin', '$2y$12$sDusIfJlzofgxJf6D7cAbetKPOSUzw.CpIxK/kVxXLSWESpynCEtm', r.id, 1
 FROM roles r
 WHERE r.role_name = 'admin'
 ON DUPLICATE KEY UPDATE username = username;

@@ -4,6 +4,21 @@
 
 <?php echo form_open(current_url()); ?>
     <p>
+        <label for="first_name">First Name</label><br>
+        <input type="text" id="first_name" name="first_name" required maxlength="100" value="<?php echo html_escape(set_value('first_name', isset($user) ? $user->first_name : '')); ?>">
+    </p>
+
+    <p>
+        <label for="middle_name">Middle Name</label><br>
+        <input type="text" id="middle_name" name="middle_name" maxlength="100" value="<?php echo html_escape(set_value('middle_name', isset($user) ? $user->middle_name : '')); ?>">
+    </p>
+
+    <p>
+        <label for="last_name">Last Name</label><br>
+        <input type="text" id="last_name" name="last_name" required maxlength="100" value="<?php echo html_escape(set_value('last_name', isset($user) ? $user->last_name : '')); ?>">
+    </p>
+
+    <p>
         <label for="username">Username</label><br>
         <input type="text" id="username" name="username" required minlength="3" maxlength="50" value="<?php echo html_escape(set_value('username', isset($user) ? $user->username : '')); ?>">
     </p>

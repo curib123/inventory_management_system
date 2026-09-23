@@ -28,15 +28,16 @@ class User_model extends CI_Model {
     }
 
     public function get_all() {
-        $this->db->select('u.id, u.username, u.role_id, u.status, u.created_at, u.updated_at, r.role_name');
+        $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.role_id, u.status, u.created_at, u.updated_at, r.role_name');
         $this->db->from('users u');
         $this->db->join('roles r', 'r.id = u.role_id', 'left');
-        $this->db->order_by('u.username', 'ASC');
+        $this->db->order_by('u.last_name', 'ASC');
+        $this->db->order_by('u.first_name', 'ASC');
         return $this->db->get()->result();
     }
 
     public function get_by_id($id) {
-        $this->db->select('u.id, u.username, u.password, u.role_id, u.status, u.created_at, u.updated_at, r.role_name');
+        $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.role_id, u.status, u.created_at, u.updated_at, r.role_name');
         $this->db->from('users u');
         $this->db->join('roles r', 'r.id = u.role_id', 'left');
         $this->db->where('u.id', (int) $id);
@@ -67,12 +68,18 @@ class User_model extends CI_Model {
 
     public function has_history($id) {
         $id = (int) $id;
-        $tables = array('stock_transactions' => 'created_by', 'stock_adjustments' => 'created_by', 'activity_logs' => 'user_id');
+        $tables = array(
+            'stock_transactions' => 'created_by',
+            'stock_adjustments' => 'created_by',
+            'activity_logs' => 'user_id'
+        );
+
         foreach ($tables as $table => $column) {
             if ($this->db->where($column, $id)->count_all_results($table) > 0) {
                 return TRUE;
             }
         }
+
         return FALSE;
     }
 
@@ -116,10 +123,13 @@ class User_model extends CI_Model {
 
     public function get_datatable($start, $length, $search, $order_column, $order_dir) {
         $this->build_datatable_query($search);
-        $this->db->select('u.id, u.username, u.status, u.created_at, r.role_name');
+        $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.status, u.created_at, r.role_name');
+
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
         }
+
+        $this->db->order_by('u.id', 'ASC');
         $this->db->limit((int) $length, (int) $start);
         return $this->db->get()->result();
     }
@@ -135,14 +145,19 @@ class User_model extends CI_Model {
 
         if ($search !== '') {
             $this->db->group_start();
-            $this->db->like('u.username', $search);
+            $this->db->like('u.first_name', $search);
+            $this->db->or_like('u.middle_name', $search);
+            $this->db->or_like('u.last_name', $search);
+            $this->db->or_like('u.username', $search);
             $this->db->or_like('r.role_name', $search);
             $this->db->or_like('u.created_at', $search);
+
             if (strcasecmp($search, 'active') === 0) {
                 $this->db->or_where('u.status', 1);
             } elseif (strcasecmp($search, 'inactive') === 0) {
                 $this->db->or_where('u.status', 0);
             }
+
             $this->db->group_end();
         }
     }
