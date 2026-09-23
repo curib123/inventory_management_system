@@ -4,12 +4,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Auth extends CI_Controller {
 
+    // user authentication controller to handle login and logout functionality
     public function __construct() {
         parent::__construct();
         $this->load->model('User_model');
         $this->load->library('session');
+        $this->load->helper('url');
     }
-
+    // user login function to check if user is logged in and redirect to dashboard if logged in
     public function index() {
         if ($this->session->userdata('logged_in')) {
             redirect('dashboard');
@@ -17,7 +19,7 @@ class Auth extends CI_Controller {
 
         $this->login();
     }
-
+    // user login function to authenticate users and set session data
     public function login() {
         $this->load->helper(array('form'));
 
@@ -31,7 +33,8 @@ class Auth extends CI_Controller {
                 $session_data = array(
                     'user_id' => $user->id,
                     'username' => $user->username,
-                    'role' => $user->role,
+                    'role_id' => $user->role_id,
+                    'role_name' => $user->role_name,
                     'logged_in' => TRUE
                 );
 
@@ -46,7 +49,7 @@ class Auth extends CI_Controller {
 
         $this->load->view('auth/login');
     }
-
+    // user logout function to destroy session data and redirect to login page
     public function logout() {
         $this->session->sess_destroy();
         redirect('login');

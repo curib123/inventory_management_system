@@ -4,17 +4,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Suppliers extends CI_Controller {
 
+    // suppliers controller to handle supplier management functionality
     public function __construct() {
         parent::__construct();
+        $this->load->library('session');
+        $this->load->helper(array('form', 'url'));
+
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
 
         $this->load->model('Supplier_model');
-        $this->load->helper('form');
+        $this->load->model('User_model');
     }
-
+    // Function to check if the user has the required permission
     public function index() {
+        $this->require_permission('manage_suppliers');
+
         $data['suppliers'] = $this->Supplier_model->get_all();
         $data['page_title'] = 'Suppliers';
 
@@ -22,8 +28,10 @@ class Suppliers extends CI_Controller {
         $this->load->view('suppliers/index', $data);
         $this->load->view('templates/footer');
     }
-
+    // Function to check if the user has the required permission and add a new supplier
     public function add() {
+        $this->require_permission('manage_suppliers');
+
         $this->form_validation->set_rules('supplier_name', 'Supplier Name', 'required');
 
         if ($this->form_validation->run() === FALSE) {
@@ -44,8 +52,10 @@ class Suppliers extends CI_Controller {
         $this->Supplier_model->save($data);
         redirect('suppliers');
     }
-
+    // Function to check if the user has the required permission and edit an existing supplier
     public function edit($id) {
+        $this->require_permission('manage_suppliers');
+
         $supplier = $this->Supplier_model->get_by_id($id);
 
         if (!$supplier) {
@@ -73,9 +83,18 @@ class Suppliers extends CI_Controller {
         $this->Supplier_model->save($data, $id);
         redirect('suppliers');
     }
-
+    // Function to check if the user has the required permission and delete an existing supplier
     public function delete($id) {
+        $this->require_permission('manage_suppliers');
+
         $this->Supplier_model->delete($id);
         redirect('suppliers');
+    }
+    // Function to check if the user has the required permission
+    private function require_permission($permission_name) {
+        $user_id = $this->session->userdata('user_id');
+        if (!$user_id || !$this->User_model->has_permission($user_id, $permission_name)) {
+            show_error('You do not have permission to access this page.', 403, 'Access Denied');
+        }
     }
 }
