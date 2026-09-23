@@ -123,11 +123,11 @@ class Roles extends CI_Controller {
             'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
         );
 
-        if (!$this->Role_model->save($role_data, $id)) {
+        $role_id = $this->Role_model->save($role_data, $id);
+        if ($role_id === FALSE) {
             show_error('The role could not be saved.', 500, 'Role Not Saved');
         }
 
-        $role_id = $id !== NULL ? (int) $id : (int) $this->db->insert_id();
         if (!$this->Role_model->sync_permissions($role_id, $this->input->post('permissions', TRUE))) {
             show_error('The role permissions could not be saved.', 500, 'Permissions Not Saved');
         }
