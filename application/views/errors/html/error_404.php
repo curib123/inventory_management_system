@@ -22,8 +22,8 @@ $safe_message = htmlspecialchars(strip_tags((string) $message), ENT_QUOTES, 'UTF
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title><?= $safe_heading; ?> | Curib Employee</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <title><?= $safe_heading; ?> | Curib Employee</title>
 </head>
 <body class="min-vh-100 d-flex align-items-center justify-content-center bg-body-tertiary p-4">
     <main class="container text-center bg-white border rounded-4 shadow-sm p-5">

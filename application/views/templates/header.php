@@ -20,9 +20,9 @@
         ));
     endif;
     ?>
-    <div class="topbar">
-        <div><strong>Inventory Management System</strong></div>
-        <div class="nav">
+    <aside class="sidebar">
+        <strong>Inventory Management System</strong>
+        <nav aria-label="Main navigation">
             <a href="<?php echo site_url('dashboard'); ?>">Dashboard</a>
             <a href="<?php echo site_url('products'); ?>">Products</a>
             <a href="<?php echo site_url('categories'); ?>">Categories</a>
@@ -35,13 +35,23 @@
             <?php if ($this->session->userdata('user_id') && $this->User_model->has_permission($this->session->userdata('user_id'), 'manage_users')): ?>
                 <a href="<?php echo site_url('roles'); ?>">Roles</a>
             <?php endif; ?>
-            <?php if ($this->session->userdata('user_id')): ?>
-                <button type="button" onclick="document.getElementById('logout-confirmation').showModal();">Logout</button>
-            <?php endif; ?>
-        </div>
-    </div>
-    <div class="container">
+        </nav>
+    </aside>
 
-    <?php if ($this->session->userdata('user_id')): ?>
-        <?php $this->load->view('modal/auth/logout'); ?>
-    <?php endif; ?>
+    <div class="page-shell">
+        <header class="topbar">
+            <h1><?php echo isset($page_title) ? html_escape($page_title) : 'Inventory'; ?></h1>
+            <?php if ($this->session->userdata('user_id')): ?>
+                <div class="user-profile">
+                    <span><?php echo html_escape($this->session->userdata('username')); ?></span>
+                    <span><?php echo html_escape($this->session->userdata('role_name')); ?></span>
+                    <button type="button" onclick="document.getElementById('logout-confirmation').showModal();">Logout</button>
+                </div>
+            <?php endif; ?>
+        </header>
+
+        <main class="container">
+
+        <?php if ($this->session->userdata('user_id')): ?>
+            <?php $this->load->view('modal/auth/logout'); ?>
+        <?php endif; ?>
