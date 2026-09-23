@@ -24,7 +24,7 @@
     <fieldset>
         <legend>Permissions</legend>
         <?php if (!empty($permissions)): foreach ($permissions as $permission): ?>
-            <label style="display:block; margin:8px 0;">
+            <label>
                 <input type="checkbox" name="permissions[]" value="<?php echo $permission->id; ?>" <?php echo in_array((int) $permission->id, $selected_permissions, TRUE) ? 'checked' : ''; ?>>
                 <?php echo html_escape($permission->permission_name); ?>
                 (<?php echo html_escape($permission->module_name); ?>)

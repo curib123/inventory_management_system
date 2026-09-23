@@ -27,11 +27,11 @@ $safe_message = htmlspecialchars(strip_tags(isset($message) ? (string) $message 
 </head>
 <body class="min-vh-100 d-flex align-items-center justify-content-center bg-body-tertiary p-4">
     <main class="container text-center bg-white border rounded-4 shadow-sm p-5">
-        <div class="badge text-bg-primary fs-4 p-2 mb-3" aria-hidden="true">C</div>
-        <p class="text-uppercase small fw-bold text-primary mb-2">Exception</p>
+        <div class="badge text-bg-danger fs-4 p-2 mb-3" aria-hidden="true">C</div>
+        <p class="text-uppercase small fw-bold text-danger mb-2">Exception</p>
         <h1 class="h2 mb-3"><?= $safe_heading; ?></h1>
         <p class="text-secondary"><?= $safe_message; ?></p>
-        <a class="btn btn-primary mt-3" href="<?= $safe_home_url; ?>">Return to the application</a>
+        <a class="btn btn-danger mt-3" href="<?= $safe_home_url; ?>">Return to the application</a>
     </main>
 </body>
 </html>

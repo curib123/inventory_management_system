@@ -1,6 +1,6 @@
 <h2><?php echo html_escape($report_title); ?></h2>
 
-<div style="margin-bottom:20px;">
+<div>
     <a class="btn" href="<?php echo site_url('reports/export/' . $report_key . '/csv'); ?>">CSV</a>
     <a class="btn btn-success" href="<?php echo site_url('reports/export/' . $report_key . '/xlsx'); ?>">Excel</a>
     <a class="btn" href="<?php echo site_url('reports/export/' . $report_key . '/pdf'); ?>">PDF</a>
