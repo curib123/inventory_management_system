@@ -29,9 +29,6 @@
             <button type="submit">Login</button>
         <?php echo form_close(); ?>
 
-        <div class="demo">
-            Demo account: admin / admin123
-        </div>
     </div>
 </body>
 </html>

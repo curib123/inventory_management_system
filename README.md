@@ -135,4 +135,4 @@ Tech Stack to use
 5. Javascript 
 6. Ajax 
 7. DataTables
-8.Chart.js
+8. Chart.js
