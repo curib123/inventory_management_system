@@ -17,6 +17,7 @@ class Reports extends CI_Controller {
         parent::__construct();
         $this->load->library('session');
         $this->load->helper(array('url', 'html'));
+        $this->load->library('Datatable_service');
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
@@ -33,6 +34,47 @@ class Reports extends CI_Controller {
     public function movement() { $this->show_report('movement'); }
     public function low_stock() { $this->show_report('low-stock'); }
     public function valuation() { $this->show_report('valuation'); }
+
+    public function datatable($report) {
+        $this->get_definition($report);
+
+        $order_columns = $this->get_report_order_columns($report);
+        $default_order = $this->get_report_default_order($report);
+        $request = $this->datatable_service->request(
+            $this->input,
+            $order_columns,
+            $default_order['column'],
+            $default_order['dir']
+        );
+
+        $rows = $this->Report_model->get_datatable(
+            $report,
+            $request['start'],
+            $request['length'],
+            $request['search'],
+            $request['order_column'],
+            $request['order_dir']
+        );
+
+        $fields = array_keys($this->get_report_columns($report));
+        $data_rows = array();
+        foreach ($rows as $row) {
+            $values = array();
+            foreach ($fields as $field) {
+                $values[] = html_escape(isset($row[$field]) ? (string) $row[$field] : '');
+            }
+            $data_rows[] = $values;
+        }
+
+        $payload = $this->datatable_service->payload(
+            $request['draw'],
+            $this->Report_model->count_datatable_total($report),
+            $this->Report_model->count_datatable_filtered($report, $request['search']),
+            $data_rows
+        );
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
+    }
 
     public function export($report, $format = 'csv') {
         $format = strtolower((string) $format);
@@ -58,11 +100,101 @@ class Reports extends CI_Controller {
         $definition = $this->get_definition($report);
         $data['report_title'] = $definition['title'];
         $data['report_key'] = $report;
-        $data['rows'] = $this->get_rows($definition);
+        $data['columns'] = $this->get_report_columns($report);
         $data['page_title'] = $definition['title'];
         $this->load->view('templates/header', $data);
         $this->load->view('reports/index', $data);
         $this->load->view('templates/footer');
+    }
+
+    private function get_report_columns($report) {
+        if ($report === 'inventory' || $report === 'valuation') {
+            return array(
+                'product_code' => 'Product Code',
+                'product_name' => 'Product Name',
+                'category_name' => 'Category',
+                'supplier_name' => 'Supplier',
+                'unit' => 'Unit',
+                'stock' => 'Stock',
+                'cost_price' => 'Cost Price',
+                'inventory_value' => 'Inventory Value'
+            );
+        }
+
+        if ($report === 'low-stock') {
+            return array(
+                'product_code' => 'Product Code',
+                'product_name' => 'Product Name',
+                'category_name' => 'Category',
+                'unit' => 'Unit',
+                'stock' => 'Stock',
+                'reorder_level' => 'Reorder Level',
+                'shortage' => 'Shortage'
+            );
+        }
+
+        return array(
+            'transaction_no' => 'Transaction No.',
+            'type' => 'Type',
+            'product_code' => 'Product Code',
+            'product_name' => 'Product Name',
+            'quantity' => 'Quantity',
+            'cost_price' => 'Cost Price',
+            'supplier_name' => 'Supplier',
+            'username' => 'Processed By',
+            'remarks' => 'Remarks',
+            'created_at' => 'Date'
+        );
+    }
+
+    private function get_report_order_columns($report) {
+        if ($report === 'inventory' || $report === 'valuation') {
+            return array(
+                'p.product_code',
+                'p.product_name',
+                'c.category_name',
+                's.supplier_name',
+                'p.unit',
+                'p.stock',
+                'p.cost_price',
+                'inventory_value'
+            );
+        }
+
+        if ($report === 'low-stock') {
+            return array(
+                'p.product_code',
+                'p.product_name',
+                'c.category_name',
+                'p.unit',
+                'p.stock',
+                'p.reorder_level',
+                'shortage'
+            );
+        }
+
+        return array(
+            't.transaction_no',
+            't.type',
+            'p.product_code',
+            'p.product_name',
+            'i.quantity',
+            'i.cost_price',
+            's.supplier_name',
+            'u.username',
+            't.remarks',
+            't.created_at'
+        );
+    }
+
+    private function get_report_default_order($report) {
+        if ($report === 'inventory' || $report === 'valuation') {
+            return array('column' => 'p.product_name', 'dir' => 'asc');
+        }
+        if ($report === 'low-stock') {
+            return array('column' => 'p.stock', 'dir' => 'asc');
+        }
+        return array('column' => 't.created_at', 'dir' => 'desc');
     }
 
     private function get_definition($report) {

@@ -8,6 +8,7 @@ class Roles extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
+        $this->load->library('Datatable_service');
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
@@ -17,7 +18,6 @@ class Roles extends CI_Controller {
 
     public function index() {
         $this->require_permission('manage_users');
-        $data['roles'] = $this->Role_model->get_all();
         $data['page_title'] = 'Roles and Permissions';
         $this->load->view('templates/header', $data);
         $this->load->view('roles/index', $data);
@@ -54,6 +54,47 @@ class Roles extends CI_Controller {
             show_error('The role could not be deleted.', 500, 'Role Not Deleted');
         }
         redirect('roles');
+    }
+
+    public function datatable() {
+        $this->require_permission('manage_users');
+
+        $columns = array('r.role_name', 'r.description', 'r.status', 'user_count', NULL);
+        $request = $this->datatable_service->request($this->input, $columns, 'r.role_name', 'asc');
+        $roles = $this->Role_model->get_datatable(
+            $request['start'],
+            $request['length'],
+            $request['search'],
+            $request['order_column'],
+            $request['order_dir']
+        );
+
+        $rows = array();
+        foreach ($roles as $role) {
+            $actions = '<a href="' . site_url('roles/edit/' . (int) $role->id) . '">Edit</a>';
+            if ((int) $role->user_count === 0) {
+                $actions .= form_open('roles/delete/' . (int) $role->id);
+                $actions .= '<button type="submit">Delete</button>';
+                $actions .= form_close();
+            }
+
+            $rows[] = array(
+                html_escape($role->role_name),
+                html_escape($role->description),
+                $role->status ? 'Active' : 'Inactive',
+                (int) $role->user_count,
+                $actions
+            );
+        }
+
+        $payload = $this->datatable_service->payload(
+            $request['draw'],
+            $this->Role_model->count_all(),
+            $this->Role_model->count_datatable_filtered($request['search']),
+            $rows
+        );
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
     private function role_form($id = NULL, $role = NULL) {

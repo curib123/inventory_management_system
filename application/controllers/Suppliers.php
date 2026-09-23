@@ -8,6 +8,7 @@ class Suppliers extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
+        $this->load->library('Datatable_service');
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
@@ -17,7 +18,6 @@ class Suppliers extends CI_Controller {
 
     public function index() {
         $this->require_permission('manage_suppliers');
-        $data['suppliers'] = $this->Supplier_model->get_all();
         $data['page_title'] = 'Suppliers';
         $this->load->view('templates/header', $data);
         $this->load->view('suppliers/index', $data);
@@ -50,6 +50,53 @@ class Suppliers extends CI_Controller {
             show_error('The supplier could not be deleted.', 500, 'Supplier Not Deleted');
         }
         redirect('suppliers');
+    }
+
+    public function datatable() {
+        $this->require_permission('manage_suppliers');
+
+        $columns = array(
+            's.supplier_name',
+            's.contact_person',
+            's.phone',
+            's.address',
+            's.status',
+            NULL
+        );
+        $request = $this->datatable_service->request($this->input, $columns, 's.supplier_name', 'asc');
+        $suppliers = $this->Supplier_model->get_datatable(
+            $request['start'],
+            $request['length'],
+            $request['search'],
+            $request['order_column'],
+            $request['order_dir']
+        );
+
+        $rows = array();
+        foreach ($suppliers as $supplier) {
+            $actions = '<a href="' . site_url('suppliers/edit/' . (int) $supplier->id) . '">Edit</a>';
+            $actions .= form_open('suppliers/delete/' . (int) $supplier->id);
+            $actions .= '<button type="submit">Delete</button>';
+            $actions .= form_close();
+
+            $rows[] = array(
+                html_escape($supplier->supplier_name),
+                html_escape($supplier->contact_person),
+                html_escape($supplier->phone),
+                html_escape($supplier->address),
+                $supplier->status ? 'Active' : 'Inactive',
+                $actions
+            );
+        }
+
+        $payload = $this->datatable_service->payload(
+            $request['draw'],
+            $this->Supplier_model->count_all(),
+            $this->Supplier_model->count_datatable_filtered($request['search']),
+            $rows
+        );
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
     private function supplier_form($id = NULL, $supplier = NULL) {

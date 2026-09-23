@@ -8,6 +8,7 @@ class Users extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
+        $this->load->library('Datatable_service');
 
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -18,7 +19,6 @@ class Users extends CI_Controller {
     }
 
     public function index() {
-        $data['users'] = $this->User_model->get_all();
         $data['page_title'] = 'Users';
         $this->load->view('templates/header', $data);
         $this->load->view('users/index', $data);
@@ -61,6 +61,47 @@ class Users extends CI_Controller {
         }
 
         redirect('users');
+    }
+
+    public function datatable() {
+        $columns = array('u.username', 'r.role_name', 'u.status', 'u.created_at', NULL);
+        $request = $this->datatable_service->request($this->input, $columns, 'u.username', 'asc');
+        $users = $this->User_model->get_datatable(
+            $request['start'],
+            $request['length'],
+            $request['search'],
+            $request['order_column'],
+            $request['order_dir']
+        );
+
+        $rows = array();
+        $current_user_id = (int) $this->session->userdata('user_id');
+
+        foreach ($users as $user) {
+            $actions = '<a href="' . site_url('users/edit/' . (int) $user->id) . '">Edit</a>';
+            if ((int) $user->id !== $current_user_id) {
+                $actions .= form_open('users/delete/' . (int) $user->id);
+                $actions .= '<button type="submit">Delete</button>';
+                $actions .= form_close();
+            }
+
+            $rows[] = array(
+                html_escape($user->username),
+                html_escape($user->role_name ?: 'N/A'),
+                $user->status ? 'Active' : 'Inactive',
+                html_escape($user->created_at),
+                $actions
+            );
+        }
+
+        $payload = $this->datatable_service->payload(
+            $request['draw'],
+            $this->User_model->count_all(),
+            $this->User_model->count_datatable_filtered($request['search']),
+            $rows
+        );
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
     private function user_form($id = NULL, $user = NULL) {

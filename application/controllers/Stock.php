@@ -8,6 +8,7 @@ class Stock extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
+        $this->load->library('Datatable_service');
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
@@ -21,7 +22,6 @@ class Stock extends CI_Controller {
 
     public function history() {
         $this->require_permission('view_reports');
-        $data['transactions'] = $this->Stock_model->get_transactions();
         $data['page_title'] = 'Stock Movement History';
         $this->load->view('templates/header', $data);
         $this->load->view('stock/history', $data);
@@ -83,7 +83,6 @@ class Stock extends CI_Controller {
 
     public function adjustments() {
         $this->require_permission('manage_adjustments');
-        $data['adjustments'] = $this->Stock_model->get_adjustments();
         $data['page_title'] = 'Stock Adjustments';
         $this->load->view('templates/header', $data);
         $this->load->view('stock/adjustments', $data);
@@ -92,11 +91,112 @@ class Stock extends CI_Controller {
 
     public function low_stock() {
         $this->require_permission('view_dashboard');
-        $data['products'] = $this->Stock_model->get_low_stock_products();
         $data['page_title'] = 'Low Stock Monitoring';
         $this->load->view('templates/header', $data);
         $this->load->view('stock/low_stock', $data);
         $this->load->view('templates/footer');
+    }
+
+    public function history_datatable() {
+        $this->require_permission('view_reports');
+
+        $columns = array('t.transaction_no', 't.type', 's.supplier_name', 'u.username', 't.created_at', NULL);
+        $request = $this->datatable_service->request($this->input, $columns, 't.created_at', 'desc');
+        $transactions = $this->Stock_model->get_transactions_datatable(
+            $request['start'],
+            $request['length'],
+            $request['search'],
+            $request['order_column'],
+            $request['order_dir']
+        );
+
+        $rows = array();
+        foreach ($transactions as $transaction) {
+            $rows[] = array(
+                html_escape($transaction->transaction_no),
+                html_escape($transaction->type),
+                html_escape($transaction->supplier_name ?: 'N/A'),
+                html_escape($transaction->username),
+                html_escape($transaction->created_at),
+                '<a href="' . site_url('stock/details/' . (int) $transaction->id) . '">Details</a>'
+            );
+        }
+
+        $payload = $this->datatable_service->payload(
+            $request['draw'],
+            $this->Stock_model->count_transactions(),
+            $this->Stock_model->count_transactions_filtered($request['search']),
+            $rows
+        );
+        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
+    }
+
+    public function adjustments_datatable() {
+        $this->require_permission('manage_adjustments');
+
+        $columns = array('p.product_name', 'a.system_stock', 'a.actual_stock', 'a.difference', 'a.reason', 'u.username', 'a.created_at');
+        $request = $this->datatable_service->request($this->input, $columns, 'a.created_at', 'desc');
+        $adjustments = $this->Stock_model->get_adjustments_datatable(
+            $request['start'],
+            $request['length'],
+            $request['search'],
+            $request['order_column'],
+            $request['order_dir']
+        );
+
+        $rows = array();
+        foreach ($adjustments as $adjustment) {
+            $rows[] = array(
+                html_escape($adjustment->product_code . ' - ' . $adjustment->product_name),
+                (int) $adjustment->system_stock,
+                (int) $adjustment->actual_stock,
+                (int) $adjustment->difference,
+                html_escape($adjustment->reason),
+                html_escape($adjustment->username),
+                html_escape($adjustment->created_at)
+            );
+        }
+
+        $payload = $this->datatable_service->payload(
+            $request['draw'],
+            $this->Stock_model->count_adjustments(),
+            $this->Stock_model->count_adjustments_filtered($request['search']),
+            $rows
+        );
+        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
+    }
+
+    public function low_stock_datatable() {
+        $this->require_permission('view_dashboard');
+
+        $columns = array('p.product_code', 'p.product_name', 'p.stock', 'p.reorder_level', 'p.unit');
+        $request = $this->datatable_service->request($this->input, $columns, 'p.stock', 'asc');
+        $products = $this->Stock_model->get_low_stock_datatable(
+            $request['start'],
+            $request['length'],
+            $request['search'],
+            $request['order_column'],
+            $request['order_dir']
+        );
+
+        $rows = array();
+        foreach ($products as $product) {
+            $rows[] = array(
+                html_escape($product->product_code),
+                html_escape($product->product_name),
+                (int) $product->stock,
+                (int) $product->reorder_level,
+                html_escape($product->unit)
+            );
+        }
+
+        $payload = $this->datatable_service->payload(
+            $request['draw'],
+            $this->Stock_model->count_low_stock_products(),
+            $this->Stock_model->count_low_stock_filtered($request['search']),
+            $rows
+        );
+        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
     private function transaction_form($type) {

@@ -8,6 +8,7 @@ class Categories extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
+        $this->load->library('Datatable_service');
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
@@ -17,7 +18,6 @@ class Categories extends CI_Controller {
 
     public function index() {
         $this->require_permission('manage_products');
-        $data['categories'] = $this->Category_model->get_all();
         $data['page_title'] = 'Categories';
         $this->load->view('templates/header', $data);
         $this->load->view('categories/index', $data);
@@ -54,6 +54,45 @@ class Categories extends CI_Controller {
             show_error('The category could not be deleted.', 500, 'Category Not Deleted');
         }
         redirect('categories');
+    }
+
+    public function datatable() {
+        $this->require_permission('manage_products');
+
+        $columns = array('c.id', 'c.category_name', 'c.status', 'product_count', NULL);
+        $request = $this->datatable_service->request($this->input, $columns, 'c.category_name', 'asc');
+        $categories = $this->Category_model->get_datatable(
+            $request['start'],
+            $request['length'],
+            $request['search'],
+            $request['order_column'],
+            $request['order_dir']
+        );
+
+        $rows = array();
+        foreach ($categories as $category) {
+            $actions = '<a href="' . site_url('categories/edit/' . (int) $category->id) . '">Edit</a>';
+            $actions .= form_open('categories/delete/' . (int) $category->id);
+            $actions .= '<button type="submit">Delete</button>';
+            $actions .= form_close();
+
+            $rows[] = array(
+                (int) $category->id,
+                html_escape($category->category_name),
+                $category->status ? 'Active' : 'Inactive',
+                (int) $category->product_count,
+                $actions
+            );
+        }
+
+        $payload = $this->datatable_service->payload(
+            $request['draw'],
+            $this->Category_model->count_all(),
+            $this->Category_model->count_datatable_filtered($request['search']),
+            $rows
+        );
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
     private function category_form($id = NULL, $category = NULL) {

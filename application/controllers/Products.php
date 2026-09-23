@@ -8,6 +8,7 @@ class Products extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
+        $this->load->library('Datatable_service');
 
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -21,7 +22,6 @@ class Products extends CI_Controller {
 
     public function index() {
         $this->require_permission('manage_products');
-        $data['products'] = $this->Product_model->get_all();
         $data['page_title'] = 'Products';
         $this->load->view('templates/header', $data);
         $this->load->view('products/index', $data);
@@ -59,6 +59,60 @@ class Products extends CI_Controller {
             show_error('The product could not be deleted.', 500, 'Product Not Deleted');
         }
         redirect('products');
+    }
+
+    public function datatable() {
+        $this->require_permission('manage_products');
+
+        $columns = array(
+            'p.id',
+            'p.product_code',
+            'p.product_name',
+            'c.category_name',
+            's.supplier_name',
+            'p.stock',
+            'p.selling_price',
+            'p.status',
+            NULL
+        );
+
+        $request = $this->datatable_service->request($this->input, $columns, 'p.product_name', 'asc');
+        $products = $this->Product_model->get_datatable(
+            $request['start'],
+            $request['length'],
+            $request['search'],
+            $request['order_column'],
+            $request['order_dir']
+        );
+
+        $rows = array();
+        foreach ($products as $product) {
+            $actions = '<a href="' . site_url('products/edit/' . (int) $product->id) . '">Edit</a>';
+            $actions .= form_open('products/delete/' . (int) $product->id);
+            $actions .= '<button type="submit">Delete</button>';
+            $actions .= form_close();
+
+            $rows[] = array(
+                (int) $product->id,
+                html_escape($product->product_code),
+                html_escape($product->product_name),
+                html_escape($product->category_name ?: 'N/A'),
+                html_escape($product->supplier_name ?: 'N/A'),
+                (int) $product->stock,
+                number_format((float) $product->selling_price, 2),
+                $product->status ? 'Active' : 'Inactive',
+                $actions
+            );
+        }
+
+        $payload = $this->datatable_service->payload(
+            $request['draw'],
+            $this->Product_model->count_all(),
+            $this->Product_model->count_datatable_filtered($request['search']),
+            $rows
+        );
+
+        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
     private function product_form($id = NULL, $product = NULL) {
