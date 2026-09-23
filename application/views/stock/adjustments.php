@@ -1,18 +1,7 @@
 <h2>Stock Adjustments</h2>
-<a class="btn btn-success" href="<?php echo site_url('stock/adjustment'); ?>">New Adjustment</a>
-
+<p><a href="<?php echo site_url('stock/adjustment'); ?>">New Adjustment</a></p>
 <table>
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>System Stock</th>
-            <th>Actual Stock</th>
-            <th>Difference</th>
-            <th>Reason</th>
-            <th>Processed By</th>
-            <th>Date</th>
-        </tr>
-    </thead>
+    <thead><tr><th>Product</th><th>System Stock</th><th>Actual Stock</th><th>Difference</th><th>Reason</th><th>Processed By</th><th>Date</th></tr></thead>
     <tbody>
         <?php if (!empty($adjustments)): foreach ($adjustments as $adjustment): ?>
             <tr>
@@ -29,5 +18,4 @@
         <?php endif; ?>
     </tbody>
 </table>
-
-<?php if (!empty($pagination)): ?><?php echo $pagination; ?><?php endif; ?>
+<?php if (!empty($pagination)): ?><p><?php echo $pagination; ?></p><?php endif; ?>

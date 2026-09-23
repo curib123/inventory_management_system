@@ -4,65 +4,88 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Product_model extends CI_Model {
 
-     // Product model to handle product-related database operations
     public function __construct() {
         parent::__construct();
         $this->load->database();
     }
-    // Function to get all products with their category and supplier names
+
     public function get_all($limit = 10, $offset = 0) {
         $this->db->select('p.*, c.category_name, s.supplier_name');
         $this->db->from('products p');
         $this->db->join('categories c', 'c.id = p.category_id', 'left');
         $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
         $this->db->order_by('p.product_name', 'ASC');
-        $this->db->limit($limit, $offset);
+        $this->db->limit((int) $limit, (int) $offset);
         return $this->db->get()->result();
     }
+
+    public function get_active($limit = 10000, $offset = 0) {
+        $this->db->select('p.*, c.category_name, s.supplier_name');
+        $this->db->from('products p');
+        $this->db->join('categories c', 'c.id = p.category_id', 'left');
+        $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
+        $this->db->where('p.status', 1);
+        $this->db->order_by('p.product_name', 'ASC');
+        $this->db->limit((int) $limit, (int) $offset);
+        return $this->db->get()->result();
+    }
+
     public function count_all() {
         return $this->db->count_all('products');
     }
-    // Function to get a product by its ID with its category and supplier names
+
     public function get_by_id($id) {
         $this->db->select('p.*, c.category_name, s.supplier_name');
         $this->db->from('products p');
         $this->db->join('categories c', 'c.id = p.category_id', 'left');
         $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
-        $this->db->where('p.id', $id);
+        $this->db->where('p.id', (int) $id);
         return $this->db->get()->row();
     }
-    // Function to save a new product or update an existing product
+
+    public function code_exists($code, $exclude_id = NULL) {
+        $this->db->where('product_code', trim($code));
+        if ($exclude_id !== NULL) {
+            $this->db->where('id !=', (int) $exclude_id);
+        }
+        return $this->db->count_all_results('products') > 0;
+    }
+
+    public function has_transaction_history($id) {
+        return $this->db->where('product_id', (int) $id)
+            ->count_all_results('stock_transaction_items') > 0;
+    }
+
     public function save($data, $id = NULL) {
-        if ($id) {
+        if ($id !== NULL) {
             unset($data['stock']);
-            $this->db->where('id', $id);
+            $this->db->where('id', (int) $id);
             return $this->db->update('products', $data);
         }
-
         return $this->db->insert('products', $data);
     }
-    // Function to delete a product by its ID
+
     public function delete($id) {
-        $this->db->where('id', $id);
+        $this->db->where('id', (int) $id);
         return $this->db->delete('products');
     }
-    // Function to get the total number of products
+
     public function get_total_products() {
         return $this->db->count_all('products');
     }
-    // Function to get the total stock of all products
+
     public function get_total_stock() {
         $this->db->select_sum('stock');
-        $query = $this->db->get('products');
-        $row = $query->row();
-        return ($row && $row->stock) ? (int) $row->stock : 0;
+        $row = $this->db->get('products')->row();
+        return ($row && $row->stock !== NULL) ? (int) $row->stock : 0;
     }
-    // Function to get products with stock less than or equal to their reorder level
+
     public function get_low_stock_products() {
         $this->db->select('p.*, c.category_name');
         $this->db->from('products p');
         $this->db->join('categories c', 'c.id = p.category_id', 'left');
-        $this->db->where('p.stock <= p.reorder_level');
+        $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
+        $this->db->where('p.status', 1);
         $this->db->order_by('p.stock', 'ASC');
         return $this->db->get()->result();
     }

@@ -1,18 +1,14 @@
 <h2>Stock Movement History</h2>
-<a class="btn btn-success" href="<?php echo site_url('stock/in'); ?>">Stock In</a>
-<a class="btn" href="<?php echo site_url('stock/out'); ?>">Stock Out</a>
-<a class="btn" href="<?php echo site_url('stock/adjustment'); ?>">Adjustment</a>
+<p>
+    <a href="<?php echo site_url('stock/in'); ?>">Stock In</a> |
+    <a href="<?php echo site_url('stock/out'); ?>">Stock Out</a> |
+    <a href="<?php echo site_url('stock/adjustment'); ?>">Adjustment</a> |
+    <a href="<?php echo site_url('stock/adjustments'); ?>">Adjustment History</a>
+</p>
 
 <table>
     <thead>
-        <tr>
-            <th>Transaction No.</th>
-            <th>Type</th>
-            <th>Supplier</th>
-            <th>Processed By</th>
-            <th>Date</th>
-            <th>Action</th>
-        </tr>
+        <tr><th>Transaction No.</th><th>Type</th><th>Supplier</th><th>Processed By</th><th>Date</th><th>Action</th></tr>
     </thead>
     <tbody>
         <?php if (!empty($transactions)): foreach ($transactions as $transaction): ?>
@@ -22,7 +18,7 @@
                 <td><?php echo html_escape($transaction->supplier_name ?: 'N/A'); ?></td>
                 <td><?php echo html_escape($transaction->username); ?></td>
                 <td><?php echo html_escape($transaction->created_at); ?></td>
-                <td><a class="btn" href="<?php echo site_url('stock/details/' . $transaction->id); ?>">Details</a></td>
+                <td><a href="<?php echo site_url('stock/details/' . (int) $transaction->id); ?>">Details</a></td>
             </tr>
         <?php endforeach; else: ?>
             <tr><td colspan="6">No stock movements found.</td></tr>
@@ -30,4 +26,4 @@
     </tbody>
 </table>
 
-<?php if (!empty($pagination)): ?><?php echo $pagination; ?><?php endif; ?>
+<?php if (!empty($pagination)): ?><p><?php echo $pagination; ?></p><?php endif; ?>

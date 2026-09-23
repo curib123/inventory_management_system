@@ -4,11 +4,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Products extends CI_Controller {
 
-    // products controller to handle product management functionality
     public function __construct() {
         parent::__construct();
-        $this->load->library('session');
-        $this->load->library('form_validation');
+        $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
 
         if (!$this->session->userdata('logged_in')) {
@@ -17,136 +15,123 @@ class Products extends CI_Controller {
 
         $this->load->model('Product_model');
         $this->load->model('Supplier_model');
-         $this->load->model('Category_model');
+        $this->load->model('Category_model');
         $this->load->model('User_model');
     }
-    // Function to check if the user has the required permission
+
     public function index() {
         $this->require_permission('manage_products');
-
         $limit = 10;
-        $page = (int) $this->input->get('per_page', TRUE);
-        $page = max(1, $page);
+        $page = max(1, (int) $this->input->get('per_page', TRUE));
         $offset = ($page - 1) * $limit;
 
-        $total_rows = $this->Product_model->count_all();
         $data['products'] = $this->Product_model->get_all($limit, $offset);
-        $data['suppliers'] = $this->Supplier_model->get_all();
-        $data['categories'] = $this->Category_model->get_all();
         $data['page_title'] = 'Products';
-        $data['pagination'] = $this->paginate($total_rows, $limit, 'products');
-
+        $data['pagination'] = $this->paginate($this->Product_model->count_all(), $limit, 'products');
         $this->load->view('templates/header', $data);
         $this->load->view('products/index', $data);
         $this->load->view('templates/footer');
     }
-    // Function to check if the user has the required permission and add a new product
+
     public function add() {
         $this->require_permission('manage_products');
-
-        $this->form_validation->set_rules('product_name', 'Product Name', 'required');
-        $this->form_validation->set_rules('product_code', 'Product Code', 'required|max_length[50]');
-        $this->form_validation->set_rules('category_id', 'Category', 'required|integer|greater_than[0]');
-        $this->form_validation->set_rules('cost_price', 'Cost Price', 'numeric|greater_than_equal_to[0]');
-        $this->form_validation->set_rules('selling_price', 'Selling Price', 'numeric|greater_than_equal_to[0]');
-        $this->form_validation->set_rules('reorder_level', 'Reorder Level', 'integer|greater_than_equal_to[0]');
-
-        if ($this->form_validation->run() === FALSE) {
-            $data['suppliers'] = $this->Supplier_model->get_all();
-            $data['categories'] = $this->Category_model->get_all();
-            $data['page_title'] = 'Add Product';
-            $this->load->view('templates/header', $data);
-            $this->load->view('products/form', $data);
-            $this->load->view('templates/footer');
-            return;
-        }
-
-        $data = array(
-            'supplier_id' => $this->input->post('supplier_id'),
-            'category_id' => $this->input->post('category_id'),
-            'product_code' => $this->input->post('product_code'),
-            'product_name' => $this->input->post('product_name'),
-            'unit' => $this->input->post('unit'),
-            'cost_price' => $this->input->post('cost_price'),
-            'selling_price' => $this->input->post('selling_price'),
-            'reorder_level' => $this->input->post('reorder_level'),
-            'status' => $this->input->post('status'),
-        );
-
-        $this->Product_model->save($data);
-        redirect('products');
+        $this->product_form();
     }
-    //edit product function to check if the user has the required permission and edit an existing product
+
     public function edit($id) {
         $this->require_permission('manage_products');
-
         $product = $this->Product_model->get_by_id($id);
-
         if (!$product) {
-            redirect('products');
+            show_404();
+        }
+        $this->product_form((int) $id, $product);
+    }
+
+    public function delete($id) {
+        $this->require_permission('manage_products');
+        if ($this->input->method(TRUE) !== 'POST') {
+            show_error('Invalid request method.', 405, 'Method Not Allowed');
         }
 
-        $this->form_validation->set_rules('product_name', 'Product Name', 'required|max_length[150]');
-        $this->form_validation->set_rules('product_code', 'Product Code', 'required|max_length[50]');
+        $product = $this->Product_model->get_by_id($id);
+        if (!$product) {
+            show_404();
+        }
+        if ($this->Product_model->has_transaction_history($id)) {
+            show_error('Products with stock transaction history cannot be deleted. Set the product to inactive instead.', 400, 'Product Not Deleted');
+        }
+        if (!$this->Product_model->delete($id)) {
+            show_error('The product could not be deleted.', 500, 'Product Not Deleted');
+        }
+        redirect('products');
+    }
+
+    private function product_form($id = NULL, $product = NULL) {
+        $this->form_validation->set_rules('product_name', 'Product Name', 'trim|required|max_length[150]');
+        $this->form_validation->set_rules('product_code', 'Product Code', 'trim|required|max_length[50]');
         $this->form_validation->set_rules('category_id', 'Category', 'required|integer|greater_than[0]');
-        $this->form_validation->set_rules('cost_price', 'Cost Price', 'numeric|greater_than_equal_to[0]');
-        $this->form_validation->set_rules('selling_price', 'Selling Price', 'numeric|greater_than_equal_to[0]');
-        $this->form_validation->set_rules('reorder_level', 'Reorder Level', 'integer|greater_than_equal_to[0]');
+        $this->form_validation->set_rules('supplier_id', 'Supplier', 'integer|greater_than[0]');
+        $this->form_validation->set_rules('unit', 'Unit', 'trim|max_length[50]');
+        $this->form_validation->set_rules('cost_price', 'Cost Price', 'required|numeric|greater_than_equal_to[0]');
+        $this->form_validation->set_rules('selling_price', 'Selling Price', 'required|numeric|greater_than_equal_to[0]');
+        $this->form_validation->set_rules('reorder_level', 'Reorder Level', 'required|integer|greater_than_equal_to[0]');
 
         if ($this->form_validation->run() === FALSE) {
             $data['product'] = $product;
             $data['suppliers'] = $this->Supplier_model->get_all();
-            $data['page_title'] = 'Edit Product';
-
+            $data['categories'] = $this->Category_model->get_all(10000, 0);
+            $data['page_title'] = $id === NULL ? 'Add Product' : 'Edit Product';
             $this->load->view('templates/header', $data);
             $this->load->view('products/form', $data);
             $this->load->view('templates/footer');
             return;
         }
 
+        $code = trim($this->input->post('product_code', TRUE));
+        $category_id = (int) $this->input->post('category_id', TRUE);
+        $supplier_raw = $this->input->post('supplier_id', TRUE);
+        $supplier_id = ($supplier_raw === '' || $supplier_raw === NULL) ? NULL : (int) $supplier_raw;
+
+        if ($this->Product_model->code_exists($code, $id)) {
+            show_error('That product code already exists.', 400, 'Product Not Saved');
+        }
+        if (!$this->Category_model->get_by_id($category_id)) {
+            show_error('The selected category does not exist.', 400, 'Product Not Saved');
+        }
+        if ($supplier_id !== NULL && !$this->Supplier_model->get_by_id($supplier_id)) {
+            show_error('The selected supplier does not exist.', 400, 'Product Not Saved');
+        }
+
         $data = array(
-            'supplier_id' => $this->input->post('supplier_id'),
-            'category_id' => $this->input->post('category_id'),
-            'product_code' => $this->input->post('product_code'),
-            'product_name' => $this->input->post('product_name'),
-            'unit' => $this->input->post('unit'),
-            'cost_price' => $this->input->post('cost_price'),
-            'selling_price' => $this->input->post('selling_price'),
-            'reorder_level' => $this->input->post('reorder_level'),
-            'status' => $this->input->post('status'),
+            'supplier_id' => $supplier_id,
+            'category_id' => $category_id,
+            'product_code' => $code,
+            'product_name' => trim($this->input->post('product_name', TRUE)),
+            'unit' => trim($this->input->post('unit', TRUE)),
+            'cost_price' => (float) $this->input->post('cost_price', TRUE),
+            'selling_price' => (float) $this->input->post('selling_price', TRUE),
+            'reorder_level' => (int) $this->input->post('reorder_level', TRUE),
+            'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
         );
 
-        $this->Product_model->save($data, $id);
+        if (!$this->Product_model->save($data, $id)) {
+            show_error('The product could not be saved.', 500, 'Product Not Saved');
+        }
         redirect('products');
     }
-    //delete product function to check if the user has the required permission and delete an existing product
-    public function delete($id) {
-        $this->require_permission('manage_products');
 
-        $this->Product_model->delete($id);
-        redirect('products');
-    }
-    // Function to paginate the products list
     private function paginate($total_rows, $limit, $base_url) {
         $this->load->library('pagination');
-
         $config['base_url'] = site_url($base_url);
-        $config['total_rows'] = $total_rows;
-        $config['per_page'] = $limit;
+        $config['total_rows'] = (int) $total_rows;
+        $config['per_page'] = (int) $limit;
         $config['use_page_numbers'] = TRUE;
         $config['page_query_string'] = TRUE;
         $config['query_string_segment'] = 'per_page';
-        $config['full_tag_open'] = '<div class="pagination" style="margin-top:20px;">';
-        $config['full_tag_close'] = '</div>';
-        $config['num_tag_open'] = '<span style="margin:0 4px;">';
-        $config['num_tag_close'] = '</span>';
-        $config['cur_tag_open'] = '<strong style="margin:0 4px;">';
-        $config['cur_tag_close'] = '</strong>';
-
         $this->pagination->initialize($config);
         return $this->pagination->create_links();
     }
-    // Function to check if the user has the required permission
+
     private function require_permission($permission_name) {
         $user_id = $this->session->userdata('user_id');
         if (!$user_id || !$this->User_model->has_permission($user_id, $permission_name)) {

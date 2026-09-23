@@ -1,43 +1,55 @@
-<h2><?php echo $page_title; ?></h2>
+<h2><?php echo html_escape($page_title); ?></h2>
 <?php echo validation_errors(); ?>
-<?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
+<?php if (!empty($item_error)): ?><p><?php echo html_escape($item_error); ?></p><?php endif; ?>
+
+<?php echo form_open(current_url()); ?>
     <?php if ($transaction_type === 'stock_in'): ?>
-        <div class="form-group">
-            <label for="supplier_id">Supplier</label>
-            <select id="supplier_id" name="supplier_id">
-                <option value="">Select supplier</option>
+        <p>
+            <label for="supplier_id">Supplier</label><br>
+            <?php $selected_supplier = set_value('supplier_id'); ?>
+            <select id="supplier_id" name="supplier_id" required>
+                <option value="">Select Supplier</option>
                 <?php foreach ($suppliers as $supplier): ?>
-                    <option value="<?php echo $supplier->id; ?>"><?php echo html_escape($supplier->supplier_name); ?></option>
+                    <?php if ((int) $supplier->status === 1): ?>
+                        <option value="<?php echo (int) $supplier->id; ?>" <?php echo ((string) $selected_supplier === (string) $supplier->id) ? 'selected' : ''; ?>><?php echo html_escape($supplier->supplier_name); ?></option>
+                    <?php endif; ?>
                 <?php endforeach; ?>
             </select>
-        </div>
+        </p>
+        <p>For stock in, each selected product must already be assigned to the selected supplier.</p>
     <?php endif; ?>
 
-    <div class="form-group">
-        <label for="product_id">Product</label>
-        <select id="product_id" name="product_id[]" required>
-            <option value="">Select product</option>
-            <?php foreach ($products as $product): ?>
-                <option value="<?php echo $product->id; ?>">
-                    <?php echo html_escape($product->product_code . ' - ' . $product->product_name); ?>
-                    (Stock: <?php echo (int) $product->stock; ?>)
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
+    <h3>Items</h3>
+    <?php for ($row = 0; $row < 5; $row++): ?>
+        <fieldset>
+            <legend>Item <?php echo $row + 1; ?></legend>
+            <p>
+                <label for="product_id_<?php echo $row; ?>">Product</label><br>
+                <select id="product_id_<?php echo $row; ?>" name="product_id[]">
+                    <option value="">Select Product</option>
+                    <?php foreach ($products as $product): ?>
+                        <option value="<?php echo (int) $product->id; ?>">
+                            <?php echo html_escape($product->product_code . ' - ' . $product->product_name); ?>
+                            <?php if ($transaction_type === 'stock_in'): ?>
+                                - Supplier: <?php echo html_escape($product->supplier_name ?: 'None'); ?>
+                            <?php endif; ?>
+                            - Stock: <?php echo (int) $product->stock; ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </p>
+            <p>
+                <label for="quantity_<?php echo $row; ?>">Quantity</label><br>
+                <input type="number" id="quantity_<?php echo $row; ?>" name="quantity[]" min="1" step="1">
+            </p>
+        </fieldset>
+    <?php endfor; ?>
 
-    <div class="form-group">
-        <label for="quantity">Quantity</label>
-        <input type="number" id="quantity" name="quantity[]" min="1" required>
-    </div>
+    <p>
+        <label for="remarks">Remarks</label><br>
+        <input type="text" id="remarks" name="remarks" maxlength="255" value="<?php echo html_escape(set_value('remarks')); ?>">
+    </p>
 
-    <div class="form-group">
-        <label for="remarks">Remarks</label>
-        <input type="text" id="remarks" name="remarks" maxlength="255">
-    </div>
-
-    <div class="form-actions">
-        <button class="btn btn-success" type="submit">Save Transaction</button>
-        <a class="btn" href="<?php echo site_url('stock/history'); ?>">Cancel</a>
-    </div>
+    <button type="submit">Save Transaction</button>
+    <a href="<?php echo site_url('stock/history'); ?>">Cancel</a>
 <?php echo form_close(); ?>

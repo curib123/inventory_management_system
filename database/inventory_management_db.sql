@@ -271,7 +271,7 @@ ON DUPLICATE KEY UPDATE role_id = role_id;
 -- Default Admin User (example credential)
 -- -------------------------------------------------------------------
 INSERT INTO users (username, password, role_id, status)
-SELECT 'admin', '$2y$10$7LEjPqhXlYlU3x/.khkMiO9vMlpbQndVv1p8nzpL1kzG7G0Yf0aKe', r.id, 1
+SELECT 'admin', '$2y$12$sDusIfJlzofgxJf6D7cAbetKPOSUzw.CpIxK/kVxXLSWESpynCEtm', r.id, 1
 FROM roles r
 WHERE r.role_name = 'admin'
 ON DUPLICATE KEY UPDATE username = username;

@@ -1,12 +1,5 @@
 <h2>Products</h2>
-<button type="button" onclick="document.getElementById('product-form-add').showModal();">Add Product</button>
-
-<?php $this->load->view('modal/products/form', array(
-    'modal_id' => 'add',
-    'suppliers' => $suppliers,
-    'categories' => $categories,
-    'form_action' => site_url('products/add')
-)); ?>
+<p><a href="<?php echo site_url('products/add'); ?>">Add Product</a></p>
 
 <table>
     <thead>
@@ -14,44 +7,38 @@
             <th>ID</th>
             <th>Code</th>
             <th>Name</th>
-            <th>Category<th>
+            <th>Category</th>
             <th>Supplier</th>
             <th>Stock</th>
-            <th>Price</th>
-            <th>Created</th>
-            <th>Updated</th>
-            <th>Action</th>
+            <th>Selling Price</th>
+            <th>Status</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
         <?php if (!empty($products)): foreach ($products as $product): ?>
             <tr>
-                <td><?php echo $product->id; ?></td>
-                <td><?php echo $product->product_code; ?></td>
-                <td><?php echo $product->product_name; ?></td>
-                <td><?php echo isset($product->category_name) ? $product->category_name : 'N/A'; ?></td>
-                <td><?php echo isset($product->supplier_name) ? $product->supplier_name : 'N/A'; ?></td>
-                <td><?php echo $product->stock; ?></td>
-                <td><?php echo $product->selling_price; ?></td>
-                <td><?php echo $product->created_at; ?></td>
-                <td><?php echo $product->updated_at; ?></td>
+                <td><?php echo (int) $product->id; ?></td>
+                <td><?php echo html_escape($product->product_code); ?></td>
+                <td><?php echo html_escape($product->product_name); ?></td>
+                <td><?php echo html_escape($product->category_name ?: 'N/A'); ?></td>
+                <td><?php echo html_escape($product->supplier_name ?: 'N/A'); ?></td>
+                <td><?php echo (int) $product->stock; ?></td>
+                <td><?php echo number_format((float) $product->selling_price, 2); ?></td>
+                <td><?php echo $product->status ? 'Active' : 'Inactive'; ?></td>
                 <td>
-                    <button type="button" onclick="document.getElementById('product-form-<?php echo (int) $product->id; ?>').showModal();">Edit</button>
-                    <button type="button" onclick="document.getElementById('product-details-<?php echo (int) $product->id; ?>').showModal();">Details</button>
-                    <button type="button" onclick="document.getElementById('product-delete-<?php echo (int) $product->id; ?>').showModal();">Delete</button>
+                    <a href="<?php echo site_url('products/edit/' . (int) $product->id); ?>">Edit</a>
+                    <?php echo form_open('products/delete/' . (int) $product->id); ?>
+                        <button type="submit">Delete</button>
+                    <?php echo form_close(); ?>
                 </td>
             </tr>
-            <?php $this->load->view('modal/products/form', array('modal_id' => $product->id, 'product' => $product, 'suppliers' => $suppliers, 'form_action' => site_url('products/edit/' . $product->id))); ?>
-            <?php $this->load->view('modal/products/details', array('product' => $product)); ?>
-            <?php $this->load->view('modal/products/delete', array('product' => $product)); ?>
         <?php endforeach; else: ?>
-            <tr>
-                <td colspan="7">No products found.</td>
-            </tr>
+            <tr><td colspan="9">No products found.</td></tr>
         <?php endif; ?>
     </tbody>
 </table>
 
 <?php if (!empty($pagination)): ?>
-    <?php echo $pagination; ?>
+    <p><?php echo $pagination; ?></p>
 <?php endif; ?>

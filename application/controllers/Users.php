@@ -1,0 +1,127 @@
+<?php
+
+defined('BASEPATH') OR exit('No direct script access allowed');
+
+class Users extends CI_Controller {
+
+    public function __construct() {
+        parent::__construct();
+        $this->load->library(array('session', 'form_validation'));
+        $this->load->helper(array('form', 'url'));
+
+        if (!$this->session->userdata('logged_in')) {
+            redirect('login');
+        }
+
+        $this->load->model('User_model');
+        $this->require_permission('manage_users');
+    }
+
+    public function index() {
+        $data['users'] = $this->User_model->get_all();
+        $data['page_title'] = 'Users';
+        $this->load->view('templates/header', $data);
+        $this->load->view('users/index', $data);
+        $this->load->view('templates/footer');
+    }
+
+    public function add() {
+        $this->user_form();
+    }
+
+    public function edit($id) {
+        $user = $this->User_model->get_by_id($id);
+        if (!$user) {
+            show_404();
+        }
+        $this->user_form((int) $id, $user);
+    }
+
+    public function delete($id) {
+        if ($this->input->method(TRUE) !== 'POST') {
+            show_error('Invalid request method.', 405, 'Method Not Allowed');
+        }
+
+        $id = (int) $id;
+        if ($id === (int) $this->session->userdata('user_id')) {
+            show_error('You cannot delete your own signed-in account.', 400, 'User Not Deleted');
+        }
+
+        $user = $this->User_model->get_by_id($id);
+        if (!$user) {
+            show_404();
+        }
+
+        if ($this->User_model->has_history($id)) {
+            show_error('This user has transaction or activity history. Set the account to inactive instead of deleting it.', 400, 'User Not Deleted');
+        }
+
+        if (!$this->User_model->delete($id)) {
+            show_error('The user could not be deleted.', 500, 'User Not Deleted');
+        }
+
+        redirect('users');
+    }
+
+    private function user_form($id = NULL, $user = NULL) {
+        $this->form_validation->set_rules('username', 'Username', 'trim|required|min_length[3]|max_length[50]|alpha_dash');
+        $this->form_validation->set_rules('role_id', 'Role', 'required|integer|greater_than[0]');
+        if ($id === NULL) {
+            $this->form_validation->set_rules('password', 'Password', 'required|min_length[8]|max_length[255]');
+        } else {
+            $this->form_validation->set_rules('password', 'Password', 'min_length[8]|max_length[255]');
+        }
+
+        if ($this->form_validation->run() === FALSE) {
+            $data['user'] = $user;
+            $data['roles'] = $this->User_model->get_active_roles();
+            $data['page_title'] = $id === NULL ? 'Add User' : 'Edit User';
+            $this->load->view('templates/header', $data);
+            $this->load->view('users/form', $data);
+            $this->load->view('templates/footer');
+            return;
+        }
+
+        $username = trim($this->input->post('username', TRUE));
+        $role_id = (int) $this->input->post('role_id', TRUE);
+        $roles = $this->User_model->get_active_roles();
+        $role_ids = array_map(function ($role) { return (int) $role->id; }, $roles);
+
+        if (!in_array($role_id, $role_ids, TRUE)) {
+            show_error('The selected role is invalid or inactive.', 400, 'User Not Saved');
+        }
+
+        if ($this->User_model->username_exists($username, $id)) {
+            show_error('That username is already in use.', 400, 'User Not Saved');
+        }
+
+        $data = array(
+            'username' => $username,
+            'role_id' => $role_id,
+            'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
+        );
+
+        $password = (string) $this->input->post('password', FALSE);
+        if ($password !== '') {
+            $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+        }
+
+        if (!$this->User_model->save($data, $id)) {
+            show_error('The user could not be saved.', 500, 'User Not Saved');
+        }
+
+        if ($id !== NULL && (int) $id === (int) $this->session->userdata('user_id') && $data['status'] === 0) {
+            $this->session->sess_destroy();
+            redirect('login');
+        }
+
+        redirect('users');
+    }
+
+    private function require_permission($permission_name) {
+        $user_id = $this->session->userdata('user_id');
+        if (!$user_id || !$this->User_model->has_permission($user_id, $permission_name)) {
+            show_error('You do not have permission to access this page.', 403, 'Access Denied');
+        }
+    }
+}

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title><?php echo html_escape($report_title); ?></title>
@@ -17,11 +17,7 @@
         </thead>
         <tbody>
             <?php if (!empty($rows)): foreach ($rows as $row): ?>
-                <tr>
-                    <?php foreach ($row as $value): ?>
-                        <td><?php echo html_escape($value); ?></td>
-                    <?php endforeach; ?>
-                </tr>
+                <tr><?php foreach ($row as $value): ?><td><?php echo html_escape($value); ?></td><?php endforeach; ?></tr>
             <?php endforeach; else: ?>
                 <tr><td>No report data found.</td></tr>
             <?php endif; ?>

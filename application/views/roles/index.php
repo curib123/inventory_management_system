@@ -1,38 +1,26 @@
 <h2>Roles and Permissions</h2>
-<button type="button" onclick="document.getElementById('role-form-add').showModal();">Add Role</button>
-<?php $this->load->view('modal/roles/form', array('modal_id' => 'add', 'permissions' => $permissions, 'form_action' => site_url('roles/add'))); ?>
+<p><a href="<?php echo site_url('roles/add'); ?>">Add Role</a></p>
 
 <table>
     <thead>
-        <tr>
-            <th>Role</th>
-            <th>Description</th>         
-            <th>Status</th>
-            <th>Users</th>
-            <th>Created</th>
-            <th>Action</th>
-        </tr>
+        <tr><th>Role</th><th>Description</th><th>Status</th><th>Users</th><th>Actions</th></tr>
     </thead>
     <tbody>
         <?php if (!empty($roles)): foreach ($roles as $role): ?>
             <tr>
                 <td><?php echo html_escape($role->role_name); ?></td>
                 <td><?php echo html_escape($role->description); ?></td>
-                </td>
                 <td><?php echo $role->status ? 'Active' : 'Inactive'; ?></td>
                 <td><?php echo (int) $role->user_count; ?></td>
-                <td><?php echo html_escape($role->created_at); ?></td>
                 <td>
-                    <button type="button" onclick="document.getElementById('role-form-<?php echo (int) $role->id; ?>').showModal();">Edit</button>
-                    <button type="button" onclick="document.getElementById('role-details-<?php echo (int) $role->id; ?>').showModal();">Details</button>
+                    <a href="<?php echo site_url('roles/edit/' . (int) $role->id); ?>">Edit</a>
                     <?php if ((int) $role->user_count === 0): ?>
-                        <button type="button" onclick="document.getElementById('role-delete-<?php echo (int) $role->id; ?>').showModal();">Delete</button>
+                        <?php echo form_open('roles/delete/' . (int) $role->id); ?>
+                            <button type="submit">Delete</button>
+                        <?php echo form_close(); ?>
                     <?php endif; ?>
                 </td>
             </tr>
-            <?php $this->load->view('modal/roles/form', array('modal_id' => $role->id, 'role' => $role, 'permissions' => $permissions, 'selected_permissions' => $this->Role_model->get_role_permissions($role->id), 'form_action' => site_url('roles/edit/' . $role->id))); ?>
-            <?php $this->load->view('modal/roles/details', array('role' => $role)); ?>
-            <?php $this->load->view('modal/roles/delete', array('role' => $role)); ?>
         <?php endforeach; else: ?>
             <tr><td colspan="5">No roles found.</td></tr>
         <?php endif; ?>

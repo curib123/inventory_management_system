@@ -1,39 +1,27 @@
 <h2>Suppliers</h2>
-<button type="button" onclick="document.getElementById('supplier-form-add').showModal();">Add Supplier</button>
-<?php $this->load->view('modal/suppliers/form', array('modal_id' => 'add', 'form_action' => site_url('suppliers/add'))); ?>
+<p><a href="<?php echo site_url('suppliers/add'); ?>">Add Supplier</a></p>
 
 <table>
     <thead>
-        <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Contact Person</th>
-            <th>Phone</th>
-            <th>Address</th>
-            <th>Action</th>
-        </tr>
+        <tr><th>Name</th><th>Contact Person</th><th>Phone</th><th>Address</th><th>Status</th><th>Actions</th></tr>
     </thead>
     <tbody>
         <?php if (!empty($suppliers)): foreach ($suppliers as $supplier): ?>
             <tr>
-                <td><?php echo $supplier->id; ?></td>
-                <td><?php echo $supplier->supplier_name; ?></td>
-                <td><?php echo $supplier->contact_person; ?></td>
-                <td><?php echo $supplier->phone; ?></td>
-                <td><?php echo $supplier->address; ?></td>
+                <td><?php echo html_escape($supplier->supplier_name); ?></td>
+                <td><?php echo html_escape($supplier->contact_person); ?></td>
+                <td><?php echo html_escape($supplier->phone); ?></td>
+                <td><?php echo html_escape($supplier->address); ?></td>
+                <td><?php echo $supplier->status ? 'Active' : 'Inactive'; ?></td>
                 <td>
-                    <button type="button" onclick="document.getElementById('supplier-form-<?php echo (int) $supplier->id; ?>').showModal();">Edit</button>
-                    <button type="button" onclick="document.getElementById('supplier-details-<?php echo (int) $supplier->id; ?>').showModal();">Details</button>
-                    <button type="button" onclick="document.getElementById('supplier-delete-<?php echo (int) $supplier->id; ?>').showModal();">Delete</button>
+                    <a href="<?php echo site_url('suppliers/edit/' . (int) $supplier->id); ?>">Edit</a>
+                    <?php echo form_open('suppliers/delete/' . (int) $supplier->id); ?>
+                        <button type="submit">Delete</button>
+                    <?php echo form_close(); ?>
                 </td>
             </tr>
-            <?php $this->load->view('modal/suppliers/form', array('modal_id' => $supplier->id, 'supplier' => $supplier, 'form_action' => site_url('suppliers/edit/' . $supplier->id))); ?>
-            <?php $this->load->view('modal/suppliers/details', array('supplier' => $supplier)); ?>
-            <?php $this->load->view('modal/suppliers/delete', array('supplier' => $supplier)); ?>
         <?php endforeach; else: ?>
-            <tr>
-                <td colspan="6">No suppliers found.</td>
-            </tr>
+            <tr><td colspan="6">No suppliers found.</td></tr>
         <?php endif; ?>
     </tbody>
 </table>

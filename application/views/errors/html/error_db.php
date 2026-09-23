@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-$safe_heading = htmlspecialchars(strip_tags(isset($heading) ? (string) $heading : 'PHP Error'), ENT_QUOTES, 'UTF-8');
+$safe_heading = htmlspecialchars(strip_tags(isset($heading) ? (string) $heading : 'Database Error'), ENT_QUOTES, 'UTF-8');
 $safe_message = htmlspecialchars(strip_tags(isset($message) ? (string) $message : 'An application error occurred.'), ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>

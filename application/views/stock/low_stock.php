@@ -1,15 +1,6 @@
 <h2>Low Stock Monitoring</h2>
-
 <table>
-    <thead>
-        <tr>
-            <th>Code</th>
-            <th>Product</th>
-            <th>Current Stock</th>
-            <th>Reorder Level</th>
-            <th>Unit</th>
-        </tr>
-    </thead>
+    <thead><tr><th>Code</th><th>Product</th><th>Current Stock</th><th>Reorder Level</th><th>Unit</th></tr></thead>
     <tbody>
         <?php if (!empty($products)): foreach ($products as $product): ?>
             <tr>
