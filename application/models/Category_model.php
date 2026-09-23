@@ -56,7 +56,7 @@ class Category_model extends CI_Model {
         $this->db->from('categories c');
         $this->db->join('products p', 'p.category_id = c.id', 'left');
         $this->apply_datatable_search($search, 'c');
-        $this->db->group_by('c.id');
+        $this->db->group_by(array('c.id', 'c.category_name', 'c.status'));
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
         }
