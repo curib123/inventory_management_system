@@ -62,6 +62,7 @@ define('SYSDIR', basename(BASEPATH));
 
 if (is_dir($application_folder) === TRUE) {
     define('APPPATH', str_replace('\\', '/', realpath($application_folder)) . '/');
+    define('VIEWPATH', APPPATH . 'views/');
 }
 
 require_once BASEPATH . 'core/CodeIgniter.php';
