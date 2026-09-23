@@ -5,7 +5,7 @@
 <?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
     <div class="form-group">
         <label for="category_name">Category Name</label>
-        <input type="text" id="category_name" name="category_name" value="<?php echo html_escape(isset($category) ? $category->category_name : ''); ?>" required maxlength="100">
+        <input type="text" id="category_name" name="category_name"  value="<?php echo html_escape(isset($category) ? $category->category_name : ''); ?>" autocomplete="off" required maxlength="20">
     </div>
 
     <div class="form-group">

@@ -4,6 +4,7 @@
 <?php $this->load->view('modal/products/form', array(
     'modal_id' => 'add',
     'suppliers' => $suppliers,
+    'categories' => $categories,
     'form_action' => site_url('products/add')
 )); ?>
 
@@ -13,9 +14,12 @@
             <th>ID</th>
             <th>Code</th>
             <th>Name</th>
+            <th>Category<th>
             <th>Supplier</th>
             <th>Stock</th>
             <th>Price</th>
+            <th>Created</th>
+            <th>Updated</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -25,9 +29,12 @@
                 <td><?php echo $product->id; ?></td>
                 <td><?php echo $product->product_code; ?></td>
                 <td><?php echo $product->product_name; ?></td>
+                <td><?php echo isset($product->category_name) ? $product->category_name : 'N/A'; ?></td>
                 <td><?php echo isset($product->supplier_name) ? $product->supplier_name : 'N/A'; ?></td>
                 <td><?php echo $product->stock; ?></td>
                 <td><?php echo $product->selling_price; ?></td>
+                <td><?php echo $product->created_at; ?></td>
+                <td><?php echo $product->updated_at; ?></td>
                 <td>
                     <button type="button" onclick="document.getElementById('product-form-<?php echo (int) $product->id; ?>').showModal();">Edit</button>
                     <button type="button" onclick="document.getElementById('product-details-<?php echo (int) $product->id; ?>').showModal();">Details</button>

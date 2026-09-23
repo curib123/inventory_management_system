@@ -6,9 +6,10 @@
     <thead>
         <tr>
             <th>Role</th>
-            <th>Description</th>
+            <th>Description</th>         
             <th>Status</th>
             <th>Users</th>
+            <th>Created</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -17,8 +18,10 @@
             <tr>
                 <td><?php echo html_escape($role->role_name); ?></td>
                 <td><?php echo html_escape($role->description); ?></td>
+                </td>
                 <td><?php echo $role->status ? 'Active' : 'Inactive'; ?></td>
                 <td><?php echo (int) $role->user_count; ?></td>
+                <td><?php echo html_escape($role->created_at); ?></td>
                 <td>
                     <button type="button" onclick="document.getElementById('role-form-<?php echo (int) $role->id; ?>').showModal();">Edit</button>
                     <button type="button" onclick="document.getElementById('role-details-<?php echo (int) $role->id; ?>').showModal();">Details</button>

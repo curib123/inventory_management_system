@@ -5,12 +5,12 @@
 <?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
     <div class="form-group">
         <label for="product_name">Product Name</label>
-        <input type="text" id="product_name" name="product_name" value="<?php echo html_escape(isset($product) ? $product->product_name : ''); ?>" required maxlength="150">
+        <input type="text" id="product_name" name="product_name" value="<?php echo html_escape(isset($product) ? $product->product_name : ''); ?>" required  autocomplete="off" maxlength="20">
     </div>
 
     <div class="form-group">
         <label for="product_code">Product Code</label>
-        <input type="text" id="product_code" name="product_code" value="<?php echo html_escape(isset($product) ? $product->product_code : ''); ?>" required maxlength="50">
+        <input type="text" id="product_code" name="product_code" value="<?php echo html_escape(isset($product) ? $product->product_code : ''); ?>" required autocomplete="off" maxlength="20">
     </div>
 
     <div class="form-group">
@@ -25,29 +25,37 @@
         </select>
     </div>
 
-    <div class="form-group">
-        <label for="category_id">Category ID</label>
-        <input type="number" id="category_id" name="category_id" min="1" step="1" value="<?php echo html_escape(isset($product) ? $product->category_id : ''); ?>" required>
+   
+     <div class="form-group">
+        <label for="category_id">Category</label>
+        <select id="category_id" name="category_id">
+            <option value="">Select Category</option>
+            <?php foreach ($categories as $category): ?>
+                <option value="<?php echo $category->id; ?>" <?php echo (isset($product) && $product->category_id == $category->id) ? 'selected' : ''; ?>>
+                    <?php echo html_escape($category->category_name); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
     </div>
 
     <div class="form-group">
         <label for="unit">Unit</label>
-        <input type="text" id="unit" name="unit" maxlength="50" value="<?php echo html_escape(isset($product) ? $product->unit : ''); ?>">
+        <input type="text" id="unit" name="unit" maxlength="50" value="<?php echo html_escape(isset($product) ? $product->unit : ''); ?>" autocomplete="off">
     </div>
 
     <div class="form-group">
         <label for="cost_price">Cost Price</label>
-        <input type="number" id="cost_price" step="0.01" min="0" name="cost_price" value="<?php echo html_escape(isset($product) ? $product->cost_price : ''); ?>">
+        <input type="number" id="cost_price" step="0.01" min="0" name="cost_price" value="<?php echo html_escape(isset($product) ? $product->cost_price : ''); ?>" autocomplete="off">
     </div>
 
     <div class="form-group">
         <label for="selling_price">Selling Price</label>
-        <input type="number" id="selling_price" step="0.01" min="0" name="selling_price" value="<?php echo html_escape(isset($product) ? $product->selling_price : ''); ?>">
+        <input type="number" id="selling_price" step="0.01" min="0" name="selling_price" value="<?php echo html_escape(isset($product) ? $product->selling_price : ''); ?>" autocomplete="off">
     </div>
 
     <div class="form-group">
         <label for="reorder_level">Reorder Level</label>
-        <input type="number" id="reorder_level" name="reorder_level" min="0" step="1" value="<?php echo isset($product) ? (int) $product->reorder_level : 0; ?>">
+        <input type="number" id="reorder_level" name="reorder_level" min="0" step="1" value="<?php echo isset($product) ? (int) $product->reorder_level : 0; ?>" autocomplete="off">
     </div>
 
     <div class="form-group">

@@ -9,6 +9,7 @@
             <th>Category Name</th>
             <th>Status</th>
             <th>Products</th>
+            <th>Created</th>
             <th>Action</th>
         </tr>
     </thead>
@@ -19,6 +20,7 @@
                 <td><?php echo $category->category_name; ?></td>
                 <td><?php echo ($category->status == 1) ? 'Active' : 'Inactive'; ?></td>
                 <td><?php echo $this->Category_model->count_products($category->id); ?></td>
+                <td><?php echo $category->created_at ?></td>
                 <td>
                     <button type="button" onclick="document.getElementById('category-form-<?php echo (int) $category->id; ?>').showModal();">Edit</button>
                     <button type="button" onclick="document.getElementById('category-details-<?php echo (int) $category->id; ?>').showModal();">Details</button>

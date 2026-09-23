@@ -21,6 +21,7 @@ class Roles extends CI_Controller {
     public function index() {
         $this->require_permission('manage_users');
 
+
         $data['roles'] = $this->Role_model->get_all();
         $data['permissions'] = $this->Role_model->get_permissions();
         $data['page_title'] = 'Roles and Permissions';

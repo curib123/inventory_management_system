@@ -1,6 +1,6 @@
 <h2><?php echo $page_title; ?></h2>
 <?php echo validation_errors(); ?>
-<?php echo form_open(); ?>
+<?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
     <div class="form-group">
         <label for="product_id">Product</label>
         <select id="product_id" name="product_id" required>

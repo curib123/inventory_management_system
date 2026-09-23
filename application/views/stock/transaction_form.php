@@ -1,6 +1,6 @@
 <h2><?php echo $page_title; ?></h2>
 <?php echo validation_errors(); ?>
-<?php echo form_open(); ?>
+<?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
     <?php if ($transaction_type === 'stock_in'): ?>
         <div class="form-group">
             <label for="supplier_id">Supplier</label>

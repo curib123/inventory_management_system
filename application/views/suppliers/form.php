@@ -2,7 +2,7 @@
 
 <?php echo validation_errors(); ?>
 
-<?php echo form_open(current_url()); ?>
+<?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
     <div class="form-group">
         <label for="supplier_name">Supplier Name</label>
         <input type="text" id="supplier_name" name="supplier_name" autocomplete="off" value="<?php echo html_escape(isset($supplier) ? $supplier->supplier_name : ''); ?>" required maxlength="150">

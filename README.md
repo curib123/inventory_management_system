@@ -1,244 +1,138 @@
-﻿# Inventory Management System
+﻿# inventory_management_system
+Built an Inventory management System using Codelgniter 3 . The focus is not only CRUD but also business logic,stock transaction,inventory calculation,report,user permissions and transaction history.
 
-A web-based inventory management system built with CodeIgniter 3, PHP, MySQL, Bootstrap, JavaScript, AJAX, DataTables, and Chart.js. It is designed to manage stock transactions, inventory records, supplier details, low-stock alerts, reports, and role-based access control.
 
-## Overview
+Development Phases
+ 
+ Phase 1 - Product & Category Management 
 
-This project is focused on real inventory operations, not just basic CRUD functionality. It includes product management, stock-in and stock-out processing, stock movement history, reporting, and authorization logic.
+1.Products
+2.Categories
+3.Product code
+4.unit
+5.Cost Price
+6.Selling Price
+7.Currect Stock
+8.Reorder Level 
+9.Product status
 
-## Features
 
-### Product and Category Management
-- Manage products and categories
-- Product code support
-- Unit tracking
-- Cost and selling price
-- Current stock value
-- Reorder level
-- Product status
+Phase 2 - Supplier Management
 
-### Supplier Management
-- Store supplier information
-- Track contact details
-- Associate products with suppliers
+1.Supplier information
+2.Supplier contact details
+3.Products associated with suppliers
 
-### Stock In
-- Create stock-in transactions
-- Generate transaction numbers
-- Select suppliers
-- Add multiple products in one transaction
-- Record quantities received
-- Increase stock automatically
-- Save stock movement history
 
-### Stock Out
-- Create stock-out transactions
-- Validate available stock before processing
-- Reduce stock automatically
-- Prevent negative inventory
-- Log stock movement
+Phase 3 - 
 
-### Stock Movement History
-- Track stock-in and stock-out activities
-- Store transaction references
-- View product and quantity details
-- Track who processed the transaction
-- Record date and time
 
-### Stock Adjustment
-- Compare system stock with physical stock
-- Record quantity differences
-- Save adjustment reason
-- Update inventory balances
-- Keep history of adjustments
+1.Create Stock in Trasaction
+2.Transaction number
+3.Select supplier when supplier select it will fetch all product connected to supplier
+4.Add multiple products in 1 transaction
+5.Quantity received from each product selected
+6.Increase product stock automatically
+7.Record stock movement 
 
-### Low Stock Monitoring
-- Configure reorder levels
-- Identify low-stock products
-- Raise inventory warnings
-- Track corrective changes
+Phase 4. 
+1.Create Stock Out Transaction
+2.Check available stock before processing 
+3.Decrease product stock automatically
+4.Prevent stock from becoming negative
+5.Record stock movement
 
-### Dashboard
-- Total products
-- Total stock quantity
-- Low stock items
-- Today’s stock in
-- Today’s stock out
-- Inventory value
-- Stock by category
-- Monthly stock movement summary
+Phase 5 - Stock Movement History
+1.Stock In History
+2.Stock Out History
+3.Transaction reference 
+4.Product
+5.Quantity
+6.User who processed the transaction 
+7.Date and Time
 
-### Reports and Export
-- Inventory reports
-- Stock-in report
-- Stock-out report
-- Stock movement reports
-- Low-stock report
-- Inventory valuation
-- CSV/Excel export using PHPSpreadsheet
-- PDF export using Dompdf
+Phase 6 - Stock Adjustment
 
-### User Roles and Permissions
-- Admin
-- Staff
-- Role-based access control
-- Transaction tracking by user
+1.Compare system stock in physical stock
+2.Record quantity difference
+3.Record adjustment reason
+4.Update inventory
+5.Keep adjustment history
 
-## Business Rules
 
-1. Stock In: New Stock = Old Stock + Quantity Received
-2. Stock Out: New Stock = Old Stock - Quantity Received
-3. Prevent stock out when inventory is insufficient
-4. Every stock change must create a transaction/history record
-5. Only authorized users can adjust or delete critical inventory records
-6. Use database transactions when updating stock and transaction records together
+Phase 7 - Low Stock Monitoring 
 
-## Tech Stack
+1.Set reorder level
+2.Indentify low stock products
+3.Records adjustment reason 
+4.Update inventory
+5.keep adjusment history
 
-- CodeIgniter 3
-- PHP
-- MySQL
-- Bootstrap
-- JavaScript
-- AJAX
-- DataTables
-- Chart.js
+Phase 8- Dashboard  - with chart.js visuals
 
-## Suggested Database Tables
+1.Total Products
+2.Total stock quantity
+3.Low stocks products
+4.Todays stock in
+5.Todays stock out
+6.Inventory value
+7.Stock by Category
+8.Monthly stock movement
 
-```sql
-users (
-    id,
-    username,
-    password,
-    role,
-    status,
-    created_at
-)
+Phase 9 - Reports & Export
 
-categories (
-    id,
-    category_name,
-    status
-)
+1.Inventory Reports
+2.Stock in Report
+3.Stock Out Report
+4.Stock Movement report
+5.Low-Stock report
+6.Inventory valuation
+7.Export CSV/Excel - PHPSpreadsheet Library
+8.Print Pdf report - Dompdf Library
 
-suppliers (
-    id,
-    supplier_name,
-    contact_person,
-    phone,
-    address
-)
+Phase 10 -User Roles & Permissions
+1. Admin
+2. Staff
+3. Controll Access to inventory functions
+4. Track which user processed transactions
 
-products (
-    id,
-    category_id,
-    supplier_id,
-    product_code,
-    product_name,
-    unit,
-    cost_price,
-    selling_price,
-    stock,
-    reorder_level,
-    status
-)
 
-stock_transactions (
-    id,
-    transaction_no,
-    type,
-    supplier_id,
-    remarks,
-    created_by,
-    created_at
-)
+Suggestion Database Tables
 
-stock_transaction_items (
-    id,
-    transaction_id,
-    product_id,
-    quantity,
-    cost_price
-)
 
-stock_adjustments (
-    id,
-    product_id,
-    system_stock,
-    actual_stock,
-    difference,
-    reason,
-    created_by,
-    created_at
-)
+1. users - id,username,password,role,status,created_at
 
-activity_logs (
-    id,
-    user_id,
-    action,
-    description,
-    ip_address,
-    created_at
-)
-```
+2. categories - id,category_name,status
 
-## Recommended Workflow
+3. suppliers - id ,supplier_name,contact_person,phone,address
 
-Product Setup -> Supplier Setup -> Stock In -> Inventory Update -> Stock Out -> Inventory Update -> Stock Movement History -> Stock Adjustment -> Dashboard -> Reports
+4. products - id ,category_id,supplier_id ,product_code ,product_name,unit,cost_price,selling_price,stock,reorder_level,status
 
-## Project Structure
+5. stock_transaction - id,transaction_no,type,supplier_id,remarks,created_by,created_at
 
-```text
-inventory_management_system/
-├── application/
-├── system/
-├── assets/
-├── uploads/
-├── index.php
-├── README.md
-├── LICENSE
-└── .htaccess
-```
+6. stock_transaction_items - id,transaction_id,product_id,quantity,cost_price
 
-## Installation
+7. stock_adjustments -id , product_id,system_stock,actual_stock,difference,reason,created_by,created_at
 
-### Prerequisites
-- PHP 7.4 or newer
-- MySQL or MariaDB
-- Apache or Nginx
-- Composer
+8. activity_logs - id,user_id,action,description,ip_address,created_at
 
-### Setup Steps
-1. Clone the repository.
-2. Import the database schema into MySQL.
-3. Run `composer install` to install PHPSpreadsheet and Dompdf.
-4. Configure the database connection in the CodeIgniter settings.
-5. Set the application base URL.
-6. Ensure writable folders have the proper permissions.
-7. Run the project in a browser.
 
-### Run Tests
+Very Important take this on my mind
 
-```bash
-vendor/bin/phpunit
-```
+1. Stock In  : New Stock = Old Stock + Quantity Received
+2. Stock Out : New Stock = Old Stock - Quantity Received
+3. Do not allow stock out when available stock is insufficient
+4. Every Stock change should create a transaction / history record
+5. Only authorized users should be allowed  to adjust or delete important inventory records
+6. Use database transaction when updating stocks and transaction records together
 
-The unit tests cover authentication, stock-in/out rules, insufficient inventory, report definitions, and export formats. Database-backed model and controller integration tests should run against a dedicated test database.
+Tech Stack to use
 
-## Security Best Practices
-
-- Hash all user passwords securely
-- Restrict access based on user role
-- Validate all input data
-- Use prepared statements for database queries
-- Record important administrative actions
-- Use database transactions for stock and transaction updates
-
-## License
-
-This project is licensed under the MIT License. See the LICENSE file for details.
-
-## Notes
-
-This repository serves as a project blueprint and planning document for the Inventory Management System. It can be extended into a complete CodeIgniter application as development continues.
+1. Codelgniter 3
+2. PHP
+3. MYsql
+4. Bootstrap
+5. Javascript 
+6. Ajax 
+7. DataTables
+8.Chart.js
