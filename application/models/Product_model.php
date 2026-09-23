@@ -34,6 +34,7 @@ class Product_model extends CI_Model {
     // Function to save a new product or update an existing product
     public function save($data, $id = NULL) {
         if ($id) {
+            unset($data['stock']);
             $this->db->where('id', $id);
             return $this->db->update('products', $data);
         }
@@ -64,17 +65,5 @@ class Product_model extends CI_Model {
         $this->db->where('p.stock <= p.reorder_level');
         $this->db->order_by('p.stock', 'ASC');
         return $this->db->get()->result();
-    }
-    // Function to update the stock of a product based on the type of transaction (in or out)   
-    public function update_stock($product_id, $quantity, $type = 'in') {
-        $product = $this->get_by_id($product_id);
-
-        if (!$product) {
-            return FALSE;
-        }
-
-        $new_stock = ($type === 'out') ? ($product->stock - $quantity) : ($product->stock + $quantity);
-
-        return $this->db->update('products', array('stock' => $new_stock), array('id' => $product_id));
     }
 }

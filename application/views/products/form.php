@@ -44,11 +44,6 @@
     </div>
 
     <div class="form-group">
-        <label>Stock</label>
-        <input type="number" name="stock" value="<?php echo isset($product) ? $product->stock : 0; ?>">
-    </div>
-
-    <div class="form-group">
         <label>Reorder Level</label>
         <input type="number" name="reorder_level" value="<?php echo isset($product) ? $product->reorder_level : 0; ?>">
     </div>

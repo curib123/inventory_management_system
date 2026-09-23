@@ -63,7 +63,6 @@ class Products extends CI_Controller {
             'unit' => $this->input->post('unit'),
             'cost_price' => $this->input->post('cost_price'),
             'selling_price' => $this->input->post('selling_price'),
-            'stock' => $this->input->post('stock'),
             'reorder_level' => $this->input->post('reorder_level'),
             'status' => $this->input->post('status'),
         );
@@ -103,7 +102,6 @@ class Products extends CI_Controller {
             'unit' => $this->input->post('unit'),
             'cost_price' => $this->input->post('cost_price'),
             'selling_price' => $this->input->post('selling_price'),
-            'stock' => $this->input->post('stock'),
             'reorder_level' => $this->input->post('reorder_level'),
             'status' => $this->input->post('status'),
         );

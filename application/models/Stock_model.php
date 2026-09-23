@@ -10,6 +10,10 @@ class Stock_model extends CI_Model {
     }
     // Function to create a stock transaction (stock in or stock out) with items
     public function create_transaction($type, $supplier_id, $remarks, $user_id, $items) {
+        if (!in_array($type, array('stock_in', 'stock_out'), TRUE) || empty($items)) {
+            return array('success' => FALSE, 'message' => 'A valid stock transaction with at least one item is required.');
+        }
+
         $this->db->trans_begin();
 
         $transaction_no = strtoupper($type) . '-' . date('YmdHis') . '-' . strtoupper(substr(uniqid(), -6));
