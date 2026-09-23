@@ -16,19 +16,13 @@
     <a href="<?php echo site_url('reports/export/' . $report_key . '/pdf'); ?>">PDF</a>
 </p>
 
-<table>
+<table data-datatable-server data-source="<?php echo site_url('reports/datatable/' . $report_key); ?>">
     <thead>
         <tr>
-            <?php if (!empty($rows)): foreach (array_keys($rows[0]) as $header): ?>
-                <th><?php echo html_escape(ucwords(str_replace('_', ' ', $header))); ?></th>
-            <?php endforeach; endif; ?>
+            <?php foreach ($columns as $label): ?>
+                <th><?php echo html_escape($label); ?></th>
+            <?php endforeach; ?>
         </tr>
     </thead>
-    <tbody>
-        <?php if (!empty($rows)): foreach ($rows as $row): ?>
-            <tr><?php foreach ($row as $value): ?><td><?php echo html_escape($value); ?></td><?php endforeach; ?></tr>
-        <?php endforeach; else: ?>
-            <tr><td>No report data found.</td></tr>
-        <?php endif; ?>
-    </tbody>
+    <tbody></tbody>
 </table>

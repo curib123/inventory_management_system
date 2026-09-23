@@ -6,23 +6,16 @@
     <a href="<?php echo site_url('stock/adjustments'); ?>">Adjustment History</a>
 </p>
 
-<table>
+<table data-datatable-server data-source="<?php echo site_url('stock/history/datatable'); ?>">
     <thead>
-        <tr><th>Transaction No.</th><th>Type</th><th>Supplier</th><th>Processed By</th><th>Date</th><th>Action</th></tr>
+        <tr>
+            <th>Transaction No.</th>
+            <th>Type</th>
+            <th>Supplier</th>
+            <th>Processed By</th>
+            <th>Date</th>
+            <th data-orderable="false">Action</th>
+        </tr>
     </thead>
-    <tbody>
-        <?php if (!empty($transactions)): foreach ($transactions as $transaction): ?>
-            <tr>
-                <td><?php echo html_escape($transaction->transaction_no); ?></td>
-                <td><?php echo html_escape($transaction->type); ?></td>
-                <td><?php echo html_escape($transaction->supplier_name ?: 'N/A'); ?></td>
-                <td><?php echo html_escape($transaction->username); ?></td>
-                <td><?php echo html_escape($transaction->created_at); ?></td>
-                <td><a href="<?php echo site_url('stock/details/' . (int) $transaction->id); ?>">Details</a></td>
-            </tr>
-        <?php endforeach; else: ?>
-            <tr><td colspan="6">No stock movements found.</td></tr>
-        <?php endif; ?>
-    </tbody>
+    <tbody></tbody>
 </table>
-
