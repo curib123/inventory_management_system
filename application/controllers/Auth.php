@@ -22,6 +22,10 @@ class Auth extends CI_Controller {
     }
     // user login function to authenticate users and set session data
     public function login() {
+        if ($this->session->userdata('logged_in')) {
+            redirect('dashboard');
+        }
+
         $this->load->helper(array('form'));
 
         if ($this->input->post()) {
