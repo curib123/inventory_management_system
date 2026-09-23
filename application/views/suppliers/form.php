@@ -1,6 +1,6 @@
 <h2><?php echo isset($supplier) ? 'Edit Supplier' : 'Add Supplier'; ?></h2>
 
-<?php echo form_open(current_url()); ?>
+<?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
     <div class="form-group">
         <label>Supplier Name</label>
         <input type="text" name="supplier_name" value="<?php echo isset($supplier) ? $supplier->supplier_name : ''; ?>" required>

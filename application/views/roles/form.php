@@ -2,7 +2,7 @@
 
 <?php echo validation_errors(); ?>
 
-<?php echo form_open(); ?>
+<?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
     <div class="form-group">
         <label for="role_name">Role Name</label>
         <input type="text" id="role_name" name="role_name" maxlength="50" required value="<?php echo set_value('role_name', isset($role->role_name) ? $role->role_name : ''); ?>">

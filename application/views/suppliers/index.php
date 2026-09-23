@@ -1,5 +1,6 @@
 <h2>Suppliers</h2>
-<a class="btn btn-success" href="<?php echo site_url('suppliers/add'); ?>">Add Supplier</a>
+<button type="button" onclick="document.getElementById('supplier-form-add').showModal();">Add Supplier</button>
+<?php $this->load->view('modal/suppliers/form', array('modal_id' => 'add', 'form_action' => site_url('suppliers/add'))); ?>
 
 <table>
     <thead>
@@ -21,10 +22,14 @@
                 <td><?php echo $supplier->phone; ?></td>
                 <td><?php echo $supplier->address; ?></td>
                 <td>
-                    <a class="btn" href="<?php echo site_url('suppliers/edit/' . $supplier->id); ?>">Edit</a>
-                    <a class="btn btn-danger" href="<?php echo site_url('suppliers/delete/' . $supplier->id); ?>" onclick="return confirm('Delete this supplier?');">Delete</a>
+                    <button type="button" onclick="document.getElementById('supplier-form-<?php echo (int) $supplier->id; ?>').showModal();">Edit</button>
+                    <button type="button" onclick="document.getElementById('supplier-details-<?php echo (int) $supplier->id; ?>').showModal();">Details</button>
+                    <button type="button" onclick="document.getElementById('supplier-delete-<?php echo (int) $supplier->id; ?>').showModal();">Delete</button>
                 </td>
             </tr>
+            <?php $this->load->view('modal/suppliers/form', array('modal_id' => $supplier->id, 'supplier' => $supplier, 'form_action' => site_url('suppliers/edit/' . $supplier->id))); ?>
+            <?php $this->load->view('modal/suppliers/details', array('supplier' => $supplier)); ?>
+            <?php $this->load->view('modal/suppliers/delete', array('supplier' => $supplier)); ?>
         <?php endforeach; else: ?>
             <tr>
                 <td colspan="6">No suppliers found.</td>

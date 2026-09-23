@@ -1,6 +1,6 @@
 <h2><?php echo isset($category) ? 'Edit Category' : 'Add Category'; ?></h2>
 
-<?php echo form_open(current_url()); ?>
+<?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
     <div class="form-group">
         <label>Category Name</label>
         <input type="text" name="category_name" value="<?php echo isset($category) ? $category->category_name : ''; ?>" required>

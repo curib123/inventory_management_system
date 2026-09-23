@@ -1,7 +1,5 @@
 <h2><?php echo $page_title; ?></h2>
 <?php echo validation_errors(); ?>
-<?php if ($this->session->flashdata('error')): ?><p><?php echo html_escape($this->session->flashdata('error')); ?></p><?php endif; ?>
-
 <?php echo form_open(); ?>
     <?php if ($transaction_type === 'stock_in'): ?>
         <div class="form-group">

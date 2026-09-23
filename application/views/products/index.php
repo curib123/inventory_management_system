@@ -1,5 +1,11 @@
 <h2>Products</h2>
-<a class="btn btn-success" href="<?php echo site_url('products/add'); ?>">Add Product</a>
+<button type="button" onclick="document.getElementById('product-form-add').showModal();">Add Product</button>
+
+<?php $this->load->view('modal/products/form', array(
+    'modal_id' => 'add',
+    'suppliers' => $suppliers,
+    'form_action' => site_url('products/add')
+)); ?>
 
 <table>
     <thead>
@@ -23,10 +29,14 @@
                 <td><?php echo $product->stock; ?></td>
                 <td><?php echo $product->selling_price; ?></td>
                 <td>
-                    <a class="btn" href="<?php echo site_url('products/edit/' . $product->id); ?>">Edit</a>
-                    <a class="btn btn-danger" href="<?php echo site_url('products/delete/' . $product->id); ?>" onclick="return confirm('Delete this product?');">Delete</a>
+                    <button type="button" onclick="document.getElementById('product-form-<?php echo (int) $product->id; ?>').showModal();">Edit</button>
+                    <button type="button" onclick="document.getElementById('product-details-<?php echo (int) $product->id; ?>').showModal();">Details</button>
+                    <button type="button" onclick="document.getElementById('product-delete-<?php echo (int) $product->id; ?>').showModal();">Delete</button>
                 </td>
             </tr>
+            <?php $this->load->view('modal/products/form', array('modal_id' => $product->id, 'product' => $product, 'suppliers' => $suppliers, 'form_action' => site_url('products/edit/' . $product->id))); ?>
+            <?php $this->load->view('modal/products/details', array('product' => $product)); ?>
+            <?php $this->load->view('modal/products/delete', array('product' => $product)); ?>
         <?php endforeach; else: ?>
             <tr>
                 <td colspan="7">No products found.</td>

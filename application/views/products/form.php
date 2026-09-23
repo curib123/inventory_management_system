@@ -1,6 +1,6 @@
 <h2><?php echo isset($product) ? 'Edit Product' : 'Add Product'; ?></h2>
 
-<?php echo form_open(current_url()); ?>
+<?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
     <div class="form-group">
         <label>Product Name</label>
         <input type="text" name="product_name" value="<?php echo isset($product) ? $product->product_name : ''; ?>" required>

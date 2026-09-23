@@ -30,6 +30,7 @@ class Products extends CI_Controller {
 
         $total_rows = $this->Product_model->count_all();
         $data['products'] = $this->Product_model->get_all($limit, $offset);
+        $data['suppliers'] = $this->Supplier_model->get_all();
         $data['page_title'] = 'Products';
         $data['pagination'] = $this->paginate($total_rows, $limit, 'products');
 

@@ -3,9 +3,6 @@
 <a class="btn" href="<?php echo site_url('stock/out'); ?>">Stock Out</a>
 <a class="btn" href="<?php echo site_url('stock/adjustment'); ?>">Adjustment</a>
 
-<?php if ($this->session->flashdata('success')): ?><p><?php echo html_escape($this->session->flashdata('success')); ?></p><?php endif; ?>
-<?php if ($this->session->flashdata('error')): ?><p><?php echo html_escape($this->session->flashdata('error')); ?></p><?php endif; ?>
-
 <table>
     <thead>
         <tr>
