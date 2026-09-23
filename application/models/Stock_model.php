@@ -7,6 +7,7 @@ class Stock_model extends CI_Model {
     public function __construct() {
         parent::__construct();
         $this->load->database();
+        $this->load->library('Stock_rules');
     }
     // Function to create a stock transaction (stock in or stock out) with items
     public function create_transaction($type, $supplier_id, $remarks, $user_id, $items) {
@@ -41,14 +42,15 @@ class Stock_model extends CI_Model {
                 return array('success' => FALSE, 'message' => 'Every product and quantity must be valid.');
             }
 
-            if ($type === 'stock_out' && $product->stock < $quantity) {
+            try {
+                $new_stock = $this->Stock_rules->calculate_stock($product->stock, $quantity, $type);
+            } catch (UnderflowException $exception) {
                 $this->db->trans_rollback();
                 return array('success' => FALSE, 'message' => 'Insufficient stock for ' . $product->product_name . '.');
+            } catch (InvalidArgumentException $exception) {
+                $this->db->trans_rollback();
+                return array('success' => FALSE, 'message' => $exception->getMessage());
             }
-
-            $new_stock = ($type === 'stock_out')
-                ? $product->stock - $quantity
-                : $product->stock + $quantity;
 
             $this->db->insert('stock_transaction_items', array(
                 'transaction_id' => $transaction_id,

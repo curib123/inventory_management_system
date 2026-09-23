@@ -224,7 +224,7 @@ inventory_management_system/
 vendor/bin/phpunit
 ```
 
-The authentication tests cover valid credentials, invalid credentials, and role-aware session data.
+The unit tests cover authentication, stock-in/out rules, insufficient inventory, report definitions, and export formats. Database-backed model and controller integration tests should run against a dedicated test database.
 
 ## Security Best Practices
 

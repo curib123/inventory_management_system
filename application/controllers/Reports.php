@@ -24,6 +24,7 @@ class Reports extends CI_Controller {
         }
 
         $this->load->model('User_model');
+        $this->load->library('Report_rules');
         $this->require_permission('view_reports');
         $this->load->model('Report_model');
     }
@@ -61,14 +62,16 @@ class Reports extends CI_Controller {
         $rows = $this->get_rows($definition);
         $format = strtolower($format);
 
+        if (!$this->Report_rules->export_format_is_supported($format)) {
+            show_error('Unsupported export format.', 400, 'Export Error');
+        }
+
         if ($format === 'csv') {
             $this->export_csv($definition['title'], $rows);
         } elseif ($format === 'xlsx') {
             $this->export_xlsx($definition['title'], $rows);
         } elseif ($format === 'pdf') {
             $this->export_pdf($definition['title'], $rows);
-        } else {
-            show_error('Unsupported export format.', 400, 'Export Error');
         }
     }
     //  to show /display report
@@ -85,11 +88,14 @@ class Reports extends CI_Controller {
     }
     // to  get report definations
     private function get_definition($report) {
-        if (!isset($this->report_definitions[$report])) {
+        try {
+            $definition = $this->Report_rules->get($report);
+        } catch (InvalidArgumentException $exception) {
             show_404();
         }
 
-        return $this->report_definitions[$report];
+        $definition['method'] = $this->report_definitions[$report]['method'];
+        return $definition;
     }
     // to get the rows in report model
     private function get_rows($definition) {
