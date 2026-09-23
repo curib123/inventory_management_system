@@ -12,3 +12,17 @@ Stack trace:
 #1 [internal function]: _exception_handler(Object(Error))
 #2 {main}
   thrown C:\xampp\htdocs\inventory_management_system\system\core\Exceptions.php 196
+ERROR - 2026-09-23 10:11:06 --> Severity: Warning --> Undefined property: Auth::$Auth_service C:\xampp\htdocs\inventory_management_system\application\controllers\Auth.php 31
+ERROR - 2026-09-23 10:11:06 --> Severity: error --> Exception: Call to a member function authenticate() on null C:\xampp\htdocs\inventory_management_system\application\controllers\Auth.php 31
+ERROR - 2026-09-23 10:11:06 --> Severity: Warning --> include(C:/xampp/htdocs/inventory_management_system/application/views/errors\html\error_exception.php): Failed to open stream: No such file or directory C:\xampp\htdocs\inventory_management_system\system\core\Exceptions.php 220
+ERROR - 2026-09-23 10:11:06 --> Severity: Warning --> include(): Failed opening 'C:/xampp/htdocs/inventory_management_system/application/views/errors\html\error_exception.php' for inclusion (include_path='C:\xampp\php\PEAR') C:\xampp\htdocs\inventory_management_system\system\core\Exceptions.php 220
+ERROR - 2026-09-23 10:11:11 --> Severity: Warning --> Undefined property: Auth::$Auth_service C:\xampp\htdocs\inventory_management_system\application\controllers\Auth.php 31
+ERROR - 2026-09-23 10:11:11 --> Severity: error --> Exception: Call to a member function authenticate() on null C:\xampp\htdocs\inventory_management_system\application\controllers\Auth.php 31
+ERROR - 2026-09-23 10:11:11 --> Severity: Warning --> include(C:/xampp/htdocs/inventory_management_system/application/views/errors\html\error_exception.php): Failed to open stream: No such file or directory C:\xampp\htdocs\inventory_management_system\system\core\Exceptions.php 220
+ERROR - 2026-09-23 10:11:11 --> Severity: Warning --> include(): Failed opening 'C:/xampp/htdocs/inventory_management_system/application/views/errors\html\error_exception.php' for inclusion (include_path='C:\xampp\php\PEAR') C:\xampp\htdocs\inventory_management_system\system\core\Exceptions.php 220
+ERROR - 2026-09-23 10:12:09 --> Severity: Warning --> Undefined property: Auth::$Auth_service C:\xampp\htdocs\inventory_management_system\application\controllers\Auth.php 31
+ERROR - 2026-09-23 10:12:09 --> Severity: error --> Exception: Call to a member function authenticate() on null C:\xampp\htdocs\inventory_management_system\application\controllers\Auth.php 31
+ERROR - 2026-09-23 10:12:22 --> Severity: Warning --> Undefined property: Auth::$Auth_service C:\xampp\htdocs\inventory_management_system\application\controllers\Auth.php 31
+ERROR - 2026-09-23 10:12:22 --> Severity: error --> Exception: Call to a member function authenticate() on null C:\xampp\htdocs\inventory_management_system\application\controllers\Auth.php 31
+ERROR - 2026-09-23 10:13:27 --> Severity: Warning --> Undefined property: Auth::$Auth_service C:\xampp\htdocs\inventory_management_system\application\controllers\Auth.php 31
+ERROR - 2026-09-23 10:13:27 --> Severity: error --> Exception: Call to a member function authenticate() on null C:\xampp\htdocs\inventory_management_system\application\controllers\Auth.php 31
