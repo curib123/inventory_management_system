@@ -8,6 +8,7 @@ class Products extends CI_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->library('session');
+        $this->load->library('form_validation');
         $this->load->helper(array('form', 'url'));
 
         if (!$this->session->userdata('logged_in')) {
@@ -22,8 +23,15 @@ class Products extends CI_Controller {
     public function index() {
         $this->require_permission('manage_products');
 
-        $data['products'] = $this->Product_model->get_all();
+        $limit = 10;
+        $page = (int) $this->input->get('per_page', TRUE);
+        $page = max(1, $page);
+        $offset = ($page - 1) * $limit;
+
+        $total_rows = $this->Product_model->count_all();
+        $data['products'] = $this->Product_model->get_all($limit, $offset);
         $data['page_title'] = 'Products';
+        $data['pagination'] = $this->paginate($total_rows, $limit, 'products');
 
         $this->load->view('templates/header', $data);
         $this->load->view('products/index', $data);
@@ -63,7 +71,7 @@ class Products extends CI_Controller {
         $this->Product_model->save($data);
         redirect('products');
     }
-    // edit product function to check if the user has the required permission and edit an existing product
+    //edit product function to check if the user has the required permission and edit an existing product
     public function edit($id) {
         $this->require_permission('manage_products');
 
@@ -110,6 +118,27 @@ class Products extends CI_Controller {
         $this->Product_model->delete($id);
         redirect('products');
     }
+
+    private function paginate($total_rows, $limit, $base_url) {
+        $this->load->library('pagination');
+
+        $config['base_url'] = site_url($base_url);
+        $config['total_rows'] = $total_rows;
+        $config['per_page'] = $limit;
+        $config['use_page_numbers'] = TRUE;
+        $config['page_query_string'] = TRUE;
+        $config['query_string_segment'] = 'per_page';
+        $config['full_tag_open'] = '<div class="pagination" style="margin-top:20px;">';
+        $config['full_tag_close'] = '</div>';
+        $config['num_tag_open'] = '<span style="margin:0 4px;">';
+        $config['num_tag_close'] = '</span>';
+        $config['cur_tag_open'] = '<strong style="margin:0 4px;">';
+        $config['cur_tag_close'] = '</strong>';
+
+        $this->pagination->initialize($config);
+        return $this->pagination->create_links();
+    }
+
     // Function to check if the user has the required permission
     private function require_permission($permission_name) {
         $user_id = $this->session->userdata('user_id');

@@ -125,6 +125,7 @@
         <div class="nav">
             <a href="<?php echo site_url('dashboard'); ?>">Dashboard</a>
             <a href="<?php echo site_url('products'); ?>">Products</a>
+            <a href="<?php echo site_url('categories'); ?>">Categories</a>
             <a href="<?php echo site_url('suppliers'); ?>">Suppliers</a>
             <a href="<?php echo site_url('logout'); ?>">Logout</a>
         </div>

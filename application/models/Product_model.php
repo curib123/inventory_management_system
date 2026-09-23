@@ -10,13 +10,18 @@ class Product_model extends CI_Model {
         $this->load->database();
     }
     // Function to get all products with their category and supplier names
-    public function get_all() {
+    public function get_all($limit = 10, $offset = 0) {
         $this->db->select('p.*, c.category_name, s.supplier_name');
         $this->db->from('products p');
         $this->db->join('categories c', 'c.id = p.category_id', 'left');
         $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
         $this->db->order_by('p.product_name', 'ASC');
+        $this->db->limit($limit, $offset);
         return $this->db->get()->result();
+    }
+
+    public function count_all() {
+        return $this->db->count_all('products');
     }
     // Function to get a product by its ID with its category and supplier names
     public function get_by_id($id) {

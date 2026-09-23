@@ -34,3 +34,7 @@
         <?php endif; ?>
     </tbody>
 </table>
+
+<?php if (!empty($pagination)): ?>
+    <?php echo $pagination; ?>
+<?php endif; ?>
