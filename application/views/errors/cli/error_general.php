@@ -1,7 +1,7 @@
 <?php
 /**
  * application/views/errors/cli/error_general.php | 2026-09-22
- * Generic CLI error output.
+ * Generic CLI error output ni; simple ra para readable gihapon sa terminal.
  */
 defined('BASEPATH') OR exit('No direct script access allowed');
 

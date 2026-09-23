@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Dashboard extends CI_Controller {
 
-    // dashboard controller to handle dashboard functionality
+    // Dashboard controller ni bai; diri gi-handle ang overview data para one place ra.
     public function __construct() {
         parent::__construct();
         $this->load->library('session');
@@ -18,7 +18,7 @@ class Dashboard extends CI_Controller {
         $this->load->model('Stock_model');
         $this->load->model('User_model');
     }
-    // Function to check if the user has the required permission
+    // Mao ni ang main dashboard load: check access first, then kuhaon ang summary data.
     public function index() {
         $this->require_permission('view_dashboard');
 
@@ -36,7 +36,7 @@ class Dashboard extends CI_Controller {
         $this->load->view('dashboard/index', $data);
         $this->load->view('templates/footer');
     }
-    // Function to check if the user has the required permission
+    // Simple permission guard ni para dili maka-sulod ang user if walay required access.
     private function require_permission($permission_name) {
         $user_id = $this->session->userdata('user_id');
         if (!$user_id || !$this->User_model->has_permission($user_id, $permission_name)) {

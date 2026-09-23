@@ -5,7 +5,7 @@ CREATE DATABASE IF NOT EXISTS inventory_management_db
 USE inventory_management_db;
 
 -- -------------------------------------------------------------------
--- Roles
+-- Roles table ni — diri gi-store ang access roles sa system.
 -- -------------------------------------------------------------------
 CREATE TABLE roles (
     id INT NOT NULL AUTO_INCREMENT,
@@ -19,7 +19,7 @@ CREATE TABLE roles (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Permissions
+-- Permissions ni — defines unsay pwede buhaton per module.
 -- -------------------------------------------------------------------
 CREATE TABLE permissions (
     id INT NOT NULL AUTO_INCREMENT,
@@ -34,7 +34,7 @@ CREATE TABLE permissions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Role Permissions
+-- Role permissions mapping ni — mao ni ang link sa roles ug permissions.
 -- -------------------------------------------------------------------
 CREATE TABLE role_permissions (
     id INT NOT NULL AUTO_INCREMENT,
@@ -57,7 +57,7 @@ CREATE TABLE role_permissions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Users
+-- Users table ni — account ug basic profile data diri ma-store.
 -- -------------------------------------------------------------------
 CREATE TABLE users (
     id INT NOT NULL AUTO_INCREMENT,
@@ -80,7 +80,7 @@ CREATE TABLE users (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Categories
+-- Categories ni — para organized ra ang product grouping.
 -- -------------------------------------------------------------------
 CREATE TABLE categories (
     id INT NOT NULL AUTO_INCREMENT,
@@ -93,7 +93,7 @@ CREATE TABLE categories (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Suppliers
+-- Suppliers table ni — contact ug supplier details diri.
 -- -------------------------------------------------------------------
 CREATE TABLE suppliers (
     id INT NOT NULL AUTO_INCREMENT,
@@ -109,7 +109,7 @@ CREATE TABLE suppliers (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Products
+-- Products ni — core inventory item data mao ni diri.
 -- -------------------------------------------------------------------
 CREATE TABLE products (
     id INT NOT NULL AUTO_INCREMENT,
@@ -141,7 +141,7 @@ CREATE TABLE products (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Stock Transactions
+-- Stock transactions ni — every stock in/out/adjustment naa diri ang header record.
 -- -------------------------------------------------------------------
 CREATE TABLE stock_transactions (
     id INT NOT NULL AUTO_INCREMENT,
@@ -168,7 +168,7 @@ CREATE TABLE stock_transactions (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Stock Transaction Items
+-- Transaction items ni — detailed product rows per stock transaction.
 -- -------------------------------------------------------------------
 CREATE TABLE stock_transaction_items (
     id INT NOT NULL AUTO_INCREMENT,
@@ -192,7 +192,7 @@ CREATE TABLE stock_transaction_items (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Stock Adjustments
+-- Stock adjustments ni — diri ma-track ang manual corrections sa stock.
 -- -------------------------------------------------------------------
 CREATE TABLE stock_adjustments (
     id INT NOT NULL AUTO_INCREMENT,
@@ -218,7 +218,7 @@ CREATE TABLE stock_adjustments (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Activity Logs
+-- Activity logs ni — para traceable ra kung kinsa ug unsay gibuhat.
 -- -------------------------------------------------------------------
 CREATE TABLE activity_logs (
     id INT NOT NULL AUTO_INCREMENT,
@@ -238,7 +238,7 @@ CREATE TABLE activity_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Roles and permissions seed data
+-- Seed data ni for roles ug permissions para ready-to-use dayon ang fresh setup.
 -- -------------------------------------------------------------------
 INSERT INTO roles (role_name, description, status) VALUES
 ('admin', 'Full system access', 1),
@@ -271,7 +271,7 @@ WHERE r.role_name = 'staff'
 ON DUPLICATE KEY UPDATE role_id = role_id;
 
 -- -------------------------------------------------------------------
--- Default Admin User (example credential)
+-- Default admin account ni for initial setup; ilisi dayon ang password sa real deployment.
 -- -------------------------------------------------------------------
 INSERT INTO users (first_name, middle_name, last_name, username, password, role_id, status)
 SELECT 'System', NULL, 'Administrator', 'admin', '$2y$12$sDusIfJlzofgxJf6D7cAbetKPOSUzw.CpIxK/kVxXLSWESpynCEtm', r.id, 1
@@ -280,7 +280,7 @@ WHERE r.role_name = 'admin'
 ON DUPLICATE KEY UPDATE username = username;
 
 -- -------------------------------------------------------------------
--- Optional default categories
+-- Optional starter categories ni; pwede ra nimo ilisan based sa actual inventory.
 -- -------------------------------------------------------------------
 INSERT INTO categories (category_name, status) VALUES
 ('General', 1),
@@ -288,6 +288,6 @@ INSERT INTO categories (category_name, status) VALUES
 ('Office Supplies', 1)
 ON DUPLICATE KEY UPDATE category_name = category_name;
 
--- Notes:
--- Default admin password is: admin123
--- The password hash above is a sample value and can be replaced with your own hash.
+-- Quick notes lang bai:
+-- Default admin password kay admin123.
+-- Sample hash ra ni; for production, gamit ug sariling secure password hash.

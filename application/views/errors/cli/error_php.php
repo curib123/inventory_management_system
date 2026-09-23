@@ -1,7 +1,7 @@
 <?php
 /**
  * application/views/errors/cli/error_php.php | 2026-09-22
- * CLI PHP diagnostic output.
+ * PHP diagnostic output ni sa CLI; diri makita dayon ang file ug line sa issue.
  */
 defined('BASEPATH') OR exit('No direct script access allowed');
 

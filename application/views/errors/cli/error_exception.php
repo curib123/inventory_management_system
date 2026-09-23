@@ -1,7 +1,7 @@
 <?php
 /**
  * application/views/errors/cli/error_exception.php | 2026-09-22
- * CLI exception output.
+ * CLI exception output ni; clean ra para dali makita ang actual issue.
  */
 defined('BASEPATH') OR exit('No direct script access allowed');
 

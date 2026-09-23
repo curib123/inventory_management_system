@@ -4,12 +4,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Report_model extends CI_Model {
  
-    // reports model to handle report generation functionality
+    // Report model ni; diri gi-centralize ang queries para limpyo ra ang controllers.
     public function __construct() {
         parent::__construct();
         $this->load->database();
     }
-    // Function to get the inventory report with product details, category, supplier, and inventory value
+    // Kuhaon diri ang inventory details, apil category, supplier, stock, ug inventory value.
     public function get_inventory_report() {
         $this->db->select('p.product_code, p.product_name, c.category_name, s.supplier_name, p.unit, p.stock, p.cost_price, (p.stock * p.cost_price) AS inventory_value');
         $this->db->from('products p');
@@ -18,7 +18,7 @@ class Report_model extends CI_Model {
         $this->db->order_by('p.product_name', 'ASC');
         return $this->db->get()->result_array();
     }
-    // Function to get the stock movement report with transaction details, product, supplier, and user information
+    // Stock movement report ni; apil transaction, product, supplier, ug user info para complete ra.
     public function get_stock_movement_report($type = NULL) {
         $this->db->select('t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, s.supplier_name, u.username, t.remarks, t.created_at');
         $this->db->from('stock_transactions t');
@@ -32,7 +32,7 @@ class Report_model extends CI_Model {
         $this->db->order_by('t.created_at', 'DESC');
         return $this->db->get()->result_array();
     }
-    // Function to get the low stock report with product details, category, and shortage information
+    // Low-stock report ni; makita dayon unsay kulang based sa reorder level.
     public function get_low_stock_report() {
         $this->db->select('p.product_code, p.product_name, c.category_name, p.unit, p.stock, p.reorder_level, (p.reorder_level - p.stock) AS shortage');
         $this->db->from('products p');
