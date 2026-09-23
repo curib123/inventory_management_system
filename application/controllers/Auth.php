@@ -28,7 +28,7 @@ class Auth extends CI_Controller {
             $username = $this->input->post('username');
             $password = $this->input->post('password');
 
-            $session_data = $this->Auth_service->authenticate($this->User_model, $username, $password);
+            $session_data = $this->auth_service->authenticate($this->User_model, $username, $password);
 
             if ($session_data) {
                 $this->session->set_userdata($session_data);

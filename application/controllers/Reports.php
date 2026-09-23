@@ -62,7 +62,7 @@ class Reports extends CI_Controller {
         $rows = $this->get_rows($definition);
         $format = strtolower($format);
 
-        if (!$this->Report_rules->export_format_is_supported($format)) {
+        if (!$this->report_rules->export_format_is_supported($format)) {
             show_error('Unsupported export format.', 400, 'Export Error');
         }
 
@@ -89,7 +89,7 @@ class Reports extends CI_Controller {
     // to  get report definations
     private function get_definition($report) {
         try {
-            $definition = $this->Report_rules->get($report);
+            $definition = $this->report_rules->get($report);
         } catch (InvalidArgumentException $exception) {
             show_404();
         }

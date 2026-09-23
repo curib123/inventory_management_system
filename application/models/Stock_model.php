@@ -43,7 +43,7 @@ class Stock_model extends CI_Model {
             }
 
             try {
-                $new_stock = $this->Stock_rules->calculate_stock($product->stock, $quantity, $type);
+                $new_stock = $this->stock_rules->calculate_stock($product->stock, $quantity, $type);
             } catch (UnderflowException $exception) {
                 $this->db->trans_rollback();
                 return array('success' => FALSE, 'message' => 'Insufficient stock for ' . $product->product_name . '.');
