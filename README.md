@@ -218,6 +218,14 @@ inventory_management_system/
 6. Ensure writable folders have the proper permissions.
 7. Run the project in a browser.
 
+### Run Tests
+
+```bash
+vendor/bin/phpunit
+```
+
+The authentication tests cover valid credentials, invalid credentials, and role-aware session data.
+
 ## Security Best Practices
 
 - Hash all user passwords securely

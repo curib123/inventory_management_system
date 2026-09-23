@@ -8,6 +8,7 @@ class Auth extends CI_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('User_model');
+        $this->load->library('Auth_service');
         $this->load->library('session');
         $this->load->helper('url');
     }
@@ -27,17 +28,9 @@ class Auth extends CI_Controller {
             $username = $this->input->post('username');
             $password = $this->input->post('password');
 
-            $user = $this->User_model->login($username, $password);
+            $session_data = $this->Auth_service->authenticate($this->User_model, $username, $password);
 
-            if ($user) {
-                $session_data = array(
-                    'user_id' => $user->id,
-                    'username' => $user->username,
-                    'role_id' => $user->role_id,
-                    'role_name' => $user->role_name,
-                    'logged_in' => TRUE
-                );
-
+            if ($session_data) {
                 $this->session->set_userdata($session_data);
                 redirect('dashboard');
             } else {

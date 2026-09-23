@@ -1,0 +1,1 @@
+{"version":1,"defects":[],"times":{"AuthServiceTest::testAuthenticateReturnsSessionDataForValidCredentials":0.009,"AuthServiceTest::testAuthenticateReturnsFalseForInvalidCredentials":0,"AuthServiceTest::testSessionDataContainsRoleInformation":0}}
