@@ -39,8 +39,9 @@ if (ENVIRONMENT === 'development') {
 
 date_default_timezone_set('Asia/Dhaka');
 
-$system_path = 'system';
-$application_folder = 'application';
+$root_path = __DIR__;
+$system_path = $root_path . DIRECTORY_SEPARATOR . 'system';
+$application_folder = $root_path . DIRECTORY_SEPARATOR . 'application';
 
 if (defined('STDIN')) {
     chdir(dirname(__FILE__));
@@ -51,7 +52,7 @@ if (is_dir($application_folder) === FALSE) {
 }
 
 if (is_dir($system_path) === FALSE) {
-    exit('Your system folder path does not appear to be correct. Please open the following file and correct this: ' . __FILE__);
+    exit('The CodeIgniter system folder is missing. Restore the system folder to: ' . $system_path);
 }
 
 define('SELF', pathinfo(__FILE__, PATHINFO_BASENAME));
@@ -60,7 +61,7 @@ define('FCPATH', str_replace('\\', '/', __FILE__));
 define('SYSDIR', basename(BASEPATH));
 
 if (is_dir($application_folder) === TRUE) {
-    define('APPPATH', $application_folder . '/');
+    define('APPPATH', str_replace('\\', '/', realpath($application_folder)) . '/');
 }
 
 require_once BASEPATH . 'core/CodeIgniter.php';
