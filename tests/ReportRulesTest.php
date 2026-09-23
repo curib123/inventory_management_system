@@ -9,6 +9,7 @@ class ReportRulesTest extends TestCase {
 
         $this->assertSame('Stock-In Report', $definition['title']);
         $this->assertSame('stock_in', $definition['type']);
+        $this->assertSame('get_stock_movement_report', $definition['method']);
     }
 
     public function testUnknownReportIsRejected() {
