@@ -1,8 +1,8 @@
 <h2>Stock Movement History</h2>
 <p>
-    <a href="<?php echo site_url('stock/in'); ?>">Stock In</a> |
-    <a href="<?php echo site_url('stock/out'); ?>">Stock Out</a> |
-    <a href="<?php echo site_url('stock/adjustment'); ?>">Adjustment</a> |
+    <button type="button" data-modal-url="<?php echo site_url('stock/in'); ?>">Stock In</button>
+    <button type="button" data-modal-url="<?php echo site_url('stock/out'); ?>">Stock Out</button>
+    <button type="button" data-modal-url="<?php echo site_url('stock/adjustment'); ?>">Adjustment</button>
     <a href="<?php echo site_url('stock/adjustments'); ?>">Adjustment History</a>
 </p>
 
@@ -19,3 +19,5 @@
     </thead>
     <tbody></tbody>
 </table>
+
+<?php $this->load->view('modal/container'); ?>

@@ -60,26 +60,43 @@ class Role_model extends CI_Model {
         $this->db->select('permission_id');
         $this->db->where('role_id', (int) $role_id);
         $rows = $this->db->get('role_permissions')->result();
-        return array_map(function ($row) { return (int) $row->permission_id; }, $rows);
+
+        return array_map(function ($row) {
+            return (int) $row->permission_id;
+        }, $rows);
     }
 
     public function sync_permissions($role_id, $permission_ids) {
         $role_id = (int) $role_id;
-        $valid_permissions = array_map(function ($row) { return (int) $row->id; }, $this->get_permissions());
+        $valid_permissions = array_map(function ($row) {
+            return (int) $row->id;
+        }, $this->get_permissions());
+
         $permission_ids = array_unique(array_map('intval', (array) $permission_ids));
         $permission_ids = array_values(array_intersect($permission_ids, $valid_permissions));
 
         $this->db->trans_start();
         $this->db->delete('role_permissions', array('role_id' => $role_id));
+
         foreach ($permission_ids as $permission_id) {
-            $this->db->insert('role_permissions', array('role_id' => $role_id, 'permission_id' => $permission_id));
+            $this->db->insert('role_permissions', array(
+                'role_id' => $role_id,
+                'permission_id' => $permission_id
+            ));
         }
+
         $this->db->trans_complete();
         return $this->db->trans_status();
     }
 
     public function has_users($role_id) {
-        return $this->db->where('role_id', (int) $role_id)->count_all_results('users') > 0;
+        return $this->count_users($role_id) > 0;
+    }
+
+    public function count_users($role_id) {
+        return $this->db
+            ->where('role_id', (int) $role_id)
+            ->count_all_results('users');
     }
 
     public function count_all() {
@@ -92,9 +109,11 @@ class Role_model extends CI_Model {
         $this->db->join('users u', 'u.role_id = r.id', 'left');
         $this->apply_datatable_search($search);
         $this->db->group_by(array('r.id', 'r.role_name', 'r.description', 'r.status'));
+
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
         }
+
         $this->db->limit((int) $length, (int) $start);
         return $this->db->get()->result();
     }
@@ -113,11 +132,13 @@ class Role_model extends CI_Model {
         $this->db->group_start();
         $this->db->like('r.role_name', $search);
         $this->db->or_like('r.description', $search);
+
         if (strcasecmp($search, 'active') === 0) {
             $this->db->or_where('r.status', 1);
         } elseif (strcasecmp($search, 'inactive') === 0) {
             $this->db->or_where('r.status', 0);
         }
+
         $this->db->group_end();
     }
 }

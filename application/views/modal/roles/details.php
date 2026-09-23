@@ -1,8 +1,9 @@
-<dialog id="role-details-<?php echo (int) $role->id; ?>">
-    <h3>Role Details</h3>
-    <p>Name: <?php echo html_escape($role->role_name); ?></p>
-    <p>Description: <?php echo html_escape($role->description); ?></p>
-    <p>Status: <?php echo $role->status ? 'Active' : 'Inactive'; ?></p>
-    <p>Users: <?php echo (int) $role->user_count; ?></p>
-    <button type="button" onclick="this.closest('dialog').close();">Close</button>
-</dialog>
+<h2>Role Details</h2>
+<dl>
+    <dt>ID</dt><dd><?php echo (int) $role->id; ?></dd>
+    <dt>Name</dt><dd><?php echo html_escape($role->role_name); ?></dd>
+    <dt>Description</dt><dd><?php echo html_escape($role->description ?: 'N/A'); ?></dd>
+    <dt>Status</dt><dd><?php echo $role->status ? 'Active' : 'Inactive'; ?></dd>
+    <dt>Users</dt><dd><?php echo (int) $user_count; ?></dd>
+</dl>
+<button type="button" data-modal-close>Close</button>

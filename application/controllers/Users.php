@@ -35,10 +35,7 @@ class Users extends CI_Controller {
             show_404();
         }
 
-        $data['page_title'] = 'View User';
-        $this->load->view('templates/header', $data);
-        $this->load->view('users/view', $data);
-        $this->load->view('templates/footer');
+        $this->load->view('modal/users/details', $data);
     }
 
     public function edit($id) {
@@ -46,30 +43,46 @@ class Users extends CI_Controller {
         if (!$user) {
             show_404();
         }
+
         $this->user_form((int) $id, $user);
     }
 
     public function delete($id) {
-        if ($this->input->method(TRUE) !== 'POST') {
-            show_error('Invalid request method.', 405, 'Method Not Allowed');
-        }
-
         $id = (int) $id;
-        if ($id === (int) $this->session->userdata('user_id')) {
-            show_error('You cannot delete your own signed-in account.', 400, 'User Not Deleted');
-        }
-
         $user = $this->User_model->get_by_id($id);
         if (!$user) {
             show_404();
         }
 
-        if ($this->User_model->has_history($id)) {
-            show_error('This user has transaction or activity history. Set the account to inactive instead of deleting it.', 400, 'User Not Deleted');
+        $delete_error = '';
+        if ($id === (int) $this->session->userdata('user_id')) {
+            $delete_error = 'You cannot delete your own signed-in account.';
+        } elseif ($this->User_model->has_history($id)) {
+            $delete_error = 'This user has transaction or activity history. Set the account to inactive instead of deleting it.';
+        }
+
+        if ($this->input->method(TRUE) !== 'POST') {
+            $this->load->view('modal/users/delete', array(
+                'user' => $user,
+                'delete_error' => $delete_error
+            ));
+            return;
+        }
+
+        if ($delete_error !== '') {
+            $this->load->view('modal/users/delete', array(
+                'user' => $user,
+                'delete_error' => $delete_error
+            ));
+            return;
         }
 
         if (!$this->User_model->delete($id)) {
-            show_error('The user could not be deleted.', 500, 'User Not Deleted');
+            $this->load->view('modal/users/delete', array(
+                'user' => $user,
+                'delete_error' => 'The user could not be deleted.'
+            ));
+            return;
         }
 
         redirect('users');
@@ -100,13 +113,12 @@ class Users extends CI_Controller {
         $current_user_id = (int) $this->session->userdata('user_id');
 
         foreach ($users as $user) {
-            $actions = '<a href="' . site_url('users/view/' . (int) $user->id) . '">View</a> ';
-            $actions .= '<a href="' . site_url('users/edit/' . (int) $user->id) . '">Edit</a>';
+            $id = (int) $user->id;
+            $actions = '<button type="button" data-modal-url="' . site_url('users/view/' . $id) . '">View</button> ';
+            $actions .= '<button type="button" data-modal-url="' . site_url('users/edit/' . $id) . '">Edit</button> ';
 
-            if ((int) $user->id !== $current_user_id) {
-                $actions .= form_open('users/delete/' . (int) $user->id);
-                $actions .= '<button type="submit">Delete</button>';
-                $actions .= form_close();
+            if ($id !== $current_user_id) {
+                $actions .= '<button type="button" data-modal-url="' . site_url('users/delete/' . $id) . '">Delete</button>';
             }
 
             $rows[] = array(
@@ -128,9 +140,7 @@ class Users extends CI_Controller {
             $rows
         );
 
-        $this->output
-            ->set_content_type('application/json')
-            ->set_output(json_encode($payload));
+        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
     private function user_form($id = NULL, $user = NULL) {
@@ -147,12 +157,7 @@ class Users extends CI_Controller {
         }
 
         if ($this->form_validation->run() === FALSE) {
-            $data['user'] = $user;
-            $data['roles'] = $this->User_model->get_active_roles();
-            $data['page_title'] = $id === NULL ? 'Add User' : 'Edit User';
-            $this->load->view('templates/header', $data);
-            $this->load->view('users/form', $data);
-            $this->load->view('templates/footer');
+            $this->render_user_form($id, $user);
             return;
         }
 
@@ -164,11 +169,13 @@ class Users extends CI_Controller {
         }, $roles);
 
         if (!in_array($role_id, $role_ids, TRUE)) {
-            show_error('The selected role is invalid or inactive.', 400, 'User Not Saved');
+            $this->render_user_form($id, $user, 'The selected role is invalid or inactive.');
+            return;
         }
 
         if ($this->User_model->username_exists($username, $id)) {
-            show_error('That username is already in use.', 400, 'User Not Saved');
+            $this->render_user_form($id, $user, 'That username is already in use.');
+            return;
         }
 
         $middle_name = trim((string) $this->input->post('middle_name', TRUE));
@@ -188,7 +195,8 @@ class Users extends CI_Controller {
         }
 
         if (!$this->User_model->save($data, $id)) {
-            show_error('The user could not be saved.', 500, 'User Not Saved');
+            $this->render_user_form($id, $user, 'The user could not be saved.');
+            return;
         }
 
         if ($id !== NULL &&
@@ -199,6 +207,15 @@ class Users extends CI_Controller {
         }
 
         redirect('users');
+    }
+
+    private function render_user_form($id, $user, $form_error = '') {
+        $data['user'] = $user;
+        $data['roles'] = $this->User_model->get_active_roles();
+        $data['page_title'] = $id === NULL ? 'Add User' : 'Edit User';
+        $data['form_error'] = $form_error;
+
+        $this->load->view('modal/users/form', $data);
     }
 
     private function require_permission($permission_name) {

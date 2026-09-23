@@ -9,15 +9,18 @@ class Suppliers extends CI_Controller {
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
         $this->load->library('Datatable_service');
+
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
+
         $this->load->model('Supplier_model');
         $this->load->model('User_model');
     }
 
     public function index() {
         $this->require_permission('manage_suppliers');
+
         $data['page_title'] = 'Suppliers';
         $this->load->view('templates/header', $data);
         $this->load->view('suppliers/index', $data);
@@ -29,26 +32,52 @@ class Suppliers extends CI_Controller {
         $this->supplier_form();
     }
 
+    public function view($id) {
+        $this->require_permission('manage_suppliers');
+
+        $data['supplier'] = $this->Supplier_model->get_by_id($id);
+        if (!$data['supplier']) {
+            show_404();
+        }
+
+        $this->load->view('modal/suppliers/details', $data);
+    }
+
     public function edit($id) {
         $this->require_permission('manage_suppliers');
+
         $supplier = $this->Supplier_model->get_by_id($id);
         if (!$supplier) {
             show_404();
         }
+
         $this->supplier_form((int) $id, $supplier);
     }
 
     public function delete($id) {
         $this->require_permission('manage_suppliers');
-        if ($this->input->method(TRUE) !== 'POST') {
-            show_error('Invalid request method.', 405, 'Method Not Allowed');
-        }
-        if (!$this->Supplier_model->get_by_id($id)) {
+
+        $supplier = $this->Supplier_model->get_by_id($id);
+        if (!$supplier) {
             show_404();
         }
-        if (!$this->Supplier_model->delete($id)) {
-            show_error('The supplier could not be deleted.', 500, 'Supplier Not Deleted');
+
+        if ($this->input->method(TRUE) !== 'POST') {
+            $this->load->view('modal/suppliers/delete', array(
+                'supplier' => $supplier,
+                'delete_error' => ''
+            ));
+            return;
         }
+
+        if (!$this->Supplier_model->delete($id)) {
+            $this->load->view('modal/suppliers/delete', array(
+                'supplier' => $supplier,
+                'delete_error' => 'The supplier could not be deleted.'
+            ));
+            return;
+        }
+
         redirect('suppliers');
     }
 
@@ -63,6 +92,7 @@ class Suppliers extends CI_Controller {
             's.status',
             NULL
         );
+
         $request = $this->datatable_service->request($this->input, $columns, 's.supplier_name', 'asc');
         $suppliers = $this->Supplier_model->get_datatable(
             $request['start'],
@@ -74,10 +104,10 @@ class Suppliers extends CI_Controller {
 
         $rows = array();
         foreach ($suppliers as $supplier) {
-            $actions = '<a href="' . site_url('suppliers/edit/' . (int) $supplier->id) . '">Edit</a>';
-            $actions .= form_open('suppliers/delete/' . (int) $supplier->id);
-            $actions .= '<button type="submit">Delete</button>';
-            $actions .= form_close();
+            $id = (int) $supplier->id;
+            $actions = '<button type="button" data-modal-url="' . site_url('suppliers/view/' . $id) . '">View</button> ';
+            $actions .= '<button type="button" data-modal-url="' . site_url('suppliers/edit/' . $id) . '">Edit</button> ';
+            $actions .= '<button type="button" data-modal-url="' . site_url('suppliers/delete/' . $id) . '">Delete</button>';
 
             $rows[] = array(
                 html_escape($supplier->supplier_name),
@@ -106,11 +136,7 @@ class Suppliers extends CI_Controller {
         $this->form_validation->set_rules('address', 'Address', 'trim');
 
         if ($this->form_validation->run() === FALSE) {
-            $data['supplier'] = $supplier;
-            $data['page_title'] = $id === NULL ? 'Add Supplier' : 'Edit Supplier';
-            $this->load->view('templates/header', $data);
-            $this->load->view('suppliers/form', $data);
-            $this->load->view('templates/footer');
+            $this->render_supplier_form($id, $supplier);
             return;
         }
 
@@ -121,10 +147,21 @@ class Suppliers extends CI_Controller {
             'address' => trim($this->input->post('address', TRUE)),
             'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
         );
+
         if (!$this->Supplier_model->save($data, $id)) {
-            show_error('The supplier could not be saved.', 500, 'Supplier Not Saved');
+            $this->render_supplier_form($id, $supplier, 'The supplier could not be saved.');
+            return;
         }
+
         redirect('suppliers');
+    }
+
+    private function render_supplier_form($id, $supplier, $form_error = '') {
+        $data['supplier'] = $supplier;
+        $data['page_title'] = $id === NULL ? 'Add Supplier' : 'Edit Supplier';
+        $data['form_error'] = $form_error;
+
+        $this->load->view('modal/suppliers/form', $data);
     }
 
     private function require_permission($permission_name) {

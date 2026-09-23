@@ -1,7 +1,8 @@
-<dialog id="category-details-<?php echo (int) $category->id; ?>">
-    <h3>Category Details</h3>
-    <p>Name: <?php echo html_escape($category->category_name); ?></p>
-    <p>Status: <?php echo $category->status ? 'Active' : 'Inactive'; ?></p>
-    <p>Products: <?php echo (int) $this->Category_model->count_products($category->id); ?></p>
-    <button type="button" onclick="this.closest('dialog').close();">Close</button>
-</dialog>
+<h2>Category Details</h2>
+<dl>
+    <dt>ID</dt><dd><?php echo (int) $category->id; ?></dd>
+    <dt>Name</dt><dd><?php echo html_escape($category->category_name); ?></dd>
+    <dt>Status</dt><dd><?php echo $category->status ? 'Active' : 'Inactive'; ?></dd>
+    <dt>Products</dt><dd><?php echo (int) $product_count; ?></dd>
+</dl>
+<button type="button" data-modal-close>Close</button>

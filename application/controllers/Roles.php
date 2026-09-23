@@ -9,15 +9,18 @@ class Roles extends CI_Controller {
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
         $this->load->library('Datatable_service');
+
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
+
         $this->load->model('Role_model');
         $this->load->model('User_model');
     }
 
     public function index() {
         $this->require_permission('manage_users');
+
         $data['page_title'] = 'Roles and Permissions';
         $this->load->view('templates/header', $data);
         $this->load->view('roles/index', $data);
@@ -29,30 +32,68 @@ class Roles extends CI_Controller {
         $this->role_form();
     }
 
-    public function edit($id) {
+    public function view($id) {
         $this->require_permission('manage_users');
+
         $role = $this->Role_model->get_by_id($id);
         if (!$role) {
             show_404();
         }
+
+        $this->load->view('modal/roles/details', array(
+            'role' => $role,
+            'user_count' => $this->Role_model->count_users($id)
+        ));
+    }
+
+    public function edit($id) {
+        $this->require_permission('manage_users');
+
+        $role = $this->Role_model->get_by_id($id);
+        if (!$role) {
+            show_404();
+        }
+
         $this->role_form((int) $id, $role);
     }
 
     public function delete($id) {
         $this->require_permission('manage_users');
-        if ($this->input->method(TRUE) !== 'POST') {
-            show_error('Invalid request method.', 405, 'Method Not Allowed');
-        }
+
         $role = $this->Role_model->get_by_id($id);
         if (!$role) {
             show_404();
         }
+
+        $delete_error = '';
         if ($this->Role_model->has_users($id)) {
-            show_error('This role cannot be deleted while users are assigned to it.', 400, 'Role Not Deleted');
+            $delete_error = 'This role cannot be deleted while users are assigned to it.';
         }
+
+        if ($this->input->method(TRUE) !== 'POST') {
+            $this->load->view('modal/roles/delete', array(
+                'role' => $role,
+                'delete_error' => $delete_error
+            ));
+            return;
+        }
+
+        if ($delete_error !== '') {
+            $this->load->view('modal/roles/delete', array(
+                'role' => $role,
+                'delete_error' => $delete_error
+            ));
+            return;
+        }
+
         if (!$this->Role_model->delete($id)) {
-            show_error('The role could not be deleted.', 500, 'Role Not Deleted');
+            $this->load->view('modal/roles/delete', array(
+                'role' => $role,
+                'delete_error' => 'The role could not be deleted.'
+            ));
+            return;
         }
+
         redirect('roles');
     }
 
@@ -71,11 +112,12 @@ class Roles extends CI_Controller {
 
         $rows = array();
         foreach ($roles as $role) {
-            $actions = '<a href="' . site_url('roles/edit/' . (int) $role->id) . '">Edit</a>';
+            $id = (int) $role->id;
+            $actions = '<button type="button" data-modal-url="' . site_url('roles/view/' . $id) . '">View</button> ';
+            $actions .= '<button type="button" data-modal-url="' . site_url('roles/edit/' . $id) . '">Edit</button> ';
+
             if ((int) $role->user_count === 0) {
-                $actions .= form_open('roles/delete/' . (int) $role->id);
-                $actions .= '<button type="submit">Delete</button>';
-                $actions .= form_close();
+                $actions .= '<button type="button" data-modal-url="' . site_url('roles/delete/' . $id) . '">Delete</button>';
             }
 
             $rows[] = array(
@@ -102,19 +144,14 @@ class Roles extends CI_Controller {
         $this->form_validation->set_rules('description', 'Description', 'trim|max_length[255]');
 
         if ($this->form_validation->run() === FALSE) {
-            $data['role'] = $role;
-            $data['permissions'] = $this->Role_model->get_permissions();
-            $data['selected_permissions'] = $id === NULL ? array() : $this->Role_model->get_role_permissions($id);
-            $data['page_title'] = $id === NULL ? 'Add Role' : 'Edit Role';
-            $this->load->view('templates/header', $data);
-            $this->load->view('roles/form', $data);
-            $this->load->view('templates/footer');
+            $this->render_role_form($id, $role);
             return;
         }
 
         $role_name = trim($this->input->post('role_name', TRUE));
         if ($this->Role_model->name_exists($role_name, $id)) {
-            show_error('That role name already exists.', 400, 'Role Not Saved');
+            $this->render_role_form($id, $role, 'That role name already exists.');
+            return;
         }
 
         $role_data = array(
@@ -125,13 +162,26 @@ class Roles extends CI_Controller {
 
         $role_id = $this->Role_model->save($role_data, $id);
         if ($role_id === FALSE) {
-            show_error('The role could not be saved.', 500, 'Role Not Saved');
+            $this->render_role_form($id, $role, 'The role could not be saved.');
+            return;
         }
 
         if (!$this->Role_model->sync_permissions($role_id, $this->input->post('permissions', TRUE))) {
-            show_error('The role permissions could not be saved.', 500, 'Permissions Not Saved');
+            $this->render_role_form($id, $role, 'The role permissions could not be saved.');
+            return;
         }
+
         redirect('roles');
+    }
+
+    private function render_role_form($id, $role, $form_error = '') {
+        $data['role'] = $role;
+        $data['permissions'] = $this->Role_model->get_permissions();
+        $data['selected_permissions'] = $id === NULL ? array() : $this->Role_model->get_role_permissions($id);
+        $data['page_title'] = $id === NULL ? 'Add Role' : 'Edit Role';
+        $data['form_error'] = $form_error;
+
+        $this->load->view('modal/roles/form', $data);
     }
 
     private function require_permission($permission_name) {

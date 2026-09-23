@@ -9,15 +9,18 @@ class Categories extends CI_Controller {
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
         $this->load->library('Datatable_service');
+
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
+
         $this->load->model('Category_model');
         $this->load->model('User_model');
     }
 
     public function index() {
         $this->require_permission('manage_products');
+
         $data['page_title'] = 'Categories';
         $this->load->view('templates/header', $data);
         $this->load->view('categories/index', $data);
@@ -29,30 +32,68 @@ class Categories extends CI_Controller {
         $this->category_form();
     }
 
-    public function edit($id) {
+    public function view($id) {
         $this->require_permission('manage_products');
+
         $category = $this->Category_model->get_by_id($id);
         if (!$category) {
             show_404();
         }
+
+        $this->load->view('modal/categories/details', array(
+            'category' => $category,
+            'product_count' => $this->Category_model->count_products($id)
+        ));
+    }
+
+    public function edit($id) {
+        $this->require_permission('manage_products');
+
+        $category = $this->Category_model->get_by_id($id);
+        if (!$category) {
+            show_404();
+        }
+
         $this->category_form((int) $id, $category);
     }
 
     public function delete($id) {
         $this->require_permission('manage_products');
-        if ($this->input->method(TRUE) !== 'POST') {
-            show_error('Invalid request method.', 405, 'Method Not Allowed');
-        }
+
         $category = $this->Category_model->get_by_id($id);
         if (!$category) {
             show_404();
         }
+
+        $delete_error = '';
         if ($this->Category_model->count_products($id) > 0) {
-            show_error('This category is assigned to products. Reassign those products before deleting the category.', 400, 'Category Not Deleted');
+            $delete_error = 'This category is assigned to products. Reassign those products before deleting the category.';
         }
+
+        if ($this->input->method(TRUE) !== 'POST') {
+            $this->load->view('modal/categories/delete', array(
+                'category' => $category,
+                'delete_error' => $delete_error
+            ));
+            return;
+        }
+
+        if ($delete_error !== '') {
+            $this->load->view('modal/categories/delete', array(
+                'category' => $category,
+                'delete_error' => $delete_error
+            ));
+            return;
+        }
+
         if (!$this->Category_model->delete($id)) {
-            show_error('The category could not be deleted.', 500, 'Category Not Deleted');
+            $this->load->view('modal/categories/delete', array(
+                'category' => $category,
+                'delete_error' => 'The category could not be deleted.'
+            ));
+            return;
         }
+
         redirect('categories');
     }
 
@@ -71,13 +112,13 @@ class Categories extends CI_Controller {
 
         $rows = array();
         foreach ($categories as $category) {
-            $actions = '<a href="' . site_url('categories/edit/' . (int) $category->id) . '">Edit</a>';
-            $actions .= form_open('categories/delete/' . (int) $category->id);
-            $actions .= '<button type="submit">Delete</button>';
-            $actions .= form_close();
+            $id = (int) $category->id;
+            $actions = '<button type="button" data-modal-url="' . site_url('categories/view/' . $id) . '">View</button> ';
+            $actions .= '<button type="button" data-modal-url="' . site_url('categories/edit/' . $id) . '">Edit</button> ';
+            $actions .= '<button type="button" data-modal-url="' . site_url('categories/delete/' . $id) . '">Delete</button>';
 
             $rows[] = array(
-                (int) $category->id,
+                $id,
                 html_escape($category->category_name),
                 $category->status ? 'Active' : 'Inactive',
                 (int) $category->product_count,
@@ -97,28 +138,37 @@ class Categories extends CI_Controller {
 
     private function category_form($id = NULL, $category = NULL) {
         $this->form_validation->set_rules('category_name', 'Category Name', 'trim|required|max_length[100]');
+
         if ($this->form_validation->run() === FALSE) {
-            $data['category'] = $category;
-            $data['page_title'] = $id === NULL ? 'Add Category' : 'Edit Category';
-            $this->load->view('templates/header', $data);
-            $this->load->view('categories/form', $data);
-            $this->load->view('templates/footer');
+            $this->render_category_form($id, $category);
             return;
         }
 
         $name = trim($this->input->post('category_name', TRUE));
         if ($this->Category_model->name_exists($name, $id)) {
-            show_error('That category name already exists.', 400, 'Category Not Saved');
+            $this->render_category_form($id, $category, 'That category name already exists.');
+            return;
         }
 
         $data = array(
             'category_name' => $name,
             'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
         );
+
         if (!$this->Category_model->save($data, $id)) {
-            show_error('The category could not be saved.', 500, 'Category Not Saved');
+            $this->render_category_form($id, $category, 'The category could not be saved.');
+            return;
         }
+
         redirect('categories');
+    }
+
+    private function render_category_form($id, $category, $form_error = '') {
+        $data['category'] = $category;
+        $data['page_title'] = $id === NULL ? 'Add Category' : 'Edit Category';
+        $data['form_error'] = $form_error;
+
+        $this->load->view('modal/categories/form', $data);
     }
 
     private function require_permission($permission_name) {

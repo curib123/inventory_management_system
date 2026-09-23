@@ -1,5 +1,5 @@
 <h2>Categories</h2>
-<p><a href="<?php echo site_url('categories/add'); ?>">Add Category</a></p>
+<p><button type="button" data-modal-url="<?php echo site_url('categories/add'); ?>">Add Category</button></p>
 
 <table data-datatable-server data-source="<?php echo site_url('categories/datatable'); ?>">
     <thead>
@@ -13,3 +13,5 @@
     </thead>
     <tbody></tbody>
 </table>
+
+<?php $this->load->view('modal/container'); ?>

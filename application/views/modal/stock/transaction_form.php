@@ -2,7 +2,7 @@
 <?php echo validation_errors(); ?>
 <?php if (!empty($item_error)): ?><p><?php echo html_escape($item_error); ?></p><?php endif; ?>
 
-<?php echo form_open(current_url()); ?>
+<?php echo form_open(current_url(), array('data-modal-form' => '1')); ?>
     <?php if ($transaction_type === 'stock_in'): ?>
         <p>
             <label for="supplier_id">Supplier</label><br>
@@ -51,5 +51,5 @@
     </p>
 
     <button type="submit">Save Transaction</button>
-    <a href="<?php echo site_url('stock/history'); ?>">Cancel</a>
+    <button type="button" data-modal-close>Cancel</button>
 <?php echo form_close(); ?>

@@ -1,10 +1,31 @@
-<dialog id="role-form-<?php echo $modal_id; ?>">
-    <?php $this->load->view('roles/form', array(
-        'role' => isset($role) ? $role : NULL,
-        'permissions' => $permissions,
-        'selected_permissions' => isset($selected_permissions) ? $selected_permissions : array(),
-        'page_title' => isset($role) ? 'Edit Role' : 'Add Role',
-        'form_action' => $form_action
-    )); ?>
-    <button type="button" onclick="this.closest('dialog').close();">Close</button>
-</dialog>
+<h2><?php echo html_escape($page_title); ?></h2>
+<?php echo validation_errors(); ?>
+<?php if (!empty($form_error)): ?><p><?php echo html_escape($form_error); ?></p><?php endif; ?>
+
+<?php echo form_open(current_url(), array('data-modal-form' => '1')); ?>
+    <p><label for="role_name">Role Name</label><br><input type="text" id="role_name" name="role_name" required maxlength="50" value="<?php echo html_escape(set_value('role_name', isset($role) && $role ? $role->role_name : '')); ?>"></p>
+    <p><label for="description">Description</label><br><input type="text" id="description" name="description" maxlength="255" value="<?php echo html_escape(set_value('description', isset($role) && $role ? $role->description : '')); ?>"></p>
+    <p>
+        <label for="status">Status</label><br>
+        <?php $selected_status = set_value('status', isset($role) && $role ? $role->status : 1); ?>
+        <select id="status" name="status">
+            <option value="1" <?php echo ((string) $selected_status === '1') ? 'selected' : ''; ?>>Active</option>
+            <option value="0" <?php echo ((string) $selected_status === '0') ? 'selected' : ''; ?>>Inactive</option>
+        </select>
+    </p>
+    <fieldset>
+        <legend>Permissions</legend>
+        <?php if (!empty($permissions)): foreach ($permissions as $permission): ?>
+            <label>
+                <input type="checkbox" name="permissions[]" value="<?php echo (int) $permission->id; ?>" <?php echo in_array((int) $permission->id, $selected_permissions, TRUE) ? 'checked' : ''; ?>>
+                <?php echo html_escape($permission->permission_name); ?> (<?php echo html_escape($permission->module_name); ?>)
+            </label><br>
+        <?php endforeach; else: ?>
+            <p>No active permissions found.</p>
+        <?php endif; ?>
+    </fieldset>
+    <p>
+        <button type="submit">Save Role</button>
+        <button type="button" data-modal-close>Cancel</button>
+    </p>
+<?php echo form_close(); ?>

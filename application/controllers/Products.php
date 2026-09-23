@@ -22,6 +22,7 @@ class Products extends CI_Controller {
 
     public function index() {
         $this->require_permission('manage_products');
+
         $data['page_title'] = 'Products';
         $this->load->view('templates/header', $data);
         $this->load->view('products/index', $data);
@@ -33,31 +34,65 @@ class Products extends CI_Controller {
         $this->product_form();
     }
 
+    public function view($id) {
+        $this->require_permission('manage_products');
+
+        $data['product'] = $this->Product_model->get_by_id($id);
+        if (!$data['product']) {
+            show_404();
+        }
+
+        $this->load->view('modal/products/details', $data);
+    }
+
     public function edit($id) {
         $this->require_permission('manage_products');
+
         $product = $this->Product_model->get_by_id($id);
         if (!$product) {
             show_404();
         }
+
         $this->product_form((int) $id, $product);
     }
 
     public function delete($id) {
         $this->require_permission('manage_products');
-        if ($this->input->method(TRUE) !== 'POST') {
-            show_error('Invalid request method.', 405, 'Method Not Allowed');
-        }
 
         $product = $this->Product_model->get_by_id($id);
         if (!$product) {
             show_404();
         }
+
+        $delete_error = '';
         if ($this->Product_model->has_transaction_history($id)) {
-            show_error('Products with stock transaction history cannot be deleted. Set the product to inactive instead.', 400, 'Product Not Deleted');
+            $delete_error = 'Products with stock transaction history cannot be deleted. Set the product to inactive instead.';
         }
+
+        if ($this->input->method(TRUE) !== 'POST') {
+            $this->load->view('modal/products/delete', array(
+                'product' => $product,
+                'delete_error' => $delete_error
+            ));
+            return;
+        }
+
+        if ($delete_error !== '') {
+            $this->load->view('modal/products/delete', array(
+                'product' => $product,
+                'delete_error' => $delete_error
+            ));
+            return;
+        }
+
         if (!$this->Product_model->delete($id)) {
-            show_error('The product could not be deleted.', 500, 'Product Not Deleted');
+            $this->load->view('modal/products/delete', array(
+                'product' => $product,
+                'delete_error' => 'The product could not be deleted.'
+            ));
+            return;
         }
+
         redirect('products');
     }
 
@@ -87,13 +122,13 @@ class Products extends CI_Controller {
 
         $rows = array();
         foreach ($products as $product) {
-            $actions = '<a href="' . site_url('products/edit/' . (int) $product->id) . '">Edit</a>';
-            $actions .= form_open('products/delete/' . (int) $product->id);
-            $actions .= '<button type="submit">Delete</button>';
-            $actions .= form_close();
+            $id = (int) $product->id;
+            $actions = '<button type="button" data-modal-url="' . site_url('products/view/' . $id) . '">View</button> ';
+            $actions .= '<button type="button" data-modal-url="' . site_url('products/edit/' . $id) . '">Edit</button> ';
+            $actions .= '<button type="button" data-modal-url="' . site_url('products/delete/' . $id) . '">Delete</button>';
 
             $rows[] = array(
-                (int) $product->id,
+                $id,
                 html_escape($product->product_code),
                 html_escape($product->product_name),
                 html_escape($product->category_name ?: 'N/A'),
@@ -126,13 +161,7 @@ class Products extends CI_Controller {
         $this->form_validation->set_rules('reorder_level', 'Reorder Level', 'required|integer|greater_than_equal_to[0]');
 
         if ($this->form_validation->run() === FALSE) {
-            $data['product'] = $product;
-            $data['suppliers'] = $this->Supplier_model->get_all();
-            $data['categories'] = $this->Category_model->get_all();
-            $data['page_title'] = $id === NULL ? 'Add Product' : 'Edit Product';
-            $this->load->view('templates/header', $data);
-            $this->load->view('products/form', $data);
-            $this->load->view('templates/footer');
+            $this->render_product_form($id, $product);
             return;
         }
 
@@ -142,13 +171,18 @@ class Products extends CI_Controller {
         $supplier_id = ($supplier_raw === '' || $supplier_raw === NULL) ? NULL : (int) $supplier_raw;
 
         if ($this->Product_model->code_exists($code, $id)) {
-            show_error('That product code already exists.', 400, 'Product Not Saved');
+            $this->render_product_form($id, $product, 'That product code already exists.');
+            return;
         }
+
         if (!$this->Category_model->get_by_id($category_id)) {
-            show_error('The selected category does not exist.', 400, 'Product Not Saved');
+            $this->render_product_form($id, $product, 'The selected category does not exist.');
+            return;
         }
+
         if ($supplier_id !== NULL && !$this->Supplier_model->get_by_id($supplier_id)) {
-            show_error('The selected supplier does not exist.', 400, 'Product Not Saved');
+            $this->render_product_form($id, $product, 'The selected supplier does not exist.');
+            return;
         }
 
         $data = array(
@@ -164,9 +198,21 @@ class Products extends CI_Controller {
         );
 
         if (!$this->Product_model->save($data, $id)) {
-            show_error('The product could not be saved.', 500, 'Product Not Saved');
+            $this->render_product_form($id, $product, 'The product could not be saved.');
+            return;
         }
+
         redirect('products');
+    }
+
+    private function render_product_form($id, $product, $form_error = '') {
+        $data['product'] = $product;
+        $data['suppliers'] = $this->Supplier_model->get_all();
+        $data['categories'] = $this->Category_model->get_all();
+        $data['page_title'] = $id === NULL ? 'Add Product' : 'Edit Product';
+        $data['form_error'] = $form_error;
+
+        $this->load->view('modal/products/form', $data);
     }
 
     private function require_permission($permission_name) {

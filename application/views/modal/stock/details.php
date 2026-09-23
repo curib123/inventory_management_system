@@ -7,7 +7,15 @@
 <p><strong>Remarks:</strong> <?php echo html_escape($transaction->remarks ?: 'N/A'); ?></p>
 
 <table>
-    <thead><tr><th>Product Code</th><th>Product</th><th>Quantity</th><th>Unit</th><th>Cost Price</th></tr></thead>
+    <thead>
+        <tr>
+            <th>Product Code</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Unit</th>
+            <th>Cost Price</th>
+        </tr>
+    </thead>
     <tbody>
         <?php if (!empty($items)): foreach ($items as $item): ?>
             <tr>
@@ -22,4 +30,5 @@
         <?php endif; ?>
     </tbody>
 </table>
-<p><a href="<?php echo site_url('stock/history'); ?>">Back to History</a></p>
+
+<button type="button" data-modal-close>Close</button>

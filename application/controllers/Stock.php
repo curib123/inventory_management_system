@@ -9,19 +9,24 @@ class Stock extends CI_Controller {
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
         $this->load->library('Datatable_service');
+
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
+
         $this->load->model('Stock_model');
         $this->load->model('Product_model');
         $this->load->model('Supplier_model');
         $this->load->model('User_model');
     }
 
-    public function index() { $this->history(); }
+    public function index() {
+        $this->history();
+    }
 
     public function history() {
         $this->require_permission('view_reports');
+
         $data['page_title'] = 'Stock Movement History';
         $this->load->view('templates/header', $data);
         $this->load->view('stock/history', $data);
@@ -30,15 +35,14 @@ class Stock extends CI_Controller {
 
     public function details($id) {
         $this->require_permission('view_reports');
+
         $data['transaction'] = $this->Stock_model->get_transaction($id);
         if (!$data['transaction']) {
             show_404();
         }
+
         $data['items'] = $this->Stock_model->get_transaction_items($id);
-        $data['page_title'] = 'Stock Transaction Details';
-        $this->load->view('templates/header', $data);
-        $this->load->view('stock/details', $data);
-        $this->load->view('templates/footer');
+        $this->load->view('modal/stock/details', $data);
     }
 
     public function stock_in() {
@@ -53,16 +57,13 @@ class Stock extends CI_Controller {
 
     public function adjustment() {
         $this->require_permission('manage_adjustments');
+
         $this->form_validation->set_rules('product_id', 'Product', 'required|integer|greater_than[0]');
         $this->form_validation->set_rules('actual_stock', 'Actual Stock', 'required|integer|greater_than_equal_to[0]');
         $this->form_validation->set_rules('reason', 'Reason', 'trim|required|max_length[255]');
 
         if ($this->form_validation->run() === FALSE) {
-            $data['products'] = $this->Product_model->get_active();
-            $data['page_title'] = 'Stock Adjustment';
-            $this->load->view('templates/header', $data);
-            $this->load->view('stock/adjustment', $data);
-            $this->load->view('templates/footer');
+            $this->render_adjustment_form();
             return;
         }
 
@@ -74,15 +75,17 @@ class Stock extends CI_Controller {
         );
 
         if (!$result['success']) {
-            $this->session->set_flashdata('error', $result['message']);
-            redirect('stock/adjustment');
+            $this->render_adjustment_form($result['message']);
+            return;
         }
+
         $this->session->set_flashdata('success', 'Stock adjustment saved: ' . $result['transaction_no']);
         redirect('stock/adjustments');
     }
 
     public function adjustments() {
         $this->require_permission('manage_adjustments');
+
         $data['page_title'] = 'Stock Adjustments';
         $this->load->view('templates/header', $data);
         $this->load->view('stock/adjustments', $data);
@@ -91,6 +94,7 @@ class Stock extends CI_Controller {
 
     public function low_stock() {
         $this->require_permission('view_dashboard');
+
         $data['page_title'] = 'Low Stock Monitoring';
         $this->load->view('templates/header', $data);
         $this->load->view('stock/low_stock', $data);
@@ -118,7 +122,7 @@ class Stock extends CI_Controller {
                 html_escape($transaction->supplier_name ?: 'N/A'),
                 html_escape($transaction->username),
                 html_escape($transaction->created_at),
-                '<a href="' . site_url('stock/details/' . (int) $transaction->id) . '">Details</a>'
+                '<button type="button" data-modal-url="' . site_url('stock/details/' . (int) $transaction->id) . '">Details</button>'
             );
         }
 
@@ -128,6 +132,7 @@ class Stock extends CI_Controller {
             $this->Stock_model->count_transactions_filtered($request['search']),
             $rows
         );
+
         $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
@@ -163,6 +168,7 @@ class Stock extends CI_Controller {
             $this->Stock_model->count_adjustments_filtered($request['search']),
             $rows
         );
+
         $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
@@ -196,6 +202,7 @@ class Stock extends CI_Controller {
             $this->Stock_model->count_low_stock_filtered($request['search']),
             $rows
         );
+
         $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
@@ -203,6 +210,7 @@ class Stock extends CI_Controller {
         if ($type === 'stock_in') {
             $this->form_validation->set_rules('supplier_id', 'Supplier', 'required|integer|greater_than[0]');
         }
+
         $this->form_validation->set_rules('remarks', 'Remarks', 'trim|max_length[255]');
 
         $is_post = $this->input->method(TRUE) === 'POST';
@@ -212,17 +220,10 @@ class Stock extends CI_Controller {
 
         if ($item_error !== '') {
             $valid = FALSE;
-            $data['item_error'] = $item_error;
         }
 
         if (!$is_post || !$valid) {
-            $data['products'] = $this->Product_model->get_active();
-            $data['suppliers'] = $this->Supplier_model->get_all();
-            $data['transaction_type'] = $type;
-            $data['page_title'] = $type === 'stock_in' ? 'Stock In' : 'Stock Out';
-            $this->load->view('templates/header', $data);
-            $this->load->view('stock/transaction_form', $data);
-            $this->load->view('templates/footer');
+            $this->render_transaction_form($type, $item_error);
             return;
         }
 
@@ -235,11 +236,30 @@ class Stock extends CI_Controller {
         );
 
         if (!$result['success']) {
-            $this->session->set_flashdata('error', $result['message']);
-            redirect('stock/' . ($type === 'stock_in' ? 'in' : 'out'));
+            $this->render_transaction_form($type, $result['message']);
+            return;
         }
+
         $this->session->set_flashdata('success', 'Stock transaction saved: ' . $result['transaction_no']);
         redirect('stock/history');
+    }
+
+    private function render_transaction_form($type, $item_error = '') {
+        $data['products'] = $this->Product_model->get_active();
+        $data['suppliers'] = $this->Supplier_model->get_all();
+        $data['transaction_type'] = $type;
+        $data['page_title'] = $type === 'stock_in' ? 'Stock In' : 'Stock Out';
+        $data['item_error'] = $item_error;
+
+        $this->load->view('modal/stock/transaction_form', $data);
+    }
+
+    private function render_adjustment_form($form_error = '') {
+        $data['products'] = $this->Product_model->get_active();
+        $data['page_title'] = 'Stock Adjustment';
+        $data['form_error'] = $form_error;
+
+        $this->load->view('modal/stock/adjustment', $data);
     }
 
     // Diri ra gi-parse ang repeated product/quantity rows para clean ang main transaction flow.
