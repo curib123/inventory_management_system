@@ -290,4 +290,4 @@ ON DUPLICATE KEY UPDATE category_name = category_name;
 
 -- Quick notes lang bai:
 -- Default admin password kay admin123.
--- Sample hash ra ni; for production, gamit ug sariling secure password hash.
+-- Sample hash ra ni; for production, gamit ug imong own secure password hash.
