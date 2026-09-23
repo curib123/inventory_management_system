@@ -207,27 +207,12 @@ class Stock extends CI_Controller {
 
         $is_post = $this->input->method(TRUE) === 'POST';
         $valid = $this->form_validation->run();
-        $items = array();
-        if ($is_post) {
-            $product_ids = (array) $this->input->post('product_id', TRUE);
-            $quantities = (array) $this->input->post('quantity', TRUE);
-            foreach ($product_ids as $index => $product_id) {
-                $product_id = (int) $product_id;
-                $quantity = isset($quantities[$index]) ? (int) $quantities[$index] : 0;
-                if ($product_id === 0 && $quantity === 0) {
-                    continue;
-                }
-                if ($product_id <= 0 || $quantity <= 0) {
-                    $valid = FALSE;
-                    $data['item_error'] = 'Every used item row must contain a product and a quantity greater than zero.';
-                    break;
-                }
-                $items[] = array('product_id' => $product_id, 'quantity' => $quantity);
-            }
-            if (empty($items)) {
-                $valid = FALSE;
-                $data['item_error'] = 'Add at least one product and quantity.';
-            }
+        $item_error = '';
+        $items = $is_post ? $this->read_transaction_items($item_error) : array();
+
+        if ($item_error !== '') {
+            $valid = FALSE;
+            $data['item_error'] = $item_error;
         }
 
         if (!$is_post || !$valid) {
@@ -255,6 +240,39 @@ class Stock extends CI_Controller {
         }
         $this->session->set_flashdata('success', 'Stock transaction saved: ' . $result['transaction_no']);
         redirect('stock/history');
+    }
+
+    // Diri ra gi-parse ang repeated product/quantity rows para clean ang main transaction flow.
+    private function read_transaction_items(&$error) {
+        $error = '';
+        $items = array();
+        $product_ids = (array) $this->input->post('product_id', TRUE);
+        $quantities = (array) $this->input->post('quantity', TRUE);
+
+        foreach ($product_ids as $index => $product_id) {
+            $product_id = (int) $product_id;
+            $quantity = isset($quantities[$index]) ? (int) $quantities[$index] : 0;
+
+            if ($product_id === 0 && $quantity === 0) {
+                continue;
+            }
+
+            if ($product_id <= 0 || $quantity <= 0) {
+                $error = 'Every used item row must contain a product and a quantity greater than zero.';
+                return array();
+            }
+
+            $items[] = array(
+                'product_id' => $product_id,
+                'quantity' => $quantity
+            );
+        }
+
+        if (empty($items)) {
+            $error = 'Add at least one product and quantity.';
+        }
+
+        return $items;
     }
 
     private function require_permission($permission_name) {
