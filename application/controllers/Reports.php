@@ -72,7 +72,6 @@ class Reports extends CI_Controller {
             show_404();
             exit;
         }
-
         if (!isset($this->report_definitions[$report])) {
             show_404();
             exit;
@@ -86,7 +85,6 @@ class Reports extends CI_Controller {
         if (!method_exists($this->Report_model, $method)) {
             show_error('Report method is unavailable.', 500, 'Report Error');
         }
-
         if (isset($definition['type']) && $definition['type'] !== NULL) {
             return $this->Report_model->{$method}($definition['type']);
         }
@@ -116,8 +114,8 @@ class Reports extends CI_Controller {
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle(substr($title, 0, 31));
-
         $row_number = 1;
+
         if (!empty($rows)) {
             $headers = array_keys($rows[0]);
             foreach ($headers as $column => $header) {

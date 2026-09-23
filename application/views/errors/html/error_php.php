@@ -14,6 +14,5 @@ $safe_message = htmlspecialchars(strip_tags(isset($message) ? (string) $message 
 <body>
     <h1><?php echo $safe_heading; ?></h1>
     <p><?php echo $safe_message; ?></p>
-    <p><a href="javascript:history.back()">Go Back</a></p>
 </body>
 </html>
