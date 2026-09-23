@@ -43,8 +43,11 @@ class Products extends CI_Controller {
         $this->require_permission('manage_products');
 
         $this->form_validation->set_rules('product_name', 'Product Name', 'required');
-        $this->form_validation->set_rules('product_code', 'Product Code', 'required');
-        $this->form_validation->set_rules('category_id', 'Category', 'required');
+        $this->form_validation->set_rules('product_code', 'Product Code', 'required|max_length[50]');
+        $this->form_validation->set_rules('category_id', 'Category', 'required|integer|greater_than[0]');
+        $this->form_validation->set_rules('cost_price', 'Cost Price', 'numeric|greater_than_equal_to[0]');
+        $this->form_validation->set_rules('selling_price', 'Selling Price', 'numeric|greater_than_equal_to[0]');
+        $this->form_validation->set_rules('reorder_level', 'Reorder Level', 'integer|greater_than_equal_to[0]');
 
         if ($this->form_validation->run() === FALSE) {
             $data['suppliers'] = $this->Supplier_model->get_all();
@@ -81,8 +84,12 @@ class Products extends CI_Controller {
             redirect('products');
         }
 
-        $this->form_validation->set_rules('product_name', 'Product Name', 'required');
-        $this->form_validation->set_rules('product_code', 'Product Code', 'required');
+        $this->form_validation->set_rules('product_name', 'Product Name', 'required|max_length[150]');
+        $this->form_validation->set_rules('product_code', 'Product Code', 'required|max_length[50]');
+        $this->form_validation->set_rules('category_id', 'Category', 'required|integer|greater_than[0]');
+        $this->form_validation->set_rules('cost_price', 'Cost Price', 'numeric|greater_than_equal_to[0]');
+        $this->form_validation->set_rules('selling_price', 'Selling Price', 'numeric|greater_than_equal_to[0]');
+        $this->form_validation->set_rules('reorder_level', 'Reorder Level', 'integer|greater_than_equal_to[0]');
 
         if ($this->form_validation->run() === FALSE) {
             $data['product'] = $product;

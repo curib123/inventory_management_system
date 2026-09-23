@@ -1,24 +1,26 @@
 <h2><?php echo isset($supplier) ? 'Edit Supplier' : 'Add Supplier'; ?></h2>
 
-<?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
+<?php echo validation_errors(); ?>
+
+<?php echo form_open(current_url()); ?>
     <div class="form-group">
-        <label>Supplier Name</label>
-        <input type="text" name="supplier_name" value="<?php echo isset($supplier) ? $supplier->supplier_name : ''; ?>" required>
+        <label for="supplier_name">Supplier Name</label>
+        <input type="text" id="supplier_name" name="supplier_name" autocomplete="off" value="<?php echo html_escape(isset($supplier) ? $supplier->supplier_name : ''); ?>" required maxlength="150">
     </div>
 
     <div class="form-group">
-        <label>Contact Person</label>
-        <input type="text" name="contact_person" value="<?php echo isset($supplier) ? $supplier->contact_person : ''; ?>">
+        <label for="contact_person">Contact Person</label>
+        <input type="text" id="contact_person" name="contact_person" autocomplete="off" value="<?php echo html_escape(isset($supplier) ? $supplier->contact_person : ''); ?>" maxlength="100">
     </div>
 
     <div class="form-group">
-        <label>Phone</label>
-        <input type="text" name="phone" value="<?php echo isset($supplier) ? $supplier->phone : ''; ?>">
+        <label for="phone">Phone</label>
+        <input type="tel" id="phone" name="phone" autocomplete="off" minlength="11" maxlength="11" value="<?php echo html_escape(isset($supplier) ? $supplier->phone : ''); ?>">
     </div>
 
     <div class="form-group">
-        <label>Address</label>
-        <textarea name="address" rows="4"><?php echo isset($supplier) ? $supplier->address : ''; ?></textarea>
+        <label for="address">Address</label>
+        <textarea id="address" name="address" autocomplete="off" rows="4"><?php echo html_escape(isset($supplier) ? $supplier->address : ''); ?></textarea>
     </div>
 
     <div class="form-actions">

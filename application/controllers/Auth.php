@@ -27,8 +27,17 @@ class Auth extends CI_Controller {
         }
 
         $this->load->helper(array('form'));
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('username', 'Username', 'trim|required|min_length[3]|max_length[50]');
+        $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]|max_length[255]');
 
         if ($this->input->post()) {
+            if ($this->form_validation->run() === FALSE) {
+                $data['error'] = validation_errors();
+                $this->load->view('auth/login', $data);
+                return;
+            }
+
             $username = $this->input->post('username');
             $password = $this->input->post('password');
 

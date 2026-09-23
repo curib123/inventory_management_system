@@ -1,56 +1,58 @@
 <h2><?php echo isset($product) ? 'Edit Product' : 'Add Product'; ?></h2>
 
+<?php echo validation_errors(); ?>
+
 <?php echo form_open(isset($form_action) ? $form_action : current_url()); ?>
     <div class="form-group">
-        <label>Product Name</label>
-        <input type="text" name="product_name" value="<?php echo isset($product) ? $product->product_name : ''; ?>" required>
+        <label for="product_name">Product Name</label>
+        <input type="text" id="product_name" name="product_name" value="<?php echo html_escape(isset($product) ? $product->product_name : ''); ?>" required maxlength="150">
     </div>
 
     <div class="form-group">
-        <label>Product Code</label>
-        <input type="text" name="product_code" value="<?php echo isset($product) ? $product->product_code : ''; ?>" required>
+        <label for="product_code">Product Code</label>
+        <input type="text" id="product_code" name="product_code" value="<?php echo html_escape(isset($product) ? $product->product_code : ''); ?>" required maxlength="50">
     </div>
 
     <div class="form-group">
-        <label>Supplier</label>
-        <select name="supplier_id">
+        <label for="supplier_id">Supplier</label>
+        <select id="supplier_id" name="supplier_id">
             <option value="">Select Supplier</option>
             <?php foreach ($suppliers as $supplier): ?>
                 <option value="<?php echo $supplier->id; ?>" <?php echo (isset($product) && $product->supplier_id == $supplier->id) ? 'selected' : ''; ?>>
-                    <?php echo $supplier->supplier_name; ?>
+                    <?php echo html_escape($supplier->supplier_name); ?>
                 </option>
             <?php endforeach; ?>
         </select>
     </div>
 
     <div class="form-group">
-        <label>Category ID</label>
-        <input type="number" name="category_id" value="<?php echo isset($product) ? $product->category_id : ''; ?>" required>
+        <label for="category_id">Category ID</label>
+        <input type="number" id="category_id" name="category_id" min="1" step="1" value="<?php echo html_escape(isset($product) ? $product->category_id : ''); ?>" required>
     </div>
 
     <div class="form-group">
-        <label>Unit</label>
-        <input type="text" name="unit" value="<?php echo isset($product) ? $product->unit : ''; ?>">
+        <label for="unit">Unit</label>
+        <input type="text" id="unit" name="unit" maxlength="50" value="<?php echo html_escape(isset($product) ? $product->unit : ''); ?>">
     </div>
 
     <div class="form-group">
-        <label>Cost Price</label>
-        <input type="number" step="0.01" name="cost_price" value="<?php echo isset($product) ? $product->cost_price : ''; ?>">
+        <label for="cost_price">Cost Price</label>
+        <input type="number" id="cost_price" step="0.01" min="0" name="cost_price" value="<?php echo html_escape(isset($product) ? $product->cost_price : ''); ?>">
     </div>
 
     <div class="form-group">
-        <label>Selling Price</label>
-        <input type="number" step="0.01" name="selling_price" value="<?php echo isset($product) ? $product->selling_price : ''; ?>">
+        <label for="selling_price">Selling Price</label>
+        <input type="number" id="selling_price" step="0.01" min="0" name="selling_price" value="<?php echo html_escape(isset($product) ? $product->selling_price : ''); ?>">
     </div>
 
     <div class="form-group">
-        <label>Reorder Level</label>
-        <input type="number" name="reorder_level" value="<?php echo isset($product) ? $product->reorder_level : 0; ?>">
+        <label for="reorder_level">Reorder Level</label>
+        <input type="number" id="reorder_level" name="reorder_level" min="0" step="1" value="<?php echo isset($product) ? (int) $product->reorder_level : 0; ?>">
     </div>
 
     <div class="form-group">
-        <label>Status</label>
-        <select name="status">
+        <label for="product_status">Status</label>
+        <select id="product_status" name="status">
             <option value="1" <?php echo (isset($product) && $product->status == 1) ? 'selected' : ''; ?>>Active</option>
             <option value="0" <?php echo (isset($product) && $product->status == 0) ? 'selected' : ''; ?>>Inactive</option>
         </select>

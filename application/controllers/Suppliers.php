@@ -32,7 +32,10 @@ class Suppliers extends CI_Controller {
     public function add() {
         $this->require_permission('manage_suppliers');
 
-        $this->form_validation->set_rules('supplier_name', 'Supplier Name', 'required');
+        $this->form_validation->set_rules('supplier_name', 'Supplier Name', 'required|max_length[150]');
+        $this->form_validation->set_rules('contact_person', 'Contact Person', 'max_length[100]');
+        $this->form_validation->set_rules('phone', 'Phone', 'max_length[30]');
+        $this->form_validation->set_rules('address', 'Address');
 
         if ($this->form_validation->run() === FALSE) {
             $data['page_title'] = 'Add Supplier';
@@ -62,7 +65,10 @@ class Suppliers extends CI_Controller {
             redirect('suppliers');
         }
 
-        $this->form_validation->set_rules('supplier_name', 'Supplier Name', 'required');
+        $this->form_validation->set_rules('supplier_name', 'Supplier Name', 'required|max_length[150]');
+        $this->form_validation->set_rules('contact_person', 'Contact Person', 'max_length[100]');
+        $this->form_validation->set_rules('phone', 'Phone', 'max_length[30]');
+        $this->form_validation->set_rules('address', 'Address');
 
         if ($this->form_validation->run() === FALSE) {
             $data['supplier'] = $supplier;

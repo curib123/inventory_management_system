@@ -18,12 +18,12 @@
         <?php echo form_open('login'); ?>
             <div class="form-group">
                 <label for="username">Username</label>
-                <input type="text" name="username" id="username" autocomplete="off" required>
+                <input type="text" name="username" id="username" autocomplete="username" required minlength="3" maxlength="50">
             </div>
 
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password" autocomplete="off" required>
+                <input type="password" name="password" id="password" autocomplete="current-password" required minlength="6" maxlength="255">
             </div>
 
             <button type="submit">Login</button>

@@ -40,7 +40,7 @@ class Categories extends CI_Controller {
     public function add() {
         $this->require_permission('manage_products');
 
-        $this->form_validation->set_rules('category_name', 'Category Name', 'required');
+        $this->form_validation->set_rules('category_name', 'Category Name', 'required|max_length[100]');
 
         if ($this->form_validation->run() === FALSE) {
             $data['page_title'] = 'Add Category';
@@ -68,7 +68,7 @@ class Categories extends CI_Controller {
             redirect('categories');
         }
 
-        $this->form_validation->set_rules('category_name', 'Category Name', 'required');
+        $this->form_validation->set_rules('category_name', 'Category Name', 'required|max_length[100]');
 
         if ($this->form_validation->run() === FALSE) {
             $data['category'] = $category;

@@ -24,7 +24,7 @@ $safe_line = (int) $line;
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <title>PHP Error | Curib Employee</title>
+    <title>PHP Error </title>
 </head>
 <body class="min-vh-100 d-flex align-items-center justify-content-center bg-body-tertiary p-4">
     <main class="container text-center bg-white border rounded-4 shadow-sm p-5">
