@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Reports extends CI_Controller {
 
+    // reports controller to handle report generation and export functionality
     private $report_definitions = array(
         'inventory' => array('title' => 'Inventory Report', 'method' => 'get_inventory_report'),
         'stock-in' => array('title' => 'Stock-In Report', 'method' => 'get_stock_movement_report', 'type' => 'stock_in'),
@@ -13,6 +14,7 @@ class Reports extends CI_Controller {
         'valuation' => array('title' => 'Inventory Valuation', 'method' => 'get_inventory_report')
     );
 
+    // Function to initialize the controller, load necessary libraries, helpers, and models, and check if the user is logged in
     public function __construct() {
         parent::__construct();
         $this->load->library('session');
@@ -22,8 +24,9 @@ class Reports extends CI_Controller {
             redirect('login');
         }
 
-        $this->load->model('Report_model');
         $this->load->model('User_model');
+        $this->require_permission('view_reports');
+        $this->load->model('Report_model');
     }
 
     public function index() {
@@ -55,7 +58,6 @@ class Reports extends CI_Controller {
     }
 
     public function export($report, $format = 'csv') {
-        $this->require_permission('view_reports');
         $definition = $this->get_definition($report);
         $rows = $this->get_rows($definition);
         $format = strtolower($format);
@@ -72,7 +74,6 @@ class Reports extends CI_Controller {
     }
 
     private function show_report($report) {
-        $this->require_permission('view_reports');
         $definition = $this->get_definition($report);
         $data['report_title'] = $definition['title'];
         $data['report_key'] = $report;
