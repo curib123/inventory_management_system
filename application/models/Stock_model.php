@@ -20,18 +20,8 @@ class Stock_model extends CI_Model {
             return array('success' => FALSE, 'message' => 'A supplier is required for stock-in transactions.');
         }
 
-        $normalized = array();
-        foreach ((array) $items as $item) {
-            $product_id = isset($item['product_id']) ? (int) $item['product_id'] : 0;
-            $quantity = isset($item['quantity']) ? (int) $item['quantity'] : 0;
-            if ($product_id <= 0 || $quantity <= 0) {
-                continue;
-            }
-            if (!isset($normalized[$product_id])) {
-                $normalized[$product_id] = 0;
-            }
-            $normalized[$product_id] += $quantity;
-        }
+        // Normalize first para duplicate product rows ma-combine before stock update.
+        $normalized = $this->normalize_items($items);
 
         if (empty($normalized)) {
             return array('success' => FALSE, 'message' => 'At least one valid product and quantity is required.');
@@ -238,7 +228,7 @@ class Stock_model extends CI_Model {
         $this->db->from('categories c');
         $this->db->join('products p', 'p.category_id = c.id AND p.status = 1', 'left');
         $this->db->where('c.status', 1);
-        $this->db->group_by('c.id');
+        $this->db->group_by(array('c.id', 'c.category_name'));
         $this->db->order_by('c.category_name', 'ASC');
         return $this->db->get()->result();
     }
@@ -252,6 +242,27 @@ class Stock_model extends CI_Model {
         $this->db->group_by("DATE_FORMAT(t.created_at, '%Y-%m')", FALSE);
         $this->db->order_by('month', 'ASC');
         return $this->db->get()->result();
+    }
+
+    private function normalize_items($items) {
+        $normalized = array();
+
+        foreach ((array) $items as $item) {
+            $product_id = isset($item['product_id']) ? (int) $item['product_id'] : 0;
+            $quantity = isset($item['quantity']) ? (int) $item['quantity'] : 0;
+
+            if ($product_id <= 0 || $quantity <= 0) {
+                continue;
+            }
+
+            if (!isset($normalized[$product_id])) {
+                $normalized[$product_id] = 0;
+            }
+
+            $normalized[$product_id] += $quantity;
+        }
+
+        return $normalized;
     }
 
     private function get_product_for_update($product_id) {
