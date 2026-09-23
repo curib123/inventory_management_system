@@ -25,6 +25,20 @@ if (version_compare(PHP_VERSION, '5.6.0', '<')) {
     exit('PHP 5.6 or newer is required.');
 }
 
+if (!defined('ENVIRONMENT')) {
+    define('ENVIRONMENT', 'development');
+}
+
+if (ENVIRONMENT === 'development') {
+    error_reporting(E_ALL);
+    ini_set('display_errors', '1');
+} else {
+    error_reporting(0);
+    ini_set('display_errors', '0');
+}
+
+date_default_timezone_set('Asia/Dhaka');
+
 $system_path = 'system';
 $application_folder = 'application';
 
