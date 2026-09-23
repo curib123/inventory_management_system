@@ -32,9 +32,16 @@ class Role_model extends CI_Model {
 
     public function save($data, $id = NULL) {
         if ($id !== NULL) {
-            return $this->db->update('roles', $data, array('id' => (int) $id));
+            $saved = $this->db->update('roles', $data, array('id' => (int) $id));
+            return $saved ? (int) $id : FALSE;
         }
-        return $this->db->insert('roles', $data);
+
+        if (!$this->db->insert('roles', $data)) {
+            return FALSE;
+        }
+
+        // Model na mismo mo-return sa new ID para dili na manghilabot ang controller sa DB object.
+        return (int) $this->db->insert_id();
     }
 
     public function delete($id) {
@@ -84,7 +91,7 @@ class Role_model extends CI_Model {
         $this->db->from('roles r');
         $this->db->join('users u', 'u.role_id = r.id', 'left');
         $this->apply_datatable_search($search);
-        $this->db->group_by('r.id');
+        $this->db->group_by(array('r.id', 'r.role_name', 'r.description', 'r.status'));
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
         }
