@@ -51,7 +51,16 @@ $this->load->view('components/modal/header', array(
 
         <div class="col-12 col-md-4">
             <label for="unit" class="form-label">Unit</label>
-            <input type="text" id="unit" name="unit" class="form-control" maxlength="50" value="<?php echo html_escape(set_value('unit', isset($product) && $product ? $product->unit : '')); ?>">
+            <?php $selected_unit = set_value('unit', isset($product) && $product ? $product->unit : 'pcs'); ?>
+            <select id="unit" name="unit" class="form-select" required>
+                <option value="">Select Unit</option>
+                <?php foreach ($product_units as $unit_value => $unit_label): ?>
+                    <option value="<?php echo html_escape($unit_value); ?>" <?php echo ((string) $selected_unit === (string) $unit_value) ? 'selected' : ''; ?>>
+                        <?php echo html_escape($unit_label); ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+            <div class="form-text">Controls how inventory quantities are described, for example pcs, box, kg, or liter.</div>
         </div>
 
         <div class="col-12 col-md-4">
