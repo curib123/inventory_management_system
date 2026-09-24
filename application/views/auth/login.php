@@ -70,7 +70,7 @@
                                 id="password"
                                 class="form-control"
                                 required
-                                minlength="6"
+                                minlength="8"
                                 maxlength="255"
                                 autocomplete="current-password"
                             >
