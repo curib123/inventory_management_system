@@ -18,8 +18,11 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
     >
 
-    <link rel="stylesheet"
-          href="<?php echo base_url('assets/css/sidebar.css'); ?>">
+     <!-- css file for sidebar external customize styling -->
+    <link rel="stylesheet" href="<?php echo base_url('assets/css/sidebar.css'); ?>">
+
+     <!-- css file for external custumize  modal styling -->
+     <link rel="stylesheet" href="<?php echo base_url('assets/css/modal.css'); ?>">
 
     <title>
         <?php echo html_escape(
@@ -84,7 +87,7 @@
             <?php if (
                 $this->User_model->has_permission(
                     $this->session->userdata('user_id'),
-                    'manage_categories'
+                    'manage_products'
                 )
             ): ?>
 
