@@ -79,3 +79,27 @@ if (!function_exists('ui_modal_form_attributes')) {
         return $attributes;
     }
 }
+
+if (!function_exists('ui_style_enabled_for')) {
+    function ui_style_enabled_for($rules, $controller, $method = '', $default = TRUE) {
+        $rules = is_array($rules) ? $rules : array();
+        $controller = strtolower(trim((string) $controller));
+        $method = strtolower(trim((string) $method));
+        $route_key = $controller . ($method !== '' ? '/' . $method : '');
+
+        if ($route_key !== '' && array_key_exists($route_key, $rules)) {
+            return (bool) $rules[$route_key];
+        }
+
+        if ($controller !== '' && array_key_exists($controller, $rules)) {
+            return (bool) $rules[$controller];
+        }
+
+        if (array_key_exists('*', $rules)) {
+            return (bool) $rules['*'];
+        }
+
+        return (bool) $default;
+    }
+}
+
