@@ -320,8 +320,13 @@ class Stock extends CI_Controller {
             if ($type === 'stock_in') {
                 // Stock In displays every product from one supplier.
                 // Blank/zero quantity means that product is simply not part of this transaction.
-                if ($quantity <= 0) {
+                if ($raw_quantity === '' || $raw_quantity === '0') {
                     continue;
+                }
+
+                if (!ctype_digit($raw_quantity) || $quantity <= 0) {
+                    $error = 'Stock-in quantities must be whole numbers greater than zero.';
+                    return array();
                 }
 
                 if ($product_id <= 0) {
