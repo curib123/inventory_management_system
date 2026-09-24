@@ -293,7 +293,14 @@ class Roles extends CI_Controller {
         $data['selected_permissions'] = $id === NULL
             ? array()
             : $this->Role_model->get_role_permissions($id);
-        $data['page_title'] = $id === NULL ? 'Add Role' : 'Edit Role';
+        if ($id === NULL) {
+            $data['page_title'] = 'Add Role';
+        } elseif (!$can_edit_role && $can_manage_permissions) {
+            $data['page_title'] = 'Manage Role Permissions';
+        } else {
+            $data['page_title'] = 'Edit Role';
+        }
+
         $data['form_error'] = $form_error;
         $data['can_edit_role'] = (bool) $can_edit_role;
         $data['can_manage_permissions'] = (bool) $can_manage_permissions;
