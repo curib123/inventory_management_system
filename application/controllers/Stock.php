@@ -275,7 +275,7 @@ class Stock extends CI_Controller {
             ? $this->Product_model->get_active()
             : array();
 
-        $data['suppliers'] = $this->Supplier_model->get_all();
+        $data['suppliers'] = $this->Supplier_model->get_active();
         $data['transaction_type'] = $type;
         $data['page_title'] = $type === 'stock_in' ? 'Stock In' : 'Stock Out';
         $data['item_error'] = $item_error;
