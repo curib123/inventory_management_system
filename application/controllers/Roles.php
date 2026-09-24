@@ -105,7 +105,14 @@ class Roles extends CI_Controller {
     public function datatable() {
         $this->require_permission('roles.view');
 
-        $columns = array('r.role_name', 'r.description', 'r.status', 'user_count', NULL);
+        $columns = array(
+            'r.role_name',
+            'r.description',
+            'r.status',
+            'user_count',
+            'permission_count',
+            NULL
+        );
         $request = $this->datatable_service->request($this->input, $columns, 'r.role_name', 'asc');
         $roles = $this->Role_model->get_datatable(
             $request['start'],
@@ -156,6 +163,7 @@ class Roles extends CI_Controller {
                 html_escape($role->description),
                 $role->status ? 'Active' : 'Inactive',
                 (int) $role->user_count,
+                (int) $role->permission_count,
                 ui_modal_action_group($action_items)
             );
         }
