@@ -1,23 +1,47 @@
-<h2>Stock Movement History</h2>
-<p>
-    <button type="button" data-modal-url="<?php echo site_url('stock/in'); ?>">Stock In</button>
-    <button type="button" data-modal-url="<?php echo site_url('stock/out'); ?>">Stock Out</button>
-    <button type="button" data-modal-url="<?php echo site_url('stock/adjustment'); ?>">Adjustment</button>
-    <a href="<?php echo site_url('stock/adjustments'); ?>">Adjustment History</a>
-</p>
+<?php
+$this->load->view('components/page_header', array(
+    'title' => 'Stock Movement History',
+    'description' => 'Track stock-in, stock-out, and adjustment activity across the inventory.',
+    'actions' => array(
+        array(
+            'label' => 'Stock In',
+            'icon' => 'bi-box-arrow-in-down',
+            'class' => 'btn-success',
+            'modal_url' => site_url('stock/in')
+        ),
+        array(
+            'label' => 'Stock Out',
+            'icon' => 'bi-box-arrow-up',
+            'class' => 'btn-warning',
+            'modal_url' => site_url('stock/out')
+        ),
+        array(
+            'label' => 'Adjustment',
+            'icon' => 'bi-sliders',
+            'class' => 'btn-primary',
+            'modal_url' => site_url('stock/adjustment')
+        ),
+        array(
+            'label' => 'Adjustment History',
+            'icon' => 'bi-clock-history',
+            'class' => 'btn-outline-secondary',
+            'url' => site_url('stock/adjustments')
+        )
+    )
+));
 
-<table data-datatable-server data-source="<?php echo site_url('stock/history/datatable'); ?>">
-    <thead>
-        <tr>
-            <th>Transaction No.</th>
-            <th>Type</th>
-            <th>Supplier</th>
-            <th>Processed By</th>
-            <th>Date</th>
-            <th data-orderable="false">Action</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+$this->load->view('components/data_table', array(
+    'source' => site_url('stock/history/datatable'),
+    'table_id' => 'stock-history-table',
+    'columns' => array(
+        'Transaction No.',
+        'Type',
+        'Supplier',
+        'Processed By',
+        'Date',
+        array('label' => 'Action', 'orderable' => false)
+    )
+));
 
-<?php $this->load->view('modal/container'); ?>
+$this->load->view('modal/container');
+?>
