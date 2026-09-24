@@ -1,12 +1,22 @@
 :root {
+    --app-bg: #f5f7fb;
     --app-surface: #ffffff;
     --app-border: #e5e7eb;
     --app-muted: #6b7280;
     --app-radius: 0.9rem;
+    --app-radius-sm: 0.65rem;
+    --app-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.08);
+    --app-modal-shadow: 0 1rem 3rem rgba(15, 23, 42, 0.2);
+
+    --app-sidebar-bg: #111827;
+    --app-sidebar-text: #cbd5e1;
+    --app-sidebar-heading: #6b7280;
+    --app-sidebar-hover: #1f2937;
+    --app-sidebar-accent: #60a5fa;
 }
 
 body {
-    background: #f5f7fb;
+    background: var(--app-bg);
 }
 
 .app-page-header {
