@@ -19,7 +19,7 @@ class Suppliers extends CI_Controller {
     }
 
     public function index() {
-        $this->require_permission('manage_suppliers');
+        $this->require_permission('suppliers.view');
 
         $data['page_title'] = 'Suppliers';
         $this->load->view('templates/header', $data);
@@ -28,12 +28,12 @@ class Suppliers extends CI_Controller {
     }
 
     public function add() {
-        $this->require_permission('manage_suppliers');
+        $this->require_permission('suppliers.create');
         $this->supplier_form();
     }
 
     public function view($id) {
-        $this->require_permission('manage_suppliers');
+        $this->require_permission('suppliers.view');
 
         $data['supplier'] = $this->Supplier_model->get_by_id($id);
         if (!$data['supplier']) {
@@ -44,7 +44,7 @@ class Suppliers extends CI_Controller {
     }
 
     public function edit($id) {
-        $this->require_permission('manage_suppliers');
+        $this->require_permission('suppliers.edit');
 
         $supplier = $this->Supplier_model->get_by_id($id);
         if (!$supplier) {
@@ -55,7 +55,7 @@ class Suppliers extends CI_Controller {
     }
 
     public function delete($id) {
-        $this->require_permission('manage_suppliers');
+        $this->require_permission('suppliers.delete');
 
         $supplier = $this->Supplier_model->get_by_id($id);
         if (!$supplier) {
@@ -82,7 +82,7 @@ class Suppliers extends CI_Controller {
     }
 
     public function datatable() {
-        $this->require_permission('manage_suppliers');
+        $this->require_permission('suppliers.view');
 
         $columns = array(
             's.supplier_name',
