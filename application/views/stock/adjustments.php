@@ -1,19 +1,27 @@
-<h2>Stock Adjustments</h2>
-<p><button type="button" data-modal-url="<?php echo site_url('stock/adjustment'); ?>">New Adjustment</button></p>
-
-<table data-datatable-server data-source="<?php echo site_url('stock/adjustments/datatable'); ?>">
-    <thead>
-        <tr>
-            <th>Product</th>
-            <th>System Stock</th>
-            <th>Actual Stock</th>
-            <th>Difference</th>
-            <th>Reason</th>
-            <th>Processed By</th>
-            <th>Date</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<?php
+$this->load->view('components/datatable', array(
+    'title' => 'Stock Adjustments',
+    'subtitle' => 'Review physical-stock corrections and their recorded reasons.',
+    'data_source' => site_url('stock/adjustments/datatable'),
+    'actions' => array(
+        array(
+            'label' => 'New Adjustment',
+            'url' => site_url('stock/adjustment'),
+            'icon' => 'bi-plus-lg',
+            'variant' => 'primary',
+            'mode' => 'modal'
+        )
+    ),
+    'columns' => array(
+        'Product',
+        'System Stock',
+        'Actual Stock',
+        'Difference',
+        'Reason',
+        'Processed By',
+        'Date'
+    )
+));
+?>
 
 <?php $this->load->view('modal/container'); ?>
