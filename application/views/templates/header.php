@@ -1,9 +1,11 @@
+<?php $ui_styling_enabled = $this->config->item('ui_styling_enabled') !== FALSE; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <?php if ($ui_styling_enabled): ?>
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
         rel="stylesheet"
@@ -24,7 +26,7 @@
     <link rel="stylesheet" href="<?php echo base_url('assets/css/app.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/table.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/sidebar.css'); ?>">
-    <link rel="stylesheet" href="<?php echo base_url('assets/css/modal.css'); ?>">
+    <link rel="stylesheet" href="<?php echo base_url('assets/css/modal.css'); ?>">\n    <?php endif; ?>
 
     <title><?php echo html_escape(isset($page_title) ? $page_title : 'Inventory Management System'); ?></title>
 </head>
