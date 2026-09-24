@@ -21,6 +21,8 @@
         href="https://cdn.datatables.net/v/bs5/dt-3.1.1/datatables.min.css"
     >
 
+    <link rel="stylesheet" href="<?php echo base_url('assets/css/app.css'); ?>">
+    <link rel="stylesheet" href="<?php echo base_url('assets/css/table.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/sidebar.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/modal.css'); ?>">
 
