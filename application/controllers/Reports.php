@@ -283,9 +283,9 @@ class Reports extends CI_Controller {
         require_once $autoload;
     }
 
-    private function require_permission($permission_name) {
+    private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
-        if (!$user_id || !$this->User_model->has_permission($user_id, $permission_name)) {
+        if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
             show_error('You do not have permission to access this page.', 403, 'Access Denied');
         }
     }
