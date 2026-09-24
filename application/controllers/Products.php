@@ -108,8 +108,6 @@ class Products extends CI_Controller {
             'p.stock',
             'p.selling_price',
             'p.status',
-            'p.created_at',
-            'p.updated_at',
             NULL
         );
 
