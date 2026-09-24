@@ -543,6 +543,45 @@ ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(statu
 
 
 -- -------------------------------------------------------------------
+-- Role-management permissions
+-- -------------------------------------------------------------------
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'View Roles', 'roles.view', 'view',
+       'View roles and assigned permissions', 1
+FROM modules WHERE module_key = 'roles'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Create Roles', 'roles.create', 'create',
+       'Create system roles', 1
+FROM modules WHERE module_key = 'roles'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Edit Roles', 'roles.edit', 'edit',
+       'Edit role information', 1
+FROM modules WHERE module_key = 'roles'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Delete Roles', 'roles.delete', 'delete',
+       'Delete unused roles', 1
+FROM modules WHERE module_key = 'roles'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Manage Role Permissions', 'roles.permissions', 'permissions',
+       'Assign or remove permissions from roles', 1
+FROM modules WHERE module_key = 'roles'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+
+-- -------------------------------------------------------------------
 -- Role permissions: ADMIN
 -- Admin gets all active permissions.
 -- -------------------------------------------------------------------
