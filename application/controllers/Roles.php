@@ -234,6 +234,10 @@ class Roles extends CI_Controller {
         }
 
         $role_id = $id;
+        $role_data = NULL;
+        $permission_ids = $can_manage_permissions
+            ? $this->input->post('permissions', TRUE)
+            : array();
 
         if ($can_edit_role) {
             $role_name = trim((string) $this->input->post('role_name', TRUE));
@@ -254,7 +258,26 @@ class Roles extends CI_Controller {
                 'description' => trim((string) $this->input->post('description', TRUE)),
                 'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
             );
+        }
 
+        if ($can_edit_role && $can_manage_permissions) {
+            $role_id = $this->Role_model->save_with_permissions(
+                $role_data,
+                $permission_ids,
+                $id
+            );
+
+            if ($role_id === FALSE) {
+                $this->render_role_form(
+                    $id,
+                    $role,
+                    'The role and permissions could not be saved. No changes were committed.',
+                    $can_edit_role,
+                    $can_manage_permissions
+                );
+                return;
+            }
+        } elseif ($can_edit_role) {
             $role_id = $this->Role_model->save($role_data, $id);
 
             if ($role_id === FALSE) {
@@ -267,17 +290,11 @@ class Roles extends CI_Controller {
                 );
                 return;
             }
-        }
-
-        if ($can_manage_permissions) {
-            $permission_ids = $this->input->post('permissions', TRUE);
-
+        } elseif ($can_manage_permissions) {
             if (!$this->Role_model->sync_permissions($role_id, $permission_ids)) {
-                $fresh_role = $role_id ? $this->Role_model->get_by_id($role_id) : $role;
-
                 $this->render_role_form(
-                    $role_id,
-                    $fresh_role,
+                    $id,
+                    $role,
                     'The role permissions could not be saved.',
                     $can_edit_role,
                     $can_manage_permissions
