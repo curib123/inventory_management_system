@@ -1,4 +1,26 @@
-<?php echo form_open(current_url(), array('data-modal-form' => '1')); ?>
+<?php
+$stock_confirmation = $transaction_type === 'stock_in'
+    ? array(
+        'title' => 'Confirm Stock In?',
+        'message' => 'Review the supplier and entered quantities before adding stock.',
+        'impact' => 'This transaction increases inventory quantities and becomes part of permanent stock history.',
+        'assist' => 'Make sure the supplier is correct and only the intended products have quantities greater than zero.',
+        'label' => 'Confirm Stock In',
+        'variant' => 'primary',
+        'icon' => 'bi-box-arrow-in-down'
+    )
+    : array(
+        'title' => 'Confirm Stock Out?',
+        'message' => 'Review the selected products and quantities before removing stock.',
+        'impact' => 'This transaction reduces inventory and becomes part of permanent stock history.',
+        'assist' => 'Confirm each product and quantity. Stock cannot go below the allowed inventory level.',
+        'label' => 'Confirm Stock Out',
+        'variant' => 'warning',
+        'icon' => 'bi-box-arrow-up'
+    );
+
+echo form_open(current_url(), ui_modal_form_attributes($stock_confirmation));
+?>
 <?php
 $this->load->view('components/modal/header', array(
     'modal_title' => $page_title,
@@ -53,7 +75,7 @@ $this->load->view('components/modal/header', array(
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
             <div>
                 <h3 class="h6 mb-1">Supplier Products</h3>
-                <p class="small text-body-secondary mb-0">Low-stock products appear first.</p>
+                <p class="small text-body-secondary mb-0">Low-stock products appear first. Leave quantity blank or zero for products not included in this transaction.</p>
             </div>
         </div>
 
@@ -121,13 +143,27 @@ $this->load->view('components/modal/header', array(
             maxlength="255"
             value="<?php echo html_escape(set_value('remarks')); ?>"
         >
+        <div class="form-text">Add a short business reason or reference when it helps explain the movement later.</div>
+    </div>
+
+    <div class="mt-3">
+        <?php
+        $this->load->view('components/form/assist_note', array(
+            'assist_title' => 'Inventory transaction',
+            'assist_text' => $transaction_type === 'stock_in'
+                ? 'Confirm the supplier and quantities carefully. Saving increases stock and creates a permanent transaction record.'
+                : 'Confirm the products and quantities carefully. Saving reduces stock and creates a permanent transaction record.',
+            'assist_variant' => $transaction_type === 'stock_in' ? 'info' : 'warning',
+            'assist_icon' => $transaction_type === 'stock_in' ? 'bi-info-circle' : 'bi-exclamation-triangle'
+        ));
+        ?>
     </div>
 </div>
 
 <?php
 $this->load->view('components/modal/footer', array(
     'close_label' => 'Cancel',
-    'submit_label' => 'Save Transaction',
+    'submit_label' => $transaction_type === 'stock_in' ? 'Review Stock In' : 'Review Stock Out',
     'submit_icon' => 'bi-check-lg'
 ));
 ?>
