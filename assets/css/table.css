@@ -41,7 +41,7 @@
 
 .app-table-card .dt-search input,
 .app-table-card .dt-length select {
-    border-radius: 0.6rem;
+    border-radius: var(--app-radius-sm);
 }
 
 .app-table-card .pagination {
@@ -49,7 +49,7 @@
 }
 
 .app-table-card .page-link {
-    border-radius: 0.5rem;
+    border-radius: var(--app-radius-sm);
     margin-inline: 0.12rem;
 }
 
