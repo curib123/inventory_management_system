@@ -42,6 +42,19 @@ class StockRulesTest extends TestCase {
         (new Stock_rules())->calculate_stock(-1, 1, 'stock_in');
     }
 
+
+    public function testStockInRejectsDatabaseIntegerOverflow() {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new Stock_rules())->calculate_stock(2147483647, 1, 'stock_in');
+    }
+
+    public function testQuantityBeyondDatabaseIntegerLimitIsRejected() {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new Stock_rules())->calculate_stock(0, 2147483648, 'stock_in');
+    }
+
     public function testUnknownTransactionTypeIsRejected() {
         $this->expectException(InvalidArgumentException::class);
 
