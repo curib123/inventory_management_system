@@ -35,8 +35,11 @@ class Stock_model extends CI_Model {
         // Normalize first para duplicate product rows ma-combine before stock update.
         $normalized = $this->normalize_items($items);
 
-        if (empty($normalized)) {
-            return array('success' => FALSE, 'message' => 'At least one valid product and quantity is required.');
+        if ($normalized === FALSE || empty($normalized)) {
+            return array(
+                'success' => FALSE,
+                'message' => 'Every stock item must contain a valid product and a positive whole-number quantity.'
+            );
         }
 
         $this->db->trans_begin();
@@ -260,12 +263,31 @@ class Stock_model extends CI_Model {
         $normalized = array();
 
         foreach ((array) $items as $item) {
-            $product_id = isset($item['product_id']) ? (int) $item['product_id'] : 0;
-            $quantity = isset($item['quantity']) ? (int) $item['quantity'] : 0;
-
-            if ($product_id <= 0 || $quantity <= 0) {
-                continue;
+            if (!is_array($item) ||
+                !isset($item['product_id']) ||
+                !isset($item['quantity']) ||
+                !is_scalar($item['product_id']) ||
+                !is_scalar($item['quantity'])) {
+                return FALSE;
             }
+
+            $product_id = filter_var(
+                $item['product_id'],
+                FILTER_VALIDATE_INT,
+                array('options' => array('min_range' => 1))
+            );
+            $quantity = filter_var(
+                $item['quantity'],
+                FILTER_VALIDATE_INT,
+                array('options' => array('min_range' => 1))
+            );
+
+            if ($product_id === FALSE || $quantity === FALSE) {
+                return FALSE;
+            }
+
+            $product_id = (int) $product_id;
+            $quantity = (int) $quantity;
 
             if (!isset($normalized[$product_id])) {
                 $normalized[$product_id] = 0;
