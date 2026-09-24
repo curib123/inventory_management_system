@@ -5,6 +5,7 @@ application/cache/*
 .phpunit.result.cache
 
 # Local environment/secrets
+application/config/ui_style.local.php
 .env
 .env.*
 !.env.example
