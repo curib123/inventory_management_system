@@ -158,15 +158,49 @@
         </header>
 
         <main class="container-fluid py-4">
-            <?php if ($this->session->flashdata('error')): ?>
-                <div class="alert alert-danger" role="alert">
-                    <?php echo html_escape($this->session->flashdata('error')); ?>
+            <?php
+            $flash_error = $this->session->flashdata('error');
+            $flash_warning = $this->session->flashdata('warning');
+            $flash_success = $this->session->flashdata('success');
+            ?>
+
+            <?php if ($flash_error): ?>
+                <div class="alert alert-danger alert-dismissible fade show app-feedback-alert" role="alert">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-exclamation-circle-fill mt-1"></i>
+                        <div>
+                            <div class="fw-semibold">Action could not be completed</div>
+                            <div><?php echo html_escape($flash_error); ?></div>
+                            <div class="small mt-1 opacity-75">Review the message, refresh the data if needed, and try again.</div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
                 </div>
             <?php endif; ?>
 
-            <?php if ($this->session->flashdata('success')): ?>
-                <div class="alert alert-success" role="alert">
-                    <?php echo html_escape($this->session->flashdata('success')); ?>
+            <?php if ($flash_warning): ?>
+                <div class="alert alert-warning alert-dismissible fade show app-feedback-alert" role="alert">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+                        <div>
+                            <div class="fw-semibold">Please review</div>
+                            <div><?php echo html_escape($flash_warning); ?></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($flash_success): ?>
+                <div class="alert alert-success alert-dismissible fade show app-feedback-alert" role="status">
+                    <div class="d-flex align-items-start gap-2">
+                        <i class="bi bi-check-circle-fill mt-1"></i>
+                        <div>
+                            <div class="fw-semibold">Completed successfully</div>
+                            <div><?php echo html_escape($flash_success); ?></div>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
                 </div>
             <?php endif; ?>
 
