@@ -33,3 +33,43 @@ if (!function_exists('ui_modal_action_group')) {
         return $html;
     }
 }
+
+if (!function_exists('ui_modal_form_attributes')) {
+    function ui_modal_form_attributes($confirmation = array(), $extra = array()) {
+        $attributes = array_merge(
+            array('data-modal-form' => '1'),
+            is_array($extra) ? $extra : array()
+        );
+
+        if (empty($confirmation) || !is_array($confirmation)) {
+            return $attributes;
+        }
+
+        $attributes['data-confirm-required'] = '1';
+        $attributes['data-confirm-title'] = isset($confirmation['title'])
+            ? (string) $confirmation['title']
+            : 'Confirm changes';
+        $attributes['data-confirm-message'] = isset($confirmation['message'])
+            ? (string) $confirmation['message']
+            : 'Review the information before continuing.';
+        $attributes['data-confirm-label'] = isset($confirmation['label'])
+            ? (string) $confirmation['label']
+            : 'Confirm';
+        $attributes['data-confirm-variant'] = isset($confirmation['variant'])
+            ? preg_replace('/[^a-z0-9-]/i', '', (string) $confirmation['variant'])
+            : 'primary';
+        $attributes['data-confirm-icon'] = isset($confirmation['icon'])
+            ? preg_replace('/[^a-z0-9-]/i', '', (string) $confirmation['icon'])
+            : 'bi-check2-circle';
+
+        if (!empty($confirmation['assist'])) {
+            $attributes['data-confirm-assist'] = (string) $confirmation['assist'];
+        }
+
+        if (!empty($confirmation['impact'])) {
+            $attributes['data-confirm-impact'] = (string) $confirmation['impact'];
+        }
+
+        return $attributes;
+    }
+}
