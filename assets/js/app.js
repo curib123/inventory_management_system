@@ -526,6 +526,181 @@ document.addEventListener('DOMContentLoaded', function () {
         preview.textContent = String(current + quantity);
     }
 
+    var confirmationStates = new WeakMap();
+
+    function confirmationVariantClass(variant) {
+        return ['primary', 'success', 'warning', 'danger'].indexOf(variant) !== -1
+            ? variant
+            : 'primary';
+    }
+
+    function showFormConfirmation(form, submitButton) {
+        if (!form || confirmationStates.has(form)) {
+            return;
+        }
+
+        var fragment = document.createDocumentFragment();
+
+        while (form.firstChild) {
+            fragment.appendChild(form.firstChild);
+        }
+
+        var variant = confirmationVariantClass(
+            form.getAttribute('data-confirm-variant') || 'primary'
+        );
+        var icon = form.getAttribute('data-confirm-icon') || 'bi-check2-circle';
+        var title = form.getAttribute('data-confirm-title') || 'Confirm changes';
+        var message = form.getAttribute('data-confirm-message') || 'Review the information before continuing.';
+        var label = form.getAttribute('data-confirm-label') || 'Confirm';
+        var assist = form.getAttribute('data-confirm-assist') || '';
+        var impact = form.getAttribute('data-confirm-impact') || '';
+
+        var state = {
+            fragment: fragment,
+            submitButton: submitButton || null
+        };
+
+        confirmationStates.set(form, state);
+
+        var stage = document.createElement('div');
+        stage.className = 'app-confirmation-stage';
+        stage.innerHTML =
+            '<div class="modal-header">' +
+                '<div class="d-flex align-items-center gap-3">' +
+                    '<span class="app-modal-icon app-modal-icon-' + escapeHtml(variant) + '">' +
+                        '<i class="bi ' + escapeHtml(icon) + '"></i>' +
+                    '</span>' +
+                    '<div>' +
+                        '<div class="text-body-secondary small fw-semibold text-uppercase">Confirmation</div>' +
+                        '<h2 class="modal-title fs-5 mb-0">' + escapeHtml(title) + '</h2>' +
+                    '</div>' +
+                '</div>' +
+                '<button type="button" class="btn-close" data-confirm-cancel aria-label="Go back"></button>' +
+            '</div>' +
+            '<div class="modal-body">' +
+                '<div class="app-confirmation-review">' +
+                    '<div class="app-confirmation-review-icon app-confirmation-review-icon-' + escapeHtml(variant) + '">' +
+                        '<i class="bi ' + escapeHtml(icon) + '"></i>' +
+                    '</div>' +
+                    '<div>' +
+                        '<div class="app-confirmation-review-title">Review before continuing</div>' +
+                        '<p class="app-confirmation-review-message mb-0">' + escapeHtml(message) + '</p>' +
+                    '</div>' +
+                '</div>' +
+                (impact
+                    ? '<div class="app-confirmation-impact">' +
+                        '<div class="app-confirmation-impact-label">What this changes</div>' +
+                        '<div>' + escapeHtml(impact) + '</div>' +
+                      '</div>'
+                    : '') +
+                (assist
+                    ? '<div class="app-confirmation-assist">' +
+                        '<i class="bi bi-lightbulb me-2"></i>' +
+                        '<span>' + escapeHtml(assist) + '</span>' +
+                      '</div>'
+                    : '') +
+                '<div class="small text-body-secondary mt-3">' +
+                    'Nothing has been submitted yet. Choose Go Back if you want to review or change any information.' +
+                '</div>' +
+            '</div>' +
+            '<div class="modal-footer">' +
+                '<button type="button" class="btn btn-outline-secondary" data-confirm-cancel>' +
+                    '<i class="bi bi-arrow-left me-1"></i>Go Back' +
+                '</button>' +
+                '<button type="button" class="btn btn-' + escapeHtml(variant) + '" data-confirm-proceed>' +
+                    '<i class="bi ' + escapeHtml(icon) + ' me-1"></i>' + escapeHtml(label) +
+                '</button>' +
+            '</div>';
+
+        form.appendChild(stage);
+
+        var proceed = stage.querySelector('[data-confirm-proceed]');
+
+        if (proceed) {
+            proceed.focus();
+        }
+    }
+
+    function restoreFormConfirmation(form) {
+        if (!form) {
+            return null;
+        }
+
+        var state = confirmationStates.get(form);
+
+        if (!state) {
+            return null;
+        }
+
+        while (form.firstChild) {
+            form.removeChild(form.firstChild);
+        }
+
+        form.appendChild(state.fragment);
+        confirmationStates.delete(form);
+
+        window.requestAnimationFrame(function () {
+            if (state.submitButton && document.body.contains(state.submitButton)) {
+                state.submitButton.focus();
+            }
+        });
+
+        return state;
+    }
+
+    async function submitModalForm(form, submitButton) {
+        if (!form) {
+            return;
+        }
+
+        submitButton = submitButton || form.querySelector('button[type="submit"]');
+
+        if (submitButton) {
+            submitButton.disabled = true;
+            submitButton.setAttribute('aria-busy', 'true');
+        }
+
+        try {
+            var response = await fetch(form.action, {
+                method: form.method || 'POST',
+                body: new FormData(form),
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            });
+
+            if (response.redirected) {
+                window.location.href = response.url;
+                return;
+            }
+
+            var html = await response.text();
+
+            if (!response.ok) {
+                var body = form.querySelector('.modal-body') || form;
+                showInlineProblem(
+                    body,
+                    responseProblem(response, html, 'save these changes')
+                );
+                return;
+            }
+
+            modalContent.innerHTML = html;
+            enhanceFeedback(modalContent);
+        } catch (error) {
+            var formBody = form.querySelector('.modal-body') || form;
+            showInlineProblem(
+                formBody,
+                statusProblem(0, 'save these changes')
+            );
+        } finally {
+            if (submitButton && document.body.contains(submitButton)) {
+                submitButton.disabled = false;
+                submitButton.removeAttribute('aria-busy');
+            }
+        }
+    }
+
     function filenameFromDisposition(disposition, fallback) {
         if (!disposition) {
             return fallback;
@@ -650,6 +825,29 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.addEventListener('click', function (event) {
+        var confirmationCancel = event.target.closest('[data-confirm-cancel]');
+
+        if (confirmationCancel) {
+            event.preventDefault();
+            restoreFormConfirmation(confirmationCancel.closest('form[data-modal-form]'));
+            return;
+        }
+
+        var confirmationProceed = event.target.closest('[data-confirm-proceed]');
+
+        if (confirmationProceed) {
+            event.preventDefault();
+
+            var confirmationForm = confirmationProceed.closest('form[data-modal-form]');
+            var confirmationState = restoreFormConfirmation(confirmationForm);
+
+            submitModalForm(
+                confirmationForm,
+                confirmationState ? confirmationState.submitButton : null
+            );
+            return;
+        }
+
         var exportButton = event.target.closest('[data-report-export]');
 
         if (exportButton) {
@@ -678,7 +876,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
-    document.addEventListener('submit', async function (event) {
+    document.addEventListener('submit', function (event) {
         var form = event.target.closest('form[data-modal-form]');
 
         if (!form) {
@@ -689,55 +887,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var submitButton = form.querySelector('button[type="submit"]');
 
-        if (submitButton) {
-            submitButton.disabled = true;
-            submitButton.setAttribute('aria-busy', 'true');
+        if (form.getAttribute('data-confirm-required') === '1') {
+            showFormConfirmation(form, submitButton);
+            return;
         }
 
-        try {
-            var response = await fetch(form.action, {
-                method: form.method || 'POST',
-                body: new FormData(form),
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            });
-
-            if (response.redirected) {
-                window.location.href = response.url;
-                return;
-            }
-
-            var html = await response.text();
-
-            if (!response.ok) {
-                var body = form.querySelector('.modal-body') || form;
-                showInlineProblem(
-                    body,
-                    responseProblem(response, html, 'save these changes')
-                );
-                return;
-            }
-
-            modalContent.innerHTML = html;
-            enhanceFeedback(modalContent);
-        } catch (error) {
-            var formBody = form.querySelector('.modal-body') || form;
-            showInlineProblem(
-                formBody,
-                statusProblem(0, 'save these changes')
-            );
-        } finally {
-            if (submitButton && document.body.contains(submitButton)) {
-                submitButton.disabled = false;
-                submitButton.removeAttribute('aria-busy');
-            }
-        }
+        submitModalForm(form, submitButton);
     });
 
     if (modalElement) {
         modalElement.addEventListener('hidden.bs.modal', function () {
             if (modalContent) {
+                modalContent.querySelectorAll('form[data-modal-form]').forEach(function (form) {
+                    confirmationStates.delete(form);
+                });
                 modalContent.innerHTML = '';
             }
         });
