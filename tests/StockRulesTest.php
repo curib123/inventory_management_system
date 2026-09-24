@@ -55,6 +55,25 @@ class StockRulesTest extends TestCase {
         (new Stock_rules())->calculate_stock(0, 2147483648, 'stock_in');
     }
 
+    public function testAdjustmentStockValueRejectsFractionalInput() {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new Stock_rules())->validate_stock_value(1.5);
+    }
+
+    public function testAdjustmentStockValueRejectsIntegerOverflow() {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new Stock_rules())->validate_stock_value(2147483648);
+    }
+
+    public function testAdjustmentStockValueAllowsSignedIntMaximum() {
+        $this->assertSame(
+            2147483647,
+            (new Stock_rules())->validate_stock_value(2147483647)
+        );
+    }
+
     public function testUnknownTransactionTypeIsRejected() {
         $this->expectException(InvalidArgumentException::class);
 
