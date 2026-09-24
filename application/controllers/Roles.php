@@ -113,12 +113,16 @@ class Roles extends CI_Controller {
         $rows = array();
         foreach ($roles as $role) {
             $id = (int) $role->id;
-            $actions = '<button type="button" data-modal-url="' . site_url('roles/view/' . $id) . '">View</button> ';
-            $actions .= '<button type="button" data-modal-url="' . site_url('roles/edit/' . $id) . '">Edit</button> ';
+            $action_items = array(
+                array('label' => 'View', 'url' => site_url('roles/view/' . $id), 'variant' => 'secondary', 'icon' => 'bi-eye'),
+                array('label' => 'Edit', 'url' => site_url('roles/edit/' . $id), 'variant' => 'primary', 'icon' => 'bi-pencil')
+            );
 
             if ((int) $role->user_count === 0) {
-                $actions .= '<button type="button" data-modal-url="' . site_url('roles/delete/' . $id) . '">Delete</button>';
+                $action_items[] = array('label' => 'Delete', 'url' => site_url('roles/delete/' . $id), 'variant' => 'danger', 'icon' => 'bi-trash');
             }
+
+            $actions = ui_modal_action_group($action_items);
 
             $rows[] = array(
                 html_escape($role->role_name),
