@@ -5,5 +5,10 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^9.6"
+    },
+    "scripts": {
+        "test": "phpunit --testdox",
+        "test:unit": "phpunit --testsuite \"Inventory Management System\" --testdox",
+        "test:plain": "phpunit --testdox=false"
     }
 }
