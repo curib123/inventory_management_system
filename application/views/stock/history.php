@@ -1,33 +1,45 @@
 <?php
+$current_user_id = (int) $this->session->userdata('user_id');
+$page_actions = array();
+
+if ($this->User_model->has_permission($current_user_id, 'stock.stock_in')) {
+    $page_actions[] = array(
+        'label' => 'Stock In',
+        'icon' => 'bi-box-arrow-in-down',
+        'class' => 'btn-success',
+        'modal_url' => site_url('stock/in')
+    );
+}
+
+if ($this->User_model->has_permission($current_user_id, 'stock.stock_out')) {
+    $page_actions[] = array(
+        'label' => 'Stock Out',
+        'icon' => 'bi-box-arrow-up',
+        'class' => 'btn-warning',
+        'modal_url' => site_url('stock/out')
+    );
+}
+
+if ($this->User_model->has_permission($current_user_id, 'stock.adjust')) {
+    $page_actions[] = array(
+        'label' => 'Adjustment',
+        'icon' => 'bi-sliders',
+        'class' => 'btn-primary',
+        'modal_url' => site_url('stock/adjustment')
+    );
+
+    $page_actions[] = array(
+        'label' => 'Adjustment History',
+        'icon' => 'bi-clock-history',
+        'class' => 'btn-outline-secondary',
+        'url' => site_url('stock/adjustments')
+    );
+}
+
 $this->load->view('components/page_header', array(
     'title' => 'Stock Movement History',
     'description' => 'Track stock-in, stock-out, and adjustment activity across the inventory.',
-    'actions' => array(
-        array(
-            'label' => 'Stock In',
-            'icon' => 'bi-box-arrow-in-down',
-            'class' => 'btn-success',
-            'modal_url' => site_url('stock/in')
-        ),
-        array(
-            'label' => 'Stock Out',
-            'icon' => 'bi-box-arrow-up',
-            'class' => 'btn-warning',
-            'modal_url' => site_url('stock/out')
-        ),
-        array(
-            'label' => 'Adjustment',
-            'icon' => 'bi-sliders',
-            'class' => 'btn-primary',
-            'modal_url' => site_url('stock/adjustment')
-        ),
-        array(
-            'label' => 'Adjustment History',
-            'icon' => 'bi-clock-history',
-            'class' => 'btn-outline-secondary',
-            'url' => site_url('stock/adjustments')
-        )
-    )
+    'actions' => $page_actions
 ));
 
 $this->load->view('components/data_table', array(
