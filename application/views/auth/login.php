@@ -17,14 +17,12 @@
     >
 
     <link rel="stylesheet"
-          href="<?php echo base_url('assets/css/auth/login.css'); ?>">
-
+          href="<?php echo base_url('assets/css/login.css'); ?>">
     <title>Login</title>
 </head>
 
-<body>
-<div class="container min-vh-100 d-flex align-items-center justify-content-center">
-    
+
+<body class="auth-page min-vh-100 d-flex align-items-center justify-content-center">
         <div class="card login-card shadow">
             <div class="card-body p-3 p-sm-3">
 
@@ -127,9 +125,8 @@
             </div>
         </div>
     
-</div>
 
-<script src="<?php echo base_url('assets/js/auth/login.js'); ?>"></script>
+<script src="<?php echo base_url('assets/js/login.js'); ?>"></script>
 </body>
 </html>
 

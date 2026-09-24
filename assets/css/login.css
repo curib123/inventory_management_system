@@ -3,11 +3,37 @@
    Login Page
 --------------------------------------------------------- */
 
-body {
-    background-color: #f8f9fa;
-    
+.auth-page {
+  position: relative;
+  background-color: #afb5bb;
+  overflow-x: hidden;
+  overflow-y: auto;
+
 }
 
+.auth-page::before {
+  content: "";
+  position: fixed;
+  inset: -18px;
+  background: url('../images/bg.jpg') center / cover no-repeat;
+  filter: blur(12px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(14, 15, 15, 0.88), rgba(31, 32, 32, 0.72));
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-page > main {
+  position: relative;
+  z-index: 1;
+}
 
 /* Login Card */
 
@@ -16,6 +42,7 @@ body {
     min-width: 350px;
     border-radius: 1rem;
     overflow: hidden;
+    z-index: 9999;
 }
 
 
