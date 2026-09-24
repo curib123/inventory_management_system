@@ -105,27 +105,11 @@ class Role_model extends CI_Model {
             return FALSE;
         }
 
-        $valid_permissions = array_map(function ($row) {
-            return (int) $row->id;
-        }, $this->get_permissions());
-
-        $permission_ids = array_unique(array_map('intval', (array) $permission_ids));
-        $permission_ids = array_values(array_intersect($permission_ids, $valid_permissions));
-
         $this->db->trans_begin();
 
-        $this->db->delete('role_permissions', array('role_id' => $role_id));
-
-        foreach ($permission_ids as $permission_id) {
-            $this->db->insert('role_permissions', array(
-                'role_id' => $role_id,
-                'permission_id' => $permission_id
-            ));
-
-            if ($this->db->affected_rows() < 1) {
-                $this->db->trans_rollback();
-                return FALSE;
-            }
+        if (!$this->replace_permissions($role_id, $permission_ids)) {
+            $this->db->trans_rollback();
+            return FALSE;
         }
 
         if ($this->db->trans_status() === FALSE) {
@@ -134,6 +118,78 @@ class Role_model extends CI_Model {
         }
 
         $this->db->trans_commit();
+        return TRUE;
+    }
+
+    public function save_with_permissions($data, $permission_ids, $id = NULL) {
+        $this->db->trans_begin();
+
+        $role_id = $this->save($data, $id);
+
+        if ($role_id === FALSE) {
+            $this->db->trans_rollback();
+            return FALSE;
+        }
+
+        if (!$this->replace_permissions($role_id, $permission_ids)) {
+            $this->db->trans_rollback();
+            return FALSE;
+        }
+
+        if ($this->db->trans_status() === FALSE) {
+            $this->db->trans_rollback();
+            return FALSE;
+        }
+
+        $this->db->trans_commit();
+        return (int) $role_id;
+    }
+
+    private function replace_permissions($role_id, $permission_ids) {
+        $role_id = (int) $role_id;
+        $normalized = array();
+
+        foreach ((array) $permission_ids as $permission_id) {
+            if (!is_scalar($permission_id)) {
+                return FALSE;
+            }
+
+            $permission_id = filter_var(
+                $permission_id,
+                FILTER_VALIDATE_INT,
+                array('options' => array('min_range' => 1))
+            );
+
+            if ($permission_id === FALSE) {
+                return FALSE;
+            }
+
+            $normalized[] = (int) $permission_id;
+        }
+
+        $normalized = array_values(array_unique($normalized));
+
+        $valid_permissions = array_map(function ($row) {
+            return (int) $row->id;
+        }, $this->get_permissions());
+
+        if (!empty(array_diff($normalized, $valid_permissions))) {
+            return FALSE;
+        }
+
+        if (!$this->db->delete('role_permissions', array('role_id' => $role_id))) {
+            return FALSE;
+        }
+
+        foreach ($normalized as $permission_id) {
+            if (!$this->db->insert('role_permissions', array(
+                'role_id' => $role_id,
+                'permission_id' => $permission_id
+            ))) {
+                return FALSE;
+            }
+        }
+
         return TRUE;
     }
 
