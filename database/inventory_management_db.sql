@@ -625,31 +625,11 @@ ON DUPLICATE KEY UPDATE
 
 
 -- -------------------------------------------------------------------
--- Default admin account ni for initial setup.
--- Ilisi dayon ang password sa real deployment.
+-- First administrator
 -- -------------------------------------------------------------------
-INSERT INTO users (
-    first_name,
-    middle_name,
-    last_name,
-    username,
-    password,
-    role_id,
-    status
-)
-SELECT
-    'System',
-    NULL,
-    'Administrator',
-    'admin',
-    '$2y$12$sDusIfJlzofgxJf6D7cAbetKPOSUzw.CpIxK/kVxXLSWESpynCEtm',
-    r.id,
-    1
-FROM roles r
-WHERE r.role_name = 'admin'
-ON DUPLICATE KEY UPDATE
-    username = username;
-
+-- No public/default password is stored in source control.
+-- After importing this schema, open /setup. The setup page is available
+-- only while the users table is empty and creates the first admin account.
 
 -- -------------------------------------------------------------------
 -- Optional starter categories ni; pwede ra nimo ilisan based sa actual inventory.
@@ -659,7 +639,3 @@ INSERT INTO categories (category_name, status) VALUES
 ('Electronics', 1),
 ('Office Supplies', 1)
 ON DUPLICATE KEY UPDATE category_name = category_name;
-
--- Quick notes lang bai:
--- Default admin password kay admin123.
--- Sample hash ra ni; for production, gamit ug imong own secure password hash.
