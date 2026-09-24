@@ -113,9 +113,9 @@ class Categories extends CI_Controller {
         $rows = array();
         foreach ($categories as $category) {
             $id = (int) $category->id;
-            $actions = '<button type="button" data-modal-url="' . site_url('categories/view/' . $id) . '">View</button> ';
-            $actions .= '<button type="button" data-modal-url="' . site_url('categories/edit/' . $id) . '">Edit</button> ';
-            $actions .= '<button type="button" data-modal-url="' . site_url('categories/delete/' . $id) . '">Delete</button>';
+            $actions = '<button type="button" class="btn btn-sm btn-outline-secondary" data-modal-url="' . site_url('categories/view/' . $id) . '"><i class="bi bi-eye"></i> View</button> ';
+            $actions .= '<button type="button" class="btn btn-sm btn-outline-primary" data-modal-url="' . site_url('categories/edit/' . $id) . '"><i class="bi bi-pencil"></i> Edit</button> ';
+            $actions .= '<button type="button" class="btn btn-sm btn-outline-danger" data-modal-url="' . site_url('categories/delete/' . $id) . '"><i class="bi bi-trash"></i> Delete</button>';
 
             $rows[] = array(
                 $id,
