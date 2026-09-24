@@ -33,7 +33,13 @@ class Supplier_model extends CI_Model {
     }
 
     public function delete($id) {
-        $this->db->where('id', (int) $id);
+        $id = (int) $id;
+
+        if ($id <= 0 || $this->has_dependencies($id)) {
+            return FALSE;
+        }
+
+        $this->db->where('id', $id);
         return $this->db->delete('suppliers');
     }
 
