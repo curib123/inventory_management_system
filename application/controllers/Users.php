@@ -93,6 +93,7 @@ class Users extends CI_Controller {
             return;
         }
 
+        $this->session->set_flashdata('success', 'User deleted successfully.');
         redirect('users');
     }
 
@@ -229,6 +230,10 @@ class Users extends CI_Controller {
             redirect('login');
         }
 
+        $this->session->set_flashdata(
+            'success',
+            $id === NULL ? 'User account created successfully.' : 'User changes saved successfully.'
+        );
         redirect('users');
     }
 
