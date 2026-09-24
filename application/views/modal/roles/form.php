@@ -82,7 +82,7 @@ foreach ((array) $permissions as $permission) {
         <div>
             <h3 class="h6 mb-1">Permissions by Module</h3>
             <p class="text-body-secondary small mb-0">
-                Permission keys are the exact values used by controllers and navigation guards.
+                Filled chips are selected. Outline chips are not selected.
             </p>
         </div>
         <span class="badge text-bg-primary"><?php echo count((array) $permissions); ?> available</span>
@@ -96,50 +96,40 @@ foreach ((array) $permissions as $permission) {
 
     <?php if (!empty($permission_groups)): ?>
         <div class="vstack gap-3">
-            <?php foreach ($permission_groups as $group): ?>
-                <section class="border rounded-3 overflow-hidden">
-                    <div class="bg-body-tertiary border-bottom px-3 py-2">
-                        <div class="fw-semibold"><?php echo html_escape($group['module_name']); ?></div>
-                        <div class="small text-body-secondary">
-                            Module key: <code><?php echo html_escape($group['module_key']); ?></code>
+            <?php foreach ($permission_groups as $module_id => $group): ?>
+                <?php
+                $chip_items = array();
+
+                foreach ($group['permissions'] as $permission) {
+                    $chip_items[] = array(
+                        'value' => (string) $permission->id,
+                        'label' => $permission->permission_name,
+                        'code' => $permission->permission_key,
+                        'description' => $permission->description
+                    );
+                }
+                ?>
+
+                <section class="app-permission-group">
+                    <div class="app-permission-group-header">
+                        <div>
+                            <div class="fw-semibold"><?php echo html_escape($group['module_name']); ?></div>
+                            <div class="small text-body-secondary">
+                                <code><?php echo html_escape($group['module_key']); ?></code>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="p-3">
-                        <div class="row g-2">
-                            <?php foreach ($group['permissions'] as $permission): ?>
-                                <div class="col-12 col-md-6">
-                                    <label
-                                        for="permission_<?php echo (int) $permission->id; ?>"
-                                        class="form-check border rounded-3 p-3 h-100 d-flex align-items-start gap-2"
-                                    >
-                                        <input
-                                            class="form-check-input flex-shrink-0"
-                                            type="checkbox"
-                                            name="permissions[]"
-                                            value="<?php echo (int) $permission->id; ?>"
-                                            id="permission_<?php echo (int) $permission->id; ?>"
-                                            <?php echo in_array((int) $permission->id, $selected_permissions, TRUE) ? 'checked' : ''; ?>
-                                            <?php echo $can_manage_permissions ? '' : 'disabled'; ?>
-                                        >
-
-                                        <span>
-                                            <span class="fw-semibold d-block">
-                                                <?php echo html_escape($permission->permission_name); ?>
-                                            </span>
-                                            <code class="small d-block mb-1">
-                                                <?php echo html_escape($permission->permission_key); ?>
-                                            </code>
-                                            <?php if (!empty($permission->description)): ?>
-                                                <small class="text-body-secondary">
-                                                    <?php echo html_escape($permission->description); ?>
-                                                </small>
-                                            <?php endif; ?>
-                                        </span>
-                                    </label>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
+                    <div class="app-permission-group-body">
+                        <?php
+                        $this->load->view('components/form/choice_chips', array(
+                            'chip_name' => 'permissions[]',
+                            'chip_items' => $chip_items,
+                            'chip_selected' => array_map('strval', $selected_permissions),
+                            'chip_disabled' => !$can_manage_permissions,
+                            'chip_id_prefix' => 'permission_' . (int) $module_id
+                        ));
+                        ?>
                     </div>
                 </section>
             <?php endforeach; ?>
