@@ -1,10 +1,13 @@
-<div class="modal-header">
-    <h2 class="modal-title fs-5">Product Details</h2>
-    <button type="button" class="btn-close" data-modal-close aria-label="Close"></button>
-</div>
+<?php
+$this->load->view('components/modal/header', array(
+    'modal_title' => 'Product Details',
+    'modal_subtitle' => 'Product information, stock, pricing, and supplier assignment.',
+    'modal_icon' => 'bi-box-seam'
+));
+?>
 
 <div class="modal-body">
-    <dl class="row mb-0">
+    <dl class="row app-detail-list mb-0">
         <dt class="col-sm-4">ID</dt><dd class="col-sm-8"><?php echo (int) $product->id; ?></dd>
         <dt class="col-sm-4">Code</dt><dd class="col-sm-8"><?php echo html_escape($product->product_code); ?></dd>
         <dt class="col-sm-4">Name</dt><dd class="col-sm-8"><?php echo html_escape($product->product_name); ?></dd>
@@ -19,6 +22,4 @@
     </dl>
 </div>
 
-<div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-modal-close>Close</button>
-</div>
+<?php $this->load->view('components/modal/footer', array('close_label' => 'Close')); ?>
