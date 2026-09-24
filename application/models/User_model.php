@@ -24,6 +24,11 @@ class User_model extends CI_Model {
             $user = $query->row();
 
             if (password_verify($password, $user->password)) {
+                $user->must_change_password = password_verify(
+                    'admin123',
+                    $user->password
+                );
+
                 return $user;
             }
         }
@@ -148,10 +153,47 @@ class User_model extends CI_Model {
     }
 
     public function has_permission($user_id, $permission_key) {
+        if ($this->requires_password_change($user_id)) {
+            return FALSE;
+        }
+
         return in_array(
             (string) $permission_key,
             $this->get_user_permission_keys($user_id),
             TRUE
+        );
+    }
+
+    public function requires_password_change($user_id) {
+        $row = $this->db
+            ->select('password')
+            ->where('id', (int) $user_id)
+            ->get('users')
+            ->row();
+
+        return $row && password_verify('admin123', $row->password);
+    }
+
+    public function verify_password($user_id, $password) {
+        $row = $this->db
+            ->select('password')
+            ->where('id', (int) $user_id)
+            ->where('status', 1)
+            ->get('users')
+            ->row();
+
+        return $row && password_verify((string) $password, $row->password);
+    }
+
+    public function update_password($user_id, $password) {
+        unset($this->permission_key_cache[(int) $user_id]);
+
+        return $this->db->update(
+            'users',
+            array(
+                'password' => password_hash((string) $password, PASSWORD_DEFAULT)
+            ),
+            array('id' => (int) $user_id)
         );
     }
 
