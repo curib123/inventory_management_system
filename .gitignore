@@ -1,0 +1,19 @@
+# Runtime logs and cache
+application/logs/*.log
+application/cache/*
+!application/cache/index.html
+.phpunit.result.cache
+
+# Local environment/secrets
+.env
+.env.*
+!.env.example
+
+# Composer dependencies can be restored with composer install
+/vendor/
+
+# IDE / OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
