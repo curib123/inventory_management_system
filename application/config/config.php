@@ -91,11 +91,24 @@ $config['ui_styling_enabled'] = TRUE;
 | keys such as "categories". "*" is the fallback.
 */
 $config['ui_page_styles'] = array(
-    '*' => TRUE
+    'dashboard/index' => TRUE,
+    'products/index' => FALSE,
+    'categories/index' => FALSE,
+    'suppliers/index' => TRUE,
+    'users/index' => FALSE,
+    'roles/index' => TRUE,
+    'stock/history' => FALSE,
+    'stock/low_stock' => TRUE,
+    'reports/index' => TRUE
 );
 
 $config['ui_modal_styles'] = array(
-    '*' => TRUE
+    'products' => TRUE,
+    'categories' => TRUE,
+    'suppliers' => TRUE,
+    'users' => TRUE,
+    'roles' => TRUE,
+    'stock' => TRUE
 );
 
 /*
