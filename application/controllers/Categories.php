@@ -110,15 +110,41 @@ class Categories extends CI_Controller {
             $request['order_dir']
         );
 
+        $current_user_id = (int) $this->session->userdata('user_id');
+        $can_edit = $this->User_model->has_permission($current_user_id, 'categories.edit');
+        $can_delete = $this->User_model->has_permission($current_user_id, 'categories.delete');
+
         $rows = array();
         foreach ($categories as $category) {
             $id = (int) $category->id;
-            $actions = ui_modal_action_group(array(
-                array('label' => 'View', 'url' => site_url('categories/view/' . $id), 'variant' => 'secondary', 'icon' => 'bi-eye'),
-                array('label' => 'Edit', 'url' => site_url('categories/edit/' . $id), 'variant' => 'primary', 'icon' => 'bi-pencil'),
-                array('label' => 'Delete', 'url' => site_url('categories/delete/' . $id), 'variant' => 'danger', 'icon' => 'bi-trash')
-            ));
+            $action_items = array(
+                array(
+                    'label' => 'View',
+                    'url' => site_url('categories/view/' . $id),
+                    'variant' => 'secondary',
+                    'icon' => 'bi-eye'
+                )
+            );
 
+            if ($can_edit) {
+                $action_items[] = array(
+                    'label' => 'Edit',
+                    'url' => site_url('categories/edit/' . $id),
+                    'variant' => 'primary',
+                    'icon' => 'bi-pencil'
+                );
+            }
+
+            if ($can_delete) {
+                $action_items[] = array(
+                    'label' => 'Delete',
+                    'url' => site_url('categories/delete/' . $id),
+                    'variant' => 'danger',
+                    'icon' => 'bi-trash'
+                );
+            }
+
+            $actions = ui_modal_action_group($action_items);
             $rows[] = array(
                 $id,
                 html_escape($category->category_name),
