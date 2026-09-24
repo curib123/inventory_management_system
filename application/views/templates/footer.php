@@ -15,6 +15,44 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        var sidebar = document.getElementById('sidebar');
+        var sidebarToggle = document.getElementById('sidebar-toggle');
+        var sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+        function setSidebarOpen(open) {
+            if (!sidebar) {
+                return;
+            }
+
+            sidebar.classList.toggle('show', open);
+
+            if (sidebarBackdrop) {
+                sidebarBackdrop.classList.toggle('show', open);
+            }
+
+            if (sidebarToggle) {
+                sidebarToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            }
+        }
+
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function () {
+                setSidebarOpen(!sidebar.classList.contains('show'));
+            });
+        }
+
+        if (sidebarBackdrop) {
+            sidebarBackdrop.addEventListener('click', function () {
+                setSidebarOpen(false);
+            });
+        }
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && sidebar && sidebar.classList.contains('show')) {
+                setSidebarOpen(false);
+            }
+        });
+
         document.querySelectorAll('table[data-datatable-server]').forEach(function (table) {
             var source = table.getAttribute('data-source');
 
