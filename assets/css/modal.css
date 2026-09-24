@@ -4,9 +4,9 @@
 
 #action-modal .modal-content {
     border: 0;
-    border-radius: 1rem;
+    border-radius: var(--app-radius);
     overflow: hidden;
-    box-shadow: 0 1rem 3rem rgba(15, 23, 42, 0.2);
+    box-shadow: var(--app-modal-shadow);
 }
 
 #action-modal .modal-header {
@@ -32,11 +32,11 @@
 
 #action-modal .form-control,
 #action-modal .form-select {
-    border-radius: 0.65rem;
+    border-radius: var(--app-radius-sm);
 }
 
 #action-modal .btn {
-    border-radius: 0.6rem;
+    border-radius: var(--app-radius-sm);
 }
 
 .modal-backdrop.show {
