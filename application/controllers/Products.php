@@ -221,7 +221,12 @@ class Products extends CI_Controller {
 
         $category = $this->Category_model->get_by_id($category_id);
 
-        if (!$category || !(int) $category->status) {
+        $uses_existing_category =
+            $id !== NULL &&
+            $product &&
+            (int) $product->category_id === $category_id;
+
+        if (!$category || (!(int) $category->status && !$uses_existing_category)) {
             $this->render_product_form(
                 $id,
                 $product,
@@ -232,8 +237,12 @@ class Products extends CI_Controller {
 
         if ($supplier_id !== NULL) {
             $supplier = $this->Supplier_model->get_by_id($supplier_id);
+            $uses_existing_supplier =
+                $id !== NULL &&
+                $product &&
+                (int) $product->supplier_id === $supplier_id;
 
-            if (!$supplier || !(int) $supplier->status) {
+            if (!$supplier || (!(int) $supplier->status && !$uses_existing_supplier)) {
                 $this->render_product_form(
                     $id,
                     $product,
@@ -267,6 +276,35 @@ class Products extends CI_Controller {
         $data['product'] = $product;
         $data['suppliers'] = $this->Supplier_model->get_active();
         $data['categories'] = $this->Category_model->get_active();
+
+        if ($product) {
+            $active_category_ids = array_map(function ($category) {
+                return (int) $category->id;
+            }, $data['categories']);
+
+            if (!in_array((int) $product->category_id, $active_category_ids, TRUE)) {
+                $current_category = $this->Category_model->get_by_id($product->category_id);
+
+                if ($current_category) {
+                    $data['categories'][] = $current_category;
+                }
+            }
+
+            if ($product->supplier_id !== NULL) {
+                $active_supplier_ids = array_map(function ($supplier) {
+                    return (int) $supplier->id;
+                }, $data['suppliers']);
+
+                if (!in_array((int) $product->supplier_id, $active_supplier_ids, TRUE)) {
+                    $current_supplier = $this->Supplier_model->get_by_id($product->supplier_id);
+
+                    if ($current_supplier) {
+                        $data['suppliers'][] = $current_supplier;
+                    }
+                }
+            }
+        }
+
         $data['page_title'] = $id === NULL ? 'Add Product' : 'Edit Product';
         $data['form_error'] = $form_error;
         $data['product_units'] = (array) $this->config->item('product_units');
