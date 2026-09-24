@@ -5,10 +5,14 @@ $route['default_controller'] = 'auth';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+//login route
 $route['login'] = 'auth/login';
 $route['logout'] = 'auth/logout';
+
+//dashboard route
 $route['dashboard'] = 'dashboard';
 
+//product route
 $route['products'] = 'products';
 $route['products/datatable'] = 'products/datatable';
 $route['products/add'] = 'products/add';
@@ -16,6 +20,7 @@ $route['products/view/(:num)'] = 'products/view/$1';
 $route['products/edit/(:num)'] = 'products/edit/$1';
 $route['products/delete/(:num)'] = 'products/delete/$1';
 
+//category 
 $route['categories'] = 'categories';
 $route['categories/datatable'] = 'categories/datatable';
 $route['categories/add'] = 'categories/add';
@@ -23,6 +28,7 @@ $route['categories/view/(:num)'] = 'categories/view/$1';
 $route['categories/edit/(:num)'] = 'categories/edit/$1';
 $route['categories/delete/(:num)'] = 'categories/delete/$1';
 
+// supplier
 $route['suppliers'] = 'suppliers';
 $route['suppliers/datatable'] = 'suppliers/datatable';
 $route['suppliers/add'] = 'suppliers/add';
@@ -30,6 +36,7 @@ $route['suppliers/view/(:num)'] = 'suppliers/view/$1';
 $route['suppliers/edit/(:num)'] = 'suppliers/edit/$1';
 $route['suppliers/delete/(:num)'] = 'suppliers/delete/$1';
 
+//user
 $route['users'] = 'users';
 $route['users/datatable'] = 'users/datatable';
 $route['users/add'] = 'users/add';
@@ -37,6 +44,8 @@ $route['users/view/(:num)'] = 'users/view/$1';
 $route['users/edit/(:num)'] = 'users/edit/$1';
 $route['users/delete/(:num)'] = 'users/delete/$1';
 
+
+//roles and permission
 $route['roles'] = 'roles';
 $route['roles/datatable'] = 'roles/datatable';
 $route['roles/add'] = 'roles/add';
@@ -44,6 +53,8 @@ $route['roles/view/(:num)'] = 'roles/view/$1';
 $route['roles/edit/(:num)'] = 'roles/edit/$1';
 $route['roles/delete/(:num)'] = 'roles/delete/$1';
 
+
+//stock
 $route['stock'] = 'stock/history';
 $route['stock/history'] = 'stock/history';
 $route['stock/history/datatable'] = 'stock/history_datatable';
@@ -56,6 +67,7 @@ $route['stock/adjustments/datatable'] = 'stock/adjustments_datatable';
 $route['stock/low-stock'] = 'stock/low_stock';
 $route['stock/low-stock/datatable'] = 'stock/low_stock_datatable';
 
+//report
 $route['reports'] = 'reports';
 $route['reports/datatable/(:any)'] = 'reports/datatable/$1';
 $route['reports/inventory'] = 'reports/inventory';
