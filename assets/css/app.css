@@ -581,3 +581,306 @@ body {
     }
 }
 
+/* --------------------------------------------------------------------------
+   Inventory dashboard
+   -------------------------------------------------------------------------- */
+:root {
+    --dashboard-primary: #2563eb;
+    --dashboard-primary-soft: rgba(37, 99, 235, 0.14);
+    --dashboard-success: #16a34a;
+    --dashboard-success-soft: rgba(22, 163, 74, 0.13);
+    --dashboard-warning: #d97706;
+    --dashboard-danger: #dc2626;
+    --dashboard-info: #0891b2;
+    --dashboard-muted: #64748b;
+    --dashboard-text: #0f172a;
+    --dashboard-grid: #e2e8f0;
+}
+
+.app-dashboard {
+    max-width: 1680px;
+    margin: 0 auto;
+}
+
+.app-dashboard-eyebrow {
+    margin-bottom: 0.2rem;
+    color: var(--bs-primary);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.app-dashboard-attention {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: min(100%, 18rem);
+    padding: 0.75rem 0.9rem;
+    border: 1px solid var(--bs-warning-border-subtle);
+    border-radius: var(--app-radius-sm);
+    background: var(--bs-warning-bg-subtle);
+}
+
+.app-dashboard-attention-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: 0 0 auto;
+    border-radius: 0.65rem;
+    background: var(--bs-body-bg);
+    color: var(--bs-warning-text-emphasis);
+}
+
+.app-dashboard-stat {
+    position: relative;
+    overflow: hidden;
+}
+
+.app-dashboard-stat::after {
+    position: absolute;
+    right: -1.5rem;
+    bottom: -2.5rem;
+    width: 6rem;
+    height: 6rem;
+    border-radius: 999px;
+    background: rgba(var(--bs-primary-rgb), 0.035);
+    content: "";
+    pointer-events: none;
+}
+
+.app-dashboard-stat .card-body {
+    position: relative;
+    z-index: 1;
+    padding: 1rem;
+}
+
+.app-dashboard-stat-top {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.app-dashboard-stat-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.15rem;
+    height: 2.15rem;
+    flex: 0 0 auto;
+    border-radius: 0.65rem;
+    font-size: 1rem;
+}
+
+.app-dashboard-stat-icon-primary {
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary);
+}
+
+.app-dashboard-stat-icon-info {
+    background: var(--bs-info-bg-subtle);
+    color: var(--bs-info-text-emphasis);
+}
+
+.app-dashboard-stat-icon-success {
+    background: var(--bs-success-bg-subtle);
+    color: var(--bs-success);
+}
+
+.app-dashboard-stat-icon-warning {
+    background: var(--bs-warning-bg-subtle);
+    color: var(--bs-warning-text-emphasis);
+}
+
+.app-dashboard-stat-icon-danger {
+    background: var(--bs-danger-bg-subtle);
+    color: var(--bs-danger);
+}
+
+.app-dashboard-stat-label {
+    min-width: 0;
+    color: var(--bs-secondary-color);
+    font-size: 0.78rem;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.app-dashboard-stat-value {
+    margin-bottom: 0.3rem;
+    color: var(--bs-body-color);
+    font-size: clamp(1.55rem, 2.2vw, 2rem);
+    font-weight: 750;
+    letter-spacing: -0.035em;
+    line-height: 1;
+    overflow-wrap: anywhere;
+}
+
+.app-dashboard-stat-value-money {
+    font-size: clamp(1.25rem, 1.8vw, 1.75rem);
+}
+
+.app-dashboard-stat-help {
+    color: var(--bs-secondary-color);
+    font-size: 0.72rem;
+    line-height: 1.35;
+}
+
+.app-dashboard-chart-card {
+    overflow: hidden;
+}
+
+.app-dashboard-chart-card .card-header {
+    padding: 1rem 1.1rem 0.65rem;
+}
+
+.app-dashboard-chart-card .card-body {
+    padding: 0.75rem 1.1rem 1.1rem;
+}
+
+.app-dashboard-chart-heading {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.app-chart {
+    position: relative;
+    width: 100%;
+}
+
+.app-chart-doughnut {
+    height: 270px;
+}
+
+.app-chart-category {
+    height: 340px;
+}
+
+.app-chart-movement {
+    height: 350px;
+}
+
+.app-chart canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.app-chart-empty {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 1.5rem;
+    border: 1px dashed var(--bs-border-color);
+    border-radius: var(--app-radius-sm);
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    text-align: center;
+}
+
+.app-chart-empty > i {
+    margin-bottom: 0.35rem;
+    font-size: 1.8rem;
+    opacity: 0.75;
+}
+
+.app-dashboard-health-legend {
+    display: grid;
+    gap: 0.55rem;
+}
+
+.app-dashboard-health-legend > div {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.78rem;
+}
+
+.app-dashboard-health-legend strong {
+    color: var(--bs-body-color);
+}
+
+.app-dashboard-health-dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 999px;
+}
+
+.app-dashboard-health-dot-success {
+    background: var(--dashboard-success);
+}
+
+.app-dashboard-health-dot-warning {
+    background: var(--dashboard-warning);
+}
+
+.app-dashboard-health-dot-danger {
+    background: var(--dashboard-danger);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --dashboard-text: #e2e8f0;
+        --dashboard-grid: rgba(148, 163, 184, 0.22);
+    }
+}
+
+@media (max-width: 767.98px) {
+    .app-dashboard-chart-heading {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .app-chart-category,
+    .app-chart-movement {
+        height: 300px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .app-dashboard-attention {
+        width: 100%;
+    }
+
+    .app-dashboard-stat .card-body {
+        padding: 0.85rem;
+    }
+
+    .app-dashboard-stat-top {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.45rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .app-dashboard-stat-value {
+        font-size: 1.45rem;
+    }
+
+    .app-dashboard-stat-value-money {
+        font-size: 1.15rem;
+    }
+
+    .app-chart-doughnut {
+        height: 245px;
+    }
+
+    .app-chart-category {
+        height: 320px;
+    }
+
+    .app-chart-movement {
+        height: 300px;
+    }
+}
+
