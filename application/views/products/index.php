@@ -1,15 +1,19 @@
 <?php
+$page_actions = array();
+
+if ($this->User_model->has_permission($this->session->userdata('user_id'), 'products.create')) {
+    $page_actions[] = array(
+        'label' => 'Add Product',
+        'icon' => 'bi-plus-lg',
+        'class' => 'btn-primary',
+        'modal_url' => site_url('products/add')
+    );
+}
+
 $this->load->view('components/page_header', array(
     'title' => 'Products',
     'description' => 'Manage inventory products, pricing, suppliers, and stock settings.',
-    'actions' => array(
-        array(
-            'label' => 'Add Product',
-            'icon' => 'bi-plus-lg',
-            'class' => 'btn-primary',
-            'modal_url' => site_url('products/add')
-        )
-    )
+    'actions' => $page_actions
 ));
 
 $this->load->view('components/data_table', array(
