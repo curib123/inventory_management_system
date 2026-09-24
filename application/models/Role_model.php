@@ -10,9 +10,13 @@ class Role_model extends CI_Model {
     }
 
     public function get_all() {
-        $this->db->select('r.*, COUNT(DISTINCT u.id) AS user_count');
+        $this->db->select(
+            'r.*, COUNT(DISTINCT u.id) AS user_count, ' .
+            'COUNT(DISTINCT rp.permission_id) AS permission_count'
+        );
         $this->db->from('roles r');
         $this->db->join('users u', 'u.role_id = r.id', 'left');
+        $this->db->join('role_permissions rp', 'rp.role_id = r.id', 'left');
         $this->db->group_by(array('r.id', 'r.role_name', 'r.description', 'r.status'));
         $this->db->order_by('r.role_name', 'ASC');
         return $this->db->get()->result();
@@ -148,9 +152,14 @@ class Role_model extends CI_Model {
     }
 
     public function get_datatable($start, $length, $search, $order_column, $order_dir) {
-        $this->db->select('r.id, r.role_name, r.description, r.status, COUNT(DISTINCT u.id) AS user_count');
+        $this->db->select(
+            'r.id, r.role_name, r.description, r.status, ' .
+            'COUNT(DISTINCT u.id) AS user_count, ' .
+            'COUNT(DISTINCT rp.permission_id) AS permission_count'
+        );
         $this->db->from('roles r');
         $this->db->join('users u', 'u.role_id = r.id', 'left');
+        $this->db->join('role_permissions rp', 'rp.role_id = r.id', 'left');
         $this->apply_datatable_search($search);
         $this->db->group_by(array('r.id', 'r.role_name', 'r.description', 'r.status'));
 
