@@ -107,9 +107,9 @@ class Suppliers extends CI_Controller {
         $rows = array();
         foreach ($suppliers as $supplier) {
             $id = (int) $supplier->id;
-            $actions = '<button type="button" data-modal-url="' . site_url('suppliers/view/' . $id) . '">View</button> ';
-            $actions .= '<button type="button" data-modal-url="' . site_url('suppliers/edit/' . $id) . '">Edit</button> ';
-            $actions .= '<button type="button" data-modal-url="' . site_url('suppliers/delete/' . $id) . '">Delete</button>';
+            $actions = '<button type="button" class="btn btn-sm btn-outline-secondary" data-modal-url="' . site_url('suppliers/view/' . $id) . '"><i class="bi bi-eye"></i> View</button> ';
+            $actions .= '<button type="button" class="btn btn-sm btn-outline-primary" data-modal-url="' . site_url('suppliers/edit/' . $id) . '"><i class="bi bi-pencil"></i> Edit</button> ';
+            $actions .= '<button type="button" class="btn btn-sm btn-outline-danger" data-modal-url="' . site_url('suppliers/delete/' . $id) . '"><i class="bi bi-trash"></i> Delete</button>';
 
             $rows[] = array(
                 html_escape($supplier->supplier_name),
