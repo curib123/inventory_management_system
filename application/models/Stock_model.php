@@ -274,12 +274,18 @@ class Stock_model extends CI_Model {
             $product_id = filter_var(
                 $item['product_id'],
                 FILTER_VALIDATE_INT,
-                array('options' => array('min_range' => 1))
+                array('options' => array(
+                    'min_range' => 1,
+                    'max_range' => 2147483647
+                ))
             );
             $quantity = filter_var(
                 $item['quantity'],
                 FILTER_VALIDATE_INT,
-                array('options' => array('min_range' => 1))
+                array('options' => array(
+                    'min_range' => 1,
+                    'max_range' => 2147483647
+                ))
             );
 
             if ($product_id === FALSE || $quantity === FALSE) {
@@ -291,6 +297,10 @@ class Stock_model extends CI_Model {
 
             if (!isset($normalized[$product_id])) {
                 $normalized[$product_id] = 0;
+            }
+
+            if ($normalized[$product_id] > 2147483647 - $quantity) {
+                return FALSE;
             }
 
             $normalized[$product_id] += $quantity;
