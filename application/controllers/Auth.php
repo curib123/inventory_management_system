@@ -13,18 +13,29 @@ class Auth extends CI_Controller {
 
     public function index() {
         if ($this->session->userdata('logged_in')) {
-            redirect('dashboard');
+            $this->redirect_to_authorized_page();
+            return;
         }
+
         $this->login();
     }
 
     public function login() {
         if ($this->session->userdata('logged_in')) {
-            redirect('dashboard');
+            $this->redirect_to_authorized_page();
+            return;
         }
 
-        $this->form_validation->set_rules('username', 'Username', 'trim|required|min_length[3]|max_length[50]');
-        $this->form_validation->set_rules('password', 'Password', 'required|min_length[6]|max_length[255]');
+        $this->form_validation->set_rules(
+            'username',
+            'Username',
+            'trim|required|min_length[3]|max_length[50]'
+        );
+        $this->form_validation->set_rules(
+            'password',
+            'Password',
+            'required|min_length[6]|max_length[255]'
+        );
 
         if ($this->input->method(TRUE) === 'POST') {
             if ($this->form_validation->run() === FALSE) {
@@ -42,7 +53,8 @@ class Auth extends CI_Controller {
             if ($session_data) {
                 $this->session->sess_regenerate(TRUE);
                 $this->session->set_userdata($session_data);
-                redirect('dashboard');
+                $this->redirect_to_authorized_page();
+                return;
             }
 
             $data['error'] = 'Invalid username or password.';
@@ -57,7 +69,37 @@ class Auth extends CI_Controller {
         if ($this->input->method(TRUE) !== 'POST') {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
         }
+
         $this->session->sess_destroy();
         redirect('login');
+    }
+
+    private function redirect_to_authorized_page() {
+        $user_id = (int) $this->session->userdata('user_id');
+
+        $destinations = array(
+            'dashboard.view' => 'dashboard',
+            'products.view' => 'products',
+            'categories.view' => 'categories',
+            'suppliers.view' => 'suppliers',
+            'stock.history' => 'stock',
+            'stock.view' => 'stock/low-stock',
+            'reports.view' => 'reports',
+            'users.view' => 'users',
+            'roles.view' => 'roles'
+        );
+
+        foreach ($destinations as $permission_key => $route) {
+            if ($this->User_model->has_permission($user_id, $permission_key)) {
+                redirect($route);
+                return;
+            }
+        }
+
+        show_error(
+            'Your account is active, but its role has no page-view permission assigned.',
+            403,
+            'No Access Assigned'
+        );
     }
 }
