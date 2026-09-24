@@ -1,0 +1,181 @@
+ body {
+            background-color: #f5f7fb;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 260px;
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            left: 0;
+            background: #111827;
+            color: #fff;
+            z-index: 1050;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            height: 70px;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .sidebar-brand i {
+            font-size: 1.7rem;
+            color: #60a5fa;
+            margin-right: 10px;
+        }
+
+        .sidebar-brand span {
+            font-size: 1.15rem;
+            font-weight: 600;
+        }
+
+        .sidebar-user {
+            padding: 20px 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,.08);
+        }
+
+        .user-avatar {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: #2563eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .sidebar-user .username {
+            font-size: .95rem;
+            font-weight: 600;
+        }
+
+        .sidebar-user .role {
+            font-size: .75rem;
+            color: #9ca3af;
+        }
+
+        .sidebar-heading {
+            padding: 20px 20px 8px;
+            color: #6b7280;
+            font-size: .7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+        }
+
+        .sidebar .nav-link {
+            color: #cbd5e1;
+            margin: 3px 12px;
+            padding: 11px 14px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            transition: all .2s ease;
+        }
+
+        .sidebar .nav-link i {
+            width: 25px;
+            font-size: 1.05rem;
+        }
+
+        .sidebar .nav-link:hover {
+            background: #1f2937;
+            color: #fff;
+        }
+
+      
+
+        .logout-section {
+            padding: 15px;
+            margin-top: 10px;
+            border-top: 1px solid rgba(255,255,255,.08);
+        }
+
+        .logout-btn {
+            width: 100%;
+            border: 0;
+            background: #dc2626;
+            color: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            transition: .2s;
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
+        }
+
+        /* Main content */
+        .main-content {
+            margin-left: 260px;
+            min-height: 100vh;
+        }
+
+        .topbar {
+            height: 70px;
+            background: #fff;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: center;
+            padding: 0 30px;
+        }
+
+        .content-wrapper {
+            padding: 30px;
+        }
+
+        /* Mobile */
+        .mobile-toggle {
+            display: none;
+        }
+
+        @media (max-width: 991.98px) {
+            .sidebar {
+                transform: translateX(-100%);
+                transition: transform .3s ease;
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+
+            .mobile-toggle {
+                display: inline-block;
+            }
+        }
+
+
+#action-modal {
+    border: 0;
+    border-radius: 1rem;
+    padding: 10px ;
+    width: min(700px, 90vw);
+    max-width: 700px;
+    max-height: 95vh;
+    overflow: hidden;
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, .25);
+}
+
+/* Background behind the dialog */
+#action-modal::backdrop {
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+/* Modal content */
+#action-modal-content {
+    max-height: 90vh;
+    overflow-y: auto;
+}
