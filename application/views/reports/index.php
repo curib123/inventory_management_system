@@ -16,11 +16,13 @@ $this->load->view('components/page_header', array(
             <a class="btn btn-sm <?php echo $report_key === 'valuation' ? 'btn-primary' : 'btn-outline-secondary'; ?>" href="<?php echo site_url('reports/valuation'); ?>">Valuation</a>
         </div>
 
-        <div class="d-flex flex-wrap gap-2">
-            <a class="btn btn-sm btn-outline-secondary" href="<?php echo site_url('reports/export/' . $report_key . '/csv'); ?>"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
-            <a class="btn btn-sm btn-outline-secondary" href="<?php echo site_url('reports/export/' . $report_key . '/xlsx'); ?>"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
-            <a class="btn btn-sm btn-outline-secondary" href="<?php echo site_url('reports/export/' . $report_key . '/pdf'); ?>"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a>
-        </div>
+        <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'reports.export')): ?>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-sm btn-outline-secondary" href="<?php echo site_url('reports/export/' . $report_key . '/csv'); ?>"><i class="bi bi-filetype-csv me-1"></i>CSV</a>
+                <a class="btn btn-sm btn-outline-secondary" href="<?php echo site_url('reports/export/' . $report_key . '/xlsx'); ?>"><i class="bi bi-file-earmark-excel me-1"></i>Excel</a>
+                <a class="btn btn-sm btn-outline-secondary" href="<?php echo site_url('reports/export/' . $report_key . '/pdf'); ?>"><i class="bi bi-file-earmark-pdf me-1"></i>PDF</a>
+            </div>
+        <?php endif; ?>
     </div>
 </div>
 
