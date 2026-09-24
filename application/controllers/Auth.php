@@ -34,7 +34,7 @@ class Auth extends CI_Controller {
         $this->form_validation->set_rules(
             'password',
             'Password',
-            'required|min_length[6]|max_length[255]'
+            'required|min_length[8]|max_length[255]'
         );
 
         if ($this->input->method(TRUE) === 'POST') {
