@@ -5,7 +5,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class User_model extends CI_Model {
 
     private $permission_key_cache = array();
-    private $password_change_cache = array();
 
     public function __construct() {
         parent::__construct();
@@ -25,11 +24,6 @@ class User_model extends CI_Model {
             $user = $query->row();
 
             if (password_verify($password, $user->password)) {
-                $user->must_change_password = password_verify(
-                    'admin123',
-                    $user->password
-                );
-
                 return $user;
             }
         }
@@ -154,38 +148,11 @@ class User_model extends CI_Model {
     }
 
     public function has_permission($user_id, $permission_key) {
-        if ($this->requires_password_change($user_id)) {
-            return FALSE;
-        }
-
         return in_array(
             (string) $permission_key,
             $this->get_user_permission_keys($user_id),
             TRUE
         );
-    }
-
-    public function requires_password_change($user_id) {
-        $user_id = (int) $user_id;
-
-        if ($user_id <= 0) {
-            return FALSE;
-        }
-
-        if (array_key_exists($user_id, $this->password_change_cache)) {
-            return $this->password_change_cache[$user_id];
-        }
-
-        $row = $this->db
-            ->select('password')
-            ->where('id', $user_id)
-            ->get('users')
-            ->row();
-
-        $this->password_change_cache[$user_id] =
-            (bool) ($row && password_verify('admin123', $row->password));
-
-        return $this->password_change_cache[$user_id];
     }
 
     public function verify_password($user_id, $password) {
@@ -201,7 +168,6 @@ class User_model extends CI_Model {
 
     public function update_password($user_id, $password) {
         unset($this->permission_key_cache[(int) $user_id]);
-        $this->password_change_cache[(int) $user_id] = FALSE;
 
         return $this->db->update(
             'users',
