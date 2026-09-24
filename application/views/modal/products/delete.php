@@ -1,7 +1,11 @@
-<div class="modal-header">
-    <h2 class="modal-title fs-5">Delete Product</h2>
-    <button type="button" class="btn-close" data-modal-close aria-label="Close"></button>
-</div>
+<?php echo form_open(current_url(), array('data-modal-form' => '1')); ?>
+<?php
+$this->load->view('components/modal/header', array(
+    'modal_title' => 'Delete Product',
+    'modal_subtitle' => 'This action permanently removes the selected product.',
+    'modal_icon' => 'bi-trash3'
+));
+?>
 
 <div class="modal-body">
     <p>Product: <strong><?php echo html_escape($product->product_name); ?></strong></p>
@@ -13,11 +17,12 @@
     <?php endif; ?>
 </div>
 
-<div class="modal-footer">
-    <button type="button" class="btn btn-secondary" data-modal-close><?php echo !empty($delete_error) ? 'Close' : 'Cancel'; ?></button>
-    <?php if (empty($delete_error)): ?>
-        <?php echo form_open(current_url(), array('data-modal-form' => '1')); ?>
-            <button type="submit" class="btn btn-danger">Delete Product</button>
-        <?php echo form_close(); ?>
-    <?php endif; ?>
-</div>
+<?php
+$this->load->view('components/modal/footer', array(
+    'close_label' => !empty($delete_error) ? 'Close' : 'Cancel',
+    'submit_label' => !empty($delete_error) ? '' : 'Delete Product',
+    'submit_class' => 'btn-danger',
+    'submit_icon' => 'bi-trash3'
+));
+?>
+<?php echo form_close(); ?>
