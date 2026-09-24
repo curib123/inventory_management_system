@@ -28,14 +28,53 @@ class Dashboard extends CI_Controller {
         $data['today_stock_in'] = $this->Stock_model->get_today_quantity('stock_in');
         $data['today_stock_out'] = $this->Stock_model->get_today_quantity('stock_out');
         $data['inventory_value'] = $this->Stock_model->get_inventory_value();
+        $data['stock_health'] = $this->Stock_model->get_stock_health_summary();
         $data['stock_by_category'] = $this->Stock_model->get_stock_by_category();
-        $data['monthly_movement'] = $this->Stock_model->get_monthly_movement_summary();
+        $data['monthly_movement'] = $this->normalize_monthly_movement(
+            $this->Stock_model->get_monthly_movement_summary()
+        );
         $data['page_title'] = 'Dashboard';
 
         $this->load->view('templates/header', $data);
         $this->load->view('dashboard/index', $data);
         $this->load->view('templates/footer');
     }
+    private function normalize_monthly_movement($rows) {
+        $by_month = array();
+
+        foreach ((array) $rows as $row) {
+            if (!isset($row->month)) {
+                continue;
+            }
+
+            $by_month[(string) $row->month] = array(
+                'stock_in' => isset($row->stock_in) ? (int) $row->stock_in : 0,
+                'stock_out' => isset($row->stock_out) ? (int) $row->stock_out : 0
+            );
+        }
+
+        $series = array();
+
+        for ($months_ago = 11; $months_ago >= 0; $months_ago--) {
+            $timestamp = strtotime(
+                'first day of -' . $months_ago . ' month'
+            );
+            $key = date('Y-m', $timestamp);
+            $movement = isset($by_month[$key])
+                ? $by_month[$key]
+                : array('stock_in' => 0, 'stock_out' => 0);
+
+            $series[] = array(
+                'month' => $key,
+                'label' => date('M Y', $timestamp),
+                'stock_in' => (int) $movement['stock_in'],
+                'stock_out' => (int) $movement['stock_out']
+            );
+        }
+
+        return $series;
+    }
+
     // Simple permission guard ni para dili maka-sulod ang user if walay required access.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
