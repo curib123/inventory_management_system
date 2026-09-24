@@ -102,8 +102,8 @@ $config['ui_modal_styles'] = array(
 |--------------------------------------------------------------------------
 | Private local UI overrides
 |--------------------------------------------------------------------------
-| Optional local-only file. It is git-ignored so personal demo/prank display
-| settings do not need to be committed or shared with the rest of the team.
+| Optional local-only file. It is git-ignored so personal presentation
+| presentation overrides do not need to be committed or shared with the rest of the team.
 |
 | Return format:
 | array(
