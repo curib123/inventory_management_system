@@ -78,7 +78,11 @@ class Stock extends CI_Controller {
         $this->require_permission('stock.adjust');
 
         $this->form_validation->set_rules('product_id', 'Product', 'required|integer|greater_than[0]');
-        $this->form_validation->set_rules('actual_stock', 'Actual Stock', 'required|integer|greater_than_equal_to[0]');
+        $this->form_validation->set_rules(
+            'actual_stock',
+            'Actual Stock',
+            'required|integer|greater_than_equal_to[0]|less_than_equal_to[2147483647]'
+        );
         $this->form_validation->set_rules('reason', 'Reason', 'trim|required|max_length[255]');
 
         if ($this->form_validation->run() === FALSE) {
