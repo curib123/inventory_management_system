@@ -219,14 +219,28 @@ class Products extends CI_Controller {
             return;
         }
 
-        if (!$this->Category_model->get_by_id($category_id)) {
-            $this->render_product_form($id, $product, 'The selected category does not exist.');
+        $category = $this->Category_model->get_by_id($category_id);
+
+        if (!$category || !(int) $category->status) {
+            $this->render_product_form(
+                $id,
+                $product,
+                'The selected category is invalid or inactive.'
+            );
             return;
         }
 
-        if ($supplier_id !== NULL && !$this->Supplier_model->get_by_id($supplier_id)) {
-            $this->render_product_form($id, $product, 'The selected supplier does not exist.');
-            return;
+        if ($supplier_id !== NULL) {
+            $supplier = $this->Supplier_model->get_by_id($supplier_id);
+
+            if (!$supplier || !(int) $supplier->status) {
+                $this->render_product_form(
+                    $id,
+                    $product,
+                    'The selected supplier is invalid or inactive.'
+                );
+                return;
+            }
         }
 
         $data = array(
@@ -251,8 +265,8 @@ class Products extends CI_Controller {
 
     private function render_product_form($id, $product, $form_error = '') {
         $data['product'] = $product;
-        $data['suppliers'] = $this->Supplier_model->get_all();
-        $data['categories'] = $this->Category_model->get_all();
+        $data['suppliers'] = $this->Supplier_model->get_active();
+        $data['categories'] = $this->Category_model->get_active();
         $data['page_title'] = $id === NULL ? 'Add Product' : 'Edit Product';
         $data['form_error'] = $form_error;
         $data['product_units'] = (array) $this->config->item('product_units');
