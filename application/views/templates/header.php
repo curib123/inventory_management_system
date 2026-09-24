@@ -26,7 +26,8 @@
     <link rel="stylesheet" href="<?php echo base_url('assets/css/app.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/table.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/sidebar.css'); ?>">
-    <link rel="stylesheet" href="<?php echo base_url('assets/css/modal.css'); ?>">\n    <?php endif; ?>
+    <link rel="stylesheet" href="<?php echo base_url('assets/css/modal.css'); ?>">
+    <?php endif; ?>
 
     <title><?php echo html_escape(isset($page_title) ? $page_title : 'Inventory Management System'); ?></title>
 </head>
