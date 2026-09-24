@@ -121,17 +121,32 @@
         </div>
     </aside>
 
+    <div class="sidebar-backdrop" id="sidebar-backdrop" aria-hidden="true"></div>
+
     <div class="main-content flex-grow-1">
         <header class="topbar d-flex align-items-center justify-content-between">
-            <h1 class="h5 mb-0 fw-semibold">
-                <?php echo html_escape(isset($page_title) ? $page_title : 'Inventory Management System'); ?>
-            </h1>
+            <div class="d-flex align-items-center gap-2 min-w-0">
+                <button
+                    type="button"
+                    class="btn btn-outline-secondary mobile-toggle"
+                    id="sidebar-toggle"
+                    aria-label="Open navigation"
+                    aria-controls="sidebar"
+                    aria-expanded="false"
+                >
+                    <i class="bi bi-list"></i>
+                </button>
+
+                <h1 class="h5 mb-0 fw-semibold text-truncate">
+                    <?php echo html_escape(isset($page_title) ? $page_title : 'Inventory Management System'); ?>
+                </h1>
+            </div>
 
             <div class="d-flex align-items-center gap-2">
                 <span class="badge text-bg-primary">
                     <?php echo html_escape($this->session->userdata('role_name')); ?>
                 </span>
-                <span class="fw-semibold">
+                <span class="fw-semibold d-none d-sm-inline">
                     <i class="bi bi-person-circle me-1"></i>
                     <?php echo html_escape($this->session->userdata('username')); ?>
                 </span>
