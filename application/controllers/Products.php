@@ -94,6 +94,7 @@ class Products extends CI_Controller {
             return;
         }
 
+        $this->session->set_flashdata('success', 'Product deleted successfully.');
         redirect('products');
     }
 
@@ -281,6 +282,10 @@ class Products extends CI_Controller {
             return;
         }
 
+        $this->session->set_flashdata(
+            'success',
+            $id === NULL ? 'Product created successfully.' : 'Product changes saved successfully.'
+        );
         redirect('products');
     }
 
