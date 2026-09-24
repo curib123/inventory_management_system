@@ -71,3 +71,14 @@ $config['compress_output'] = FALSE;
 $config['time_reference'] = 'local';
 $config['rewrite_short_tags'] = FALSE;
 $config['proxy_ips'] = '';
+
+/*
+|--------------------------------------------------------------------------
+| UI styling
+|--------------------------------------------------------------------------
+| TRUE  = Bootstrap, Bootstrap Icons, DataTables CSS, and app CSS are loaded.
+| FALSE = No CSS stylesheets are loaded; pages render as plain HTML while
+|         server-side features, forms, validation, and permissions still work.
+*/
+$config['ui_styling_enabled'] = TRUE;
+
