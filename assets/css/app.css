@@ -1,0 +1,64 @@
+:root {
+    --app-surface: #ffffff;
+    --app-border: #e5e7eb;
+    --app-muted: #6b7280;
+    --app-radius: 0.9rem;
+}
+
+body {
+    background: #f5f7fb;
+}
+
+.app-page-header {
+    min-height: 54px;
+}
+
+.app-page-header h2 {
+    letter-spacing: -0.02em;
+}
+
+.app-table-card,
+.card {
+    border-radius: var(--app-radius);
+}
+
+.app-table-card .card-body {
+    padding: 1rem;
+}
+
+.app-modal-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary);
+    flex: 0 0 auto;
+}
+
+.app-detail-list dt {
+    color: var(--app-muted);
+    font-weight: 600;
+}
+
+.app-detail-list dd {
+    margin-bottom: 0.85rem;
+}
+
+.app-empty-state {
+    padding: 2rem;
+    text-align: center;
+    color: var(--app-muted);
+}
+
+@media (max-width: 575.98px) {
+    .app-page-header .btn {
+        width: 100%;
+    }
+
+    .app-page-header > .d-flex {
+        width: 100%;
+    }
+}
