@@ -1,15 +1,19 @@
 <?php
+$page_actions = array();
+
+if ($this->User_model->has_permission($this->session->userdata('user_id'), 'roles.create')) {
+    $page_actions[] = array(
+        'label' => 'Add Role',
+        'icon' => 'bi-shield-plus',
+        'class' => 'btn-primary',
+        'modal_url' => site_url('roles/add')
+    );
+}
+
 $this->load->view('components/page_header', array(
     'title' => 'Roles and Permissions',
     'description' => 'Create roles and control which parts of the inventory system each role can access.',
-    'actions' => array(
-        array(
-            'label' => 'Add Role',
-            'icon' => 'bi-shield-plus',
-            'class' => 'btn-primary',
-            'modal_url' => site_url('roles/add')
-        )
-    )
+    'actions' => $page_actions
 ));
 
 $this->load->view('components/data_table', array(
