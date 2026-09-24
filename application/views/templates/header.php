@@ -19,16 +19,30 @@
 
     <?php if ($this->session->userdata('user_id')): ?>
         <nav aria-label="Main navigation">
-            <a href="<?php echo site_url('dashboard'); ?>">Dashboard</a> |
-            <a href="<?php echo site_url('products'); ?>">Products</a> |
-            <a href="<?php echo site_url('categories'); ?>">Categories</a> |
-            <a href="<?php echo site_url('suppliers'); ?>">Suppliers</a> |
-            <a href="<?php echo site_url('stock'); ?>">Stock History</a> |
-            <a href="<?php echo site_url('stock/low-stock'); ?>">Low Stock</a> |
-            <a href="<?php echo site_url('reports'); ?>">Reports</a>
+             <?php if($this->User_model->has_permission($this->session->userdata('user_id'), 'view_dashboard')) : ?>
+               <a href="<?php echo site_url('dashboard'); ?>">Dashboard</a> 
+             <?php endif; ?>
+              <?php if($this->User_model->has_permission($this->session->userdata('user_id'), 'manage_products')) : ?>
+               <a href="<?php echo site_url('products'); ?>">Products</a> 
+             <?php endif; ?>
+               <?php if($this->User_model->has_permission($this->session->userdata('user_id'), 'manage_categories')) : ?>
+               <a href="<?php echo site_url('categories'); ?>">Categories</a> 
+             <?php endif; ?>
+               <?php if($this->User_model->has_permission($this->session->userdata('user_id'), 'view_dashboard')) : ?>
+               <a href="<?php echo site_url('suppliers'); ?>">Suppliers</a> 
+             <?php endif; ?>
+               <?php if($this->User_model->has_permission($this->session->userdata('user_id'), 'view_dashboard')) : ?>
+                <a href="<?php echo site_url('stock'); ?>">Stock History</a> 
+             <?php endif; ?>
+               <?php if($this->User_model->has_permission($this->session->userdata('user_id'), 'view_dashboard')) : ?>
+                 <a href="<?php echo site_url('stock/low-stock'); ?>">Low Stock</a> 
+             <?php endif; ?>
+               <?php if($this->User_model->has_permission($this->session->userdata('user_id'), 'view_dashboard')) : ?>
+                 <a href="<?php echo site_url('reports'); ?>">Reports</a>
+             <?php endif; ?>
             <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'manage_users')): ?>
-                | <a href="<?php echo site_url('users'); ?>">Users</a>
-                | <a href="<?php echo site_url('roles'); ?>">Roles</a>
+                 <a href="<?php echo site_url('users'); ?>">Users</a>
+                 <a href="<?php echo site_url('roles'); ?>">Roles</a>
             <?php endif; ?>
         </nav>
         <?php echo form_open('logout'); ?>

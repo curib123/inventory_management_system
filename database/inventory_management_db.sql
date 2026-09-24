@@ -248,6 +248,7 @@ ON DUPLICATE KEY UPDATE role_name = role_name;
 INSERT INTO permissions (permission_name, module_name, description, status) VALUES
 ('view_dashboard', 'dashboard', 'View dashboard overview', 1),
 ('manage_products', 'products', 'Create, edit, and delete products', 1),
+('manage_categories', 'category', 'Create, edit, and delete category', 1),
 ('manage_suppliers', 'suppliers', 'Create, edit, and delete suppliers', 1),
 ('manage_stock_in', 'stock_in', 'Process stock-in transactions', 1),
 ('manage_stock_out', 'stock_out', 'Process stock-out transactions', 1),

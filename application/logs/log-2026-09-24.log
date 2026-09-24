@@ -20,3 +20,6 @@ OR  `u`.`updated_at` LIKE '%mama%' ESCAPE '!'
  )
 ORDER BY `s`.`supplier_name` ASC
  LIMIT 10
+ERROR - 2026-09-24 10:55:32 --> Severity: error --> Exception: syntax error, unexpected token "endif", expecting end of file C:\xampp\htdocs\inventory_management_system\application\views\templates\header.php 41
+ERROR - 2026-09-24 11:08:41 --> Severity: Warning --> Undefined variable $permissions C:\xampp\htdocs\inventory_management_system\application\views\templates\header.php 36
+ERROR - 2026-09-24 11:08:41 --> Severity: error --> Exception: in_array(): Argument #2 ($haystack) must be of type array, null given C:\xampp\htdocs\inventory_management_system\application\views\templates\header.php 36
