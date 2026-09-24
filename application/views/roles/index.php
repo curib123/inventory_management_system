@@ -24,6 +24,7 @@ $this->load->view('components/data_table', array(
         'Description',
         'Status',
         'Users',
+        'Permissions',
         array('label' => 'Actions', 'orderable' => false)
     )
 ));
