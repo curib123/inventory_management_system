@@ -125,9 +125,11 @@ class Products extends CI_Controller {
         $rows = array();
         foreach ($products as $product) {
             $id = (int) $product->id;
-            $actions = '<button type="button" class="btn btn-sm btn-outline-secondary" data-modal-url="' . site_url('products/view/' . $id) . '"><i class="bi bi-eye"></i> View</button> ';
-            $actions .= '<button type="button" class="btn btn-sm btn-outline-primary" data-modal-url="' . site_url('products/edit/' . $id) . '"><i class="bi bi-pencil"></i> Edit</button> ';
-            $actions .= '<button type="button" class="btn btn-sm btn-outline-danger" data-modal-url="' . site_url('products/delete/' . $id) . '"><i class="bi bi-trash"></i> Delete</button>';
+            $actions = ui_modal_action_group(array(
+                array('label' => 'View', 'url' => site_url('products/view/' . $id), 'variant' => 'secondary', 'icon' => 'bi-eye'),
+                array('label' => 'Edit', 'url' => site_url('products/edit/' . $id), 'variant' => 'primary', 'icon' => 'bi-pencil'),
+                array('label' => 'Delete', 'url' => site_url('products/delete/' . $id), 'variant' => 'danger', 'icon' => 'bi-trash')
+            ));
 
             $rows[] = array(
                 $id,
@@ -138,8 +140,6 @@ class Products extends CI_Controller {
                 (int) $product->stock,
                 number_format((float) $product->selling_price, 2),
                 $product->status ? 'Active' : 'Inactive',
-                html_escape($product->created_at),
-                html_escape($product->updated_at),
                 $actions
             );
         }
