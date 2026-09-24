@@ -1,0 +1,144 @@
+:root {
+    --app-surface-radius: 1rem;
+    --app-surface-border: var(--bs-border-color);
+    --app-surface-shadow: 0 .35rem 1.25rem rgba(15, 23, 42, .06);
+}
+
+/* Shared page heading */
+.app-page-header {
+    margin-bottom: 1rem;
+}
+
+.app-page-title {
+    margin-bottom: .25rem;
+}
+
+.app-page-subtitle {
+    margin-bottom: 0;
+    color: var(--bs-secondary-color);
+}
+
+/* One central table design for every server-side DataTable page */
+.app-table-card {
+    border: 0;
+    border-radius: var(--app-surface-radius);
+    box-shadow: var(--app-surface-shadow);
+    overflow: hidden;
+}
+
+.app-table-card .card-body {
+    padding: 1rem;
+}
+
+.app-table {
+    margin-bottom: 0;
+}
+
+.app-table > thead > tr > th {
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.app-table > tbody > tr > td {
+    vertical-align: middle;
+}
+
+.app-page-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+}
+
+.app-page-actions .btn {
+    white-space: nowrap;
+}
+
+/* DataTables Bootstrap controls */
+.app-table-card .dt-layout-row {
+    gap: .75rem;
+    align-items: center;
+}
+
+.app-table-card .dt-search input,
+.app-table-card .dt-length select {
+    min-height: 38px;
+}
+
+.app-table-card .dt-info {
+    color: var(--bs-secondary-color);
+}
+
+/* One central modal design for every CRUD/action modal */
+#action-modal .modal-dialog {
+    width: min(920px, calc(100vw - 2rem));
+}
+
+#action-modal .modal-content {
+    border: 0;
+    border-radius: var(--app-surface-radius);
+    box-shadow: 0 1.25rem 3rem rgba(15, 23, 42, .22);
+    overflow: hidden;
+}
+
+#action-modal .modal-header,
+#action-modal .modal-footer {
+    background: var(--bs-body-bg);
+}
+
+#action-modal .modal-header {
+    border-bottom: 1px solid var(--app-surface-border);
+    padding: 1rem 1.25rem;
+}
+
+#action-modal .modal-body {
+    padding: 1.25rem;
+}
+
+#action-modal .modal-footer {
+    border-top: 1px solid var(--app-surface-border);
+    padding: 1rem 1.25rem;
+}
+
+#action-modal .app-modal-subtitle {
+    margin: .2rem 0 0;
+    color: var(--bs-secondary-color);
+    font-size: .875rem;
+}
+
+#action-modal .form-label {
+    font-weight: 600;
+}
+
+#action-modal .app-detail-list dt {
+    color: var(--bs-secondary-color);
+    font-weight: 600;
+}
+
+#action-modal .app-detail-list dd {
+    margin-bottom: .75rem;
+}
+
+@media (max-width: 767.98px) {
+    .app-page-header {
+        align-items: stretch !important;
+    }
+
+    .app-page-actions {
+        width: 100%;
+    }
+
+    .app-page-actions .btn {
+        flex: 1 1 auto;
+    }
+
+    .app-table-card .card-body {
+        padding: .75rem;
+    }
+
+    #action-modal .modal-body,
+    #action-modal .modal-header,
+    #action-modal .modal-footer {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+}
