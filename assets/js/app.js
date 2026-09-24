@@ -162,6 +162,35 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    function updateStockPreview(input) {
+        var product = input.closest('.app-stock-product');
+
+        if (!product) {
+            return;
+        }
+
+        var preview = product.querySelector('[data-stock-new]');
+
+        if (!preview) {
+            return;
+        }
+
+        var current = parseInt(preview.getAttribute('data-current-stock'), 10) || 0;
+        var quantity = /^\d+$/.test(input.value.trim())
+            ? parseInt(input.value, 10)
+            : 0;
+
+        preview.textContent = String(current + quantity);
+    }
+
+    document.addEventListener('input', function (event) {
+        var quantityInput = event.target.closest('[data-stock-quantity]');
+
+        if (quantityInput) {
+            updateStockPreview(quantityInput);
+        }
+    });
+
     document.addEventListener('change', function (event) {
         var supplierSelect = event.target.closest('[data-stock-in-supplier]');
 
