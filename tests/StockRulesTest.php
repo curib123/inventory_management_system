@@ -29,6 +29,19 @@ class StockRulesTest extends TestCase {
         $rules->calculate_stock(10, 0, 'stock_in');
     }
 
+
+    public function testFractionalQuantityIsRejectedInsteadOfTruncated() {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new Stock_rules())->calculate_stock(10, 1.5, 'stock_in');
+    }
+
+    public function testNegativeCurrentStockIsRejected() {
+        $this->expectException(InvalidArgumentException::class);
+
+        (new Stock_rules())->calculate_stock(-1, 1, 'stock_in');
+    }
+
     public function testUnknownTransactionTypeIsRejected() {
         $this->expectException(InvalidArgumentException::class);
 
