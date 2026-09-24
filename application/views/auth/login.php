@@ -1,9 +1,11 @@
+<?php $ui_styling_enabled = $this->config->item('ui_styling_enabled') !== FALSE; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+    <?php if ($ui_styling_enabled): ?>
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
         rel="stylesheet"
@@ -14,14 +16,14 @@
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-    >
+    >\n    <?php endif; ?>
 
     <title>Login | Inventory Management System</title>
 </head>
 
 <body class="bg-body-tertiary">
     <main class="container min-vh-100 d-flex align-items-center justify-content-center py-4">
-        <div class="card shadow-sm border-0 w-100" style="max-width: 420px;">
+        <div class="card shadow-sm border-0 w-100"<?php echo $ui_styling_enabled ? ' style="max-width: 420px;"' : ''; ?>>
             <div class="card-body p-4 p-md-5">
                 <div class="text-center mb-4">
                     <div class="display-6 text-primary mb-2">
