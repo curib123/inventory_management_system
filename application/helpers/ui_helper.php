@@ -46,15 +46,21 @@ if (!function_exists('ui_modal_form_attributes')) {
         }
 
         $attributes['data-confirm-required'] = '1';
-        $attributes['data-confirm-title'] = isset($confirmation['title'])
-            ? (string) $confirmation['title']
-            : 'Confirm changes';
-        $attributes['data-confirm-message'] = isset($confirmation['message'])
-            ? (string) $confirmation['message']
-            : 'Review the information before continuing.';
-        $attributes['data-confirm-label'] = isset($confirmation['label'])
-            ? (string) $confirmation['label']
-            : 'Confirm';
+        $attributes['data-confirm-title'] = html_escape(
+            isset($confirmation['title'])
+                ? (string) $confirmation['title']
+                : 'Confirm changes'
+        );
+        $attributes['data-confirm-message'] = html_escape(
+            isset($confirmation['message'])
+                ? (string) $confirmation['message']
+                : 'Review the information before continuing.'
+        );
+        $attributes['data-confirm-label'] = html_escape(
+            isset($confirmation['label'])
+                ? (string) $confirmation['label']
+                : 'Confirm'
+        );
         $attributes['data-confirm-variant'] = isset($confirmation['variant'])
             ? preg_replace('/[^a-z0-9-]/i', '', (string) $confirmation['variant'])
             : 'primary';
@@ -63,11 +69,11 @@ if (!function_exists('ui_modal_form_attributes')) {
             : 'bi-check2-circle';
 
         if (!empty($confirmation['assist'])) {
-            $attributes['data-confirm-assist'] = (string) $confirmation['assist'];
+            $attributes['data-confirm-assist'] = html_escape((string) $confirmation['assist']);
         }
 
         if (!empty($confirmation['impact'])) {
-            $attributes['data-confirm-impact'] = (string) $confirmation['impact'];
+            $attributes['data-confirm-impact'] = html_escape((string) $confirmation['impact']);
         }
 
         return $attributes;
