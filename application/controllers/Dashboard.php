@@ -37,9 +37,9 @@ class Dashboard extends CI_Controller {
         $this->load->view('templates/footer');
     }
     // Simple permission guard ni para dili maka-sulod ang user if walay required access.
-    private function require_permission($permission_name) {
+    private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
-        if (!$user_id || !$this->User_model->has_permission($user_id, $permission_name)) {
+        if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
             show_error('You do not have permission to access this page.', 403, 'Access Denied');
         }
     }
