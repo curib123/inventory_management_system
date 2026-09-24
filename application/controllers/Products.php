@@ -125,9 +125,9 @@ class Products extends CI_Controller {
         $rows = array();
         foreach ($products as $product) {
             $id = (int) $product->id;
-            $actions = '<button type="button" data-modal-url="' . site_url('products/view/' . $id) . '">View</button> ';
-            $actions .= '<button type="button" data-modal-url="' . site_url('products/edit/' . $id) . '">Edit</button> ';
-            $actions .= '<button type="button" data-modal-url="' . site_url('products/delete/' . $id) . '">Delete</button>';
+            $actions = '<button type="button" class="btn btn-sm btn-outline-secondary" data-modal-url="' . site_url('products/view/' . $id) . '"><i class="bi bi-eye"></i> View</button> ';
+            $actions .= '<button type="button" class="btn btn-sm btn-outline-primary" data-modal-url="' . site_url('products/edit/' . $id) . '"><i class="bi bi-pencil"></i> Edit</button> ';
+            $actions .= '<button type="button" class="btn btn-sm btn-outline-danger" data-modal-url="' . site_url('products/delete/' . $id) . '"><i class="bi bi-trash"></i> Delete</button>';
 
             $rows[] = array(
                 $id,
