@@ -82,3 +82,54 @@ $config['proxy_ips'] = '';
 */
 $config['ui_styling_enabled'] = TRUE;
 
+/*
+|--------------------------------------------------------------------------
+| Per-page and per-modal styling
+|--------------------------------------------------------------------------
+| These are internal configuration switches only; there is no UI control.
+| Route-specific keys such as "categories/index" override controller-wide
+| keys such as "categories". "*" is the fallback.
+*/
+$config['ui_page_styles'] = array(
+    '*' => TRUE
+);
+
+$config['ui_modal_styles'] = array(
+    '*' => TRUE
+);
+
+/*
+|--------------------------------------------------------------------------
+| Private local UI overrides
+|--------------------------------------------------------------------------
+| Optional local-only file. It is git-ignored so personal demo/prank display
+| settings do not need to be committed or shared with the rest of the team.
+|
+| Return format:
+| array(
+|     'pages' => array('categories/index' => FALSE),
+|     'modals' => array('categories' => TRUE)
+| );
+*/
+$private_ui_file = APPPATH . 'config/ui_style.local.php';
+
+if (is_file($private_ui_file)) {
+    $private_ui = include $private_ui_file;
+
+    if (is_array($private_ui)) {
+        if (isset($private_ui['pages']) && is_array($private_ui['pages'])) {
+            $config['ui_page_styles'] = array_replace(
+                $config['ui_page_styles'],
+                $private_ui['pages']
+            );
+        }
+
+        if (isset($private_ui['modals']) && is_array($private_ui['modals'])) {
+            $config['ui_modal_styles'] = array_replace(
+                $config['ui_modal_styles'],
+                $private_ui['modals']
+            );
+        }
+    }
+}
+
