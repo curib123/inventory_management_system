@@ -108,6 +108,8 @@ class Products extends CI_Controller {
             'p.stock',
             'p.selling_price',
             'p.status',
+            'p.created_at',
+            'p.updated_at',
             NULL
         );
 
@@ -136,6 +138,8 @@ class Products extends CI_Controller {
                 (int) $product->stock,
                 number_format((float) $product->selling_price, 2),
                 $product->status ? 'Active' : 'Inactive',
+                html_escape($product->created_at),
+                html_escape($product->updated_at),
                 $actions
             );
         }

@@ -123,7 +123,7 @@ class User_model extends CI_Model {
 
     public function get_datatable($start, $length, $search, $order_column, $order_dir) {
         $this->build_datatable_query($search);
-        $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.status, u.created_at, r.role_name');
+        $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.status, u.created_at, u.updated_at, r.role_name');
 
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
@@ -151,6 +151,7 @@ class User_model extends CI_Model {
             $this->db->or_like('u.username', $search);
             $this->db->or_like('r.role_name', $search);
             $this->db->or_like('u.created_at', $search);
+            $this->db->or_like('u.updated_at', $search);
 
             if (strcasecmp($search, 'active') === 0) {
                 $this->db->or_where('u.status', 1);

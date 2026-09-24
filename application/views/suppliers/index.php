@@ -9,6 +9,8 @@
             <th>Phone</th>
             <th>Address</th>
             <th>Status</th>
+            <th>Created</th>
+            <th>Updated</th>
             <th data-orderable="false">Actions</th>
         </tr>
     </thead>

@@ -24,18 +24,18 @@ Phase 2 - Supplier Management
 3.Products associated with suppliers
 
 
-Phase 3 - 
+Phase 3 - Stock in
 
 
 1.Create Stock in Trasaction
 2.Transaction number
-3.Select supplier when supplier select it will fetch all product connected to supplier
-4.Add multiple products in 1 transaction
-5.Quantity received from each product selected
+3.When Select supplier when supplier selected it will fetch all product connected to that supplier selected
+4.It will add multiple products in 1 transaction
+5.Quantity received from each product selected and show old stock , and total new stock preview 
 6.Increase product stock automatically
 7.Record stock movement 
 
-Phase 4. 
+Phase 4. Stock out
 1.Create Stock Out Transaction
 2.Check available stock before processing 
 3.Decrease product stock automatically

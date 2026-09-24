@@ -44,7 +44,7 @@ class Supplier_model extends CI_Model {
     }
 
     public function get_datatable($start, $length, $search, $order_column, $order_dir) {
-        $this->db->select('s.id, s.supplier_name, s.contact_person, s.phone, s.address, s.status');
+        $this->db->select('s.id, s.supplier_name, s.contact_person, s.phone, s.address, s.status,s.created_at,s.updated_at');
         $this->db->from('suppliers s');
         $this->apply_datatable_search($search);
         if ($order_column) {
@@ -75,6 +75,8 @@ class Supplier_model extends CI_Model {
         } elseif (strcasecmp($search, 'inactive') === 0) {
             $this->db->or_where('s.status', 0);
         }
+        $this->db->or_like('s.created_at', $search);
+        $this->db->or_like('s.updated_at', $search);
         $this->db->group_end();
     }
 }

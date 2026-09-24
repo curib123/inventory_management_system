@@ -99,7 +99,7 @@ class Product_model extends CI_Model {
 
     public function get_datatable($start, $length, $search, $order_column, $order_dir) {
         $this->build_datatable_query($search);
-        $this->db->select('p.id, p.product_code, p.product_name, c.category_name, s.supplier_name, p.stock, p.selling_price, p.status');
+        $this->db->select('p.id, p.product_code, p.product_name, c.category_name, s.supplier_name, p.stock, p.selling_price, p.status,p.created_at,p.updated_at');
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
         }
@@ -129,6 +129,8 @@ class Product_model extends CI_Model {
             } elseif (strcasecmp($search, 'inactive') === 0) {
                 $this->db->or_where('p.status', 0);
             }
+            $this->db->or_like('p.created_at',$search);
+            $this-db->or_like('p.updated_at',$search);
             $this->db->group_end();
         }
     }

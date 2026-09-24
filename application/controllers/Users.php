@@ -97,6 +97,7 @@ class Users extends CI_Controller {
             'r.role_name',
             'u.status',
             'u.created_at',
+            'u.updated_at',
             NULL
         );
 
@@ -110,6 +111,7 @@ class Users extends CI_Controller {
         );
 
         $rows = array();
+
         $current_user_id = (int) $this->session->userdata('user_id');
 
         foreach ($users as $user) {
@@ -129,6 +131,7 @@ class Users extends CI_Controller {
                 html_escape($user->role_name ?: 'N/A'),
                 $user->status ? 'Active' : 'Inactive',
                 html_escape($user->created_at),
+                html_escape($user->updated_at),
                 $actions
             );
         }

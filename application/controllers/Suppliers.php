@@ -90,6 +90,8 @@ class Suppliers extends CI_Controller {
             's.phone',
             's.address',
             's.status',
+            's.created_at',
+            's.updated_at',
             NULL
         );
 
@@ -115,6 +117,8 @@ class Suppliers extends CI_Controller {
                 html_escape($supplier->phone),
                 html_escape($supplier->address),
                 $supplier->status ? 'Active' : 'Inactive',
+                html_escape($supplier->created_at),
+                html_escape($supplier->updated_at),
                 $actions
             );
         }

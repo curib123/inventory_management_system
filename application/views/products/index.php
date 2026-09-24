@@ -12,6 +12,8 @@
             <th>Stock</th>
             <th>Selling Price</th>
             <th>Status</th>
+            <th>Created</th>
+            <th>Updated</th>
             <th data-orderable="false">Actions</th>
         </tr>
     </thead>
