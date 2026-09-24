@@ -43,6 +43,24 @@ class DatatableServiceTest extends TestCase {
         $this->assertSame('desc', $request['order_dir']);
     }
 
+
+    public function testPaginationAllowsOffsetsBeyondOneHundred() {
+        $input = new DatatableInputStub(array(
+            'start' => '250',
+            'length' => '25'
+        ));
+
+        $request = (new Datatable_service())->request(
+            $input,
+            array('u.username'),
+            'u.username',
+            'asc'
+        );
+
+        $this->assertSame(250, $request['start']);
+        $this->assertSame(25, $request['length']);
+    }
+
     public function testInvalidLengthFallsBackToTen() {
         $input = new DatatableInputStub(array(
             'length' => '999'
