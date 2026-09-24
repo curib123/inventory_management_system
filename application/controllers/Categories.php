@@ -19,7 +19,7 @@ class Categories extends CI_Controller {
     }
 
     public function index() {
-        $this->require_permission('manage_products');
+        $this->require_permission('categories.view');
 
         $data['page_title'] = 'Categories';
         $this->load->view('templates/header', $data);
@@ -28,12 +28,12 @@ class Categories extends CI_Controller {
     }
 
     public function add() {
-        $this->require_permission('manage_products');
+        $this->require_permission('categories.create');
         $this->category_form();
     }
 
     public function view($id) {
-        $this->require_permission('manage_products');
+        $this->require_permission('categories.view');
 
         $category = $this->Category_model->get_by_id($id);
         if (!$category) {
@@ -47,7 +47,7 @@ class Categories extends CI_Controller {
     }
 
     public function edit($id) {
-        $this->require_permission('manage_products');
+        $this->require_permission('categories.edit');
 
         $category = $this->Category_model->get_by_id($id);
         if (!$category) {
@@ -58,7 +58,7 @@ class Categories extends CI_Controller {
     }
 
     public function delete($id) {
-        $this->require_permission('manage_products');
+        $this->require_permission('categories.delete');
 
         $category = $this->Category_model->get_by_id($id);
         if (!$category) {
@@ -98,7 +98,7 @@ class Categories extends CI_Controller {
     }
 
     public function datatable() {
-        $this->require_permission('manage_products');
+        $this->require_permission('categories.view');
 
         $columns = array('c.id', 'c.category_name', 'c.status', 'product_count', NULL);
         $request = $this->datatable_service->request($this->input, $columns, 'c.category_name', 'asc');
