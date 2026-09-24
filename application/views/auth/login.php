@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
         rel="stylesheet"
-        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
         crossorigin="anonymous"
     >
 
@@ -16,110 +16,76 @@
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
     >
 
-    <link rel="stylesheet"
-          href="<?php echo base_url('assets/css/login.css'); ?>">
-    <title>Login</title>
+    <title>Login | Inventory Management System</title>
 </head>
 
-
-<body class="auth-page min-vh-100 d-flex align-items-center justify-content-center">
-        <div class="card login-card shadow">
-            <div class="card-body p-3 p-sm-3">
-
-                <div class="text-center mb-3">
-                    <div class="login-logo bg-primary text-white rounded-3 d-inline-flex align-items-center justify-content-center mb-2">
-                        <i class="bi bi-box-seam fs-3"></i>
+<body class="bg-body-tertiary">
+    <main class="container min-vh-100 d-flex align-items-center justify-content-center py-4">
+        <div class="card shadow-sm border-0 w-100" style="max-width: 420px;">
+            <div class="card-body p-4 p-md-5">
+                <div class="text-center mb-4">
+                    <div class="display-6 text-primary mb-2">
+                        <i class="bi bi-box-seam"></i>
                     </div>
-
-                    <h1 class="h5 fw-bold mb-1">Inventory Management System</h1>
-                    <p class="small text-secondary mb-0">Sign in to manage your inventory</p>
+                    <h1 class="h4 mb-1">Inventory Management System</h1>
+                    <p class="text-body-secondary mb-0">Sign in to continue</p>
                 </div>
 
-                <div id="loginAlert" class="alert d-none align-items-center py-2 px-3 mb-3 small" role="alert">
-                    <i id="alertIcon" class="bi me-2"></i>
-                    <span id="alertMessage"></span>
-                </div>
+                <?php if (!empty($error)): ?>
+                    <div class="alert alert-danger" role="alert">
+                        <?php echo $error; ?>
+                    </div>
+                <?php endif; ?>
 
                 <?php echo form_open('login'); ?>
-
-                    <input
-                        type="hidden"
-                        id="csrfToken"
-                        name="<?php echo $this->security->get_csrf_token_name(); ?>"
-                        value="<?php echo $this->security->get_csrf_hash(); ?>"
-                    >
-
-                    <div class="mb-2">
-                        <label for="username" class="form-label small fw-semibold mb-1">Username</label>
-
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-white">
-                                <i class="bi bi-person text-secondary"></i>
+                            <span class="input-group-text">
+                                <i class="bi bi-person"></i>
                             </span>
-
                             <input
                                 type="text"
                                 name="username"
                                 id="username"
                                 class="form-control"
-                                placeholder="Username"
-                                autocomplete="off"
                                 required
-                                minlength="2"
+                                minlength="3"
                                 maxlength="50"
+                                autocomplete="username"
                                 value="<?php echo html_escape(set_value('username')); ?>"
                             >
                         </div>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="password" class="form-label small fw-semibold mb-1">Password</label>
-
+                    <div class="mb-4">
+                        <label for="password" class="form-label">Password</label>
                         <div class="input-group">
-                            <span class="input-group-text bg-white">
-                                <i class="bi bi-lock text-secondary"></i>
+                            <span class="input-group-text">
+                                <i class="bi bi-lock"></i>
                             </span>
-
                             <input
                                 type="password"
                                 name="password"
                                 id="password"
                                 class="form-control"
-                                placeholder="Password"
-                                autocomplete="off"
                                 required
                                 minlength="6"
                                 maxlength="255"
+                                autocomplete="current-password"
                             >
-
-                           
                         </div>
                     </div>
 
                     <div class="d-grid">
-                        <button
-                            type="submit"
-                            id="loginButton"
-                            class="btn btn-primary fw-semibold"
-                        >
-                            <i id="loginIcon" class="bi bi-box-arrow-in-right me-1"></i>
-                            <span id="loginText">Sign In</span>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>
+                            Sign In
                         </button>
                     </div>
-
                 <?php echo form_close(); ?>
             </div>
-
-            <div class="card-footer bg-white border-0 text-center py-2">
-                <small class="text-secondary">
-                    <i class="bi bi-shield-check me-1"></i>
-                    Inventory Management System
-                </small>
-            </div>
         </div>
-    
-<script src="<?php echo base_url('assets/js/auth/login.js'); ?>"></script>
-
+    </main>
 </body>
 </html>
-
