@@ -31,14 +31,29 @@ $config['log_date_format'] = 'Y-m-d H:i:s';
 $config['error_views_path'] = '';
 $config['cache_path'] = '';
 $config['cache_query_string'] = FALSE;
-$config['encryption_key'] = 'inventory-management-system-key-change-me';
+$environment_key = getenv('INVENTORY_ENCRYPTION_KEY');
+
+if ($environment_key === FALSE || trim($environment_key) === '') {
+    if (ENVIRONMENT === 'production') {
+        exit('INVENTORY_ENCRYPTION_KEY must be configured in production.');
+    }
+
+    // Development-only fallback so local XAMPP clones still run without
+    // shipping a reusable production secret in source control.
+    $environment_key = hash(
+        'sha256',
+        FCPATH . '|' . php_uname('n') . '|inventory-development'
+    );
+}
+
+$config['encryption_key'] = $environment_key;
 $config['sess_driver'] = 'files';
 $config['sess_cookie_name'] = 'ci_session';
 $config['sess_expiration'] = 7200;
 $config['sess_save_path'] = sys_get_temp_dir();
 $config['sess_match_ip'] = FALSE;
 $config['sess_time_to_update'] = 300;
-$config['sess_regenerate_destroy'] = FALSE;
+$config['sess_regenerate_destroy'] = TRUE;
 $config['cookie_prefix'] = '';
 $config['cookie_domain'] = '';
 $config['cookie_path'] = '/';
