@@ -15,7 +15,7 @@ class Reports extends CI_Controller {
         }
         $this->load->model('User_model');
         $this->load->library('Report_rules');
-        $this->require_permission('view_reports');
+        $this->require_permission('reports.view');
         $this->load->model('Report_model');
     }
 
@@ -69,6 +69,7 @@ class Reports extends CI_Controller {
     }
 
     public function export($report, $format = 'csv') {
+        $this->require_permission('reports.export');
         $format = strtolower((string) $format);
         if (!$this->report_rules->export_format_is_supported($format)) {
             show_error('Unsupported export format.', 400, 'Export Error');
