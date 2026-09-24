@@ -1,4 +1,17 @@
-<?php echo form_open(current_url(), array('data-modal-form' => '1')); ?>
+<?php
+$role_is_edit = isset($role) && $role;
+$role_confirmation = array(
+    'title' => $role_is_edit ? 'Save role and permission changes?' : 'Create this role?',
+    'message' => 'Review the role settings and selected permission chips before continuing.',
+    'impact' => 'Permission changes can immediately alter what every user assigned to this role can view or modify.',
+    'assist' => 'Confirm the selected permissions match the responsibilities of users assigned to this role.',
+    'label' => (!$can_edit_role && $can_manage_permissions) ? 'Save Permissions' : ($role_is_edit ? 'Save Role Changes' : 'Create Role'),
+    'variant' => 'warning',
+    'icon' => 'bi-shield-check'
+);
+
+echo form_open(current_url(), ui_modal_form_attributes($role_confirmation));
+?>
 <?php
 $this->load->view('components/modal/header', array(
     'modal_title' => $page_title,
@@ -42,14 +55,15 @@ foreach ((array) $permissions as $permission) {
                 required
                 maxlength="50"
                 placeholder="e.g. warehouse_staff"
-                value="<?php echo html_escape(set_value('role_name', isset($role) && $role ? $role->role_name : '')); ?>"
+                value="<?php echo html_escape(set_value('role_name', $role_is_edit ? $role->role_name : '')); ?>"
                 <?php echo $can_edit_role ? '' : 'disabled'; ?>
             >
+            <div class="form-text">Use a stable role name that describes the staff responsibility.</div>
         </div>
 
         <div class="col-12 col-md-4">
             <label for="status" class="form-label">Status</label>
-            <?php $selected_status = set_value('status', isset($role) && $role ? $role->status : 1); ?>
+            <?php $selected_status = set_value('status', $role_is_edit ? $role->status : 1); ?>
             <select class="form-select" id="status" name="status" <?php echo $can_edit_role ? '' : 'disabled'; ?>>
                 <option value="1" <?php echo ((string) $selected_status === '1') ? 'selected' : ''; ?>>Active</option>
                 <option value="0" <?php echo ((string) $selected_status === '0') ? 'selected' : ''; ?>>Inactive</option>
@@ -66,7 +80,7 @@ foreach ((array) $permissions as $permission) {
                 maxlength="255"
                 placeholder="Enter a short description for this role"
                 <?php echo $can_edit_role ? '' : 'disabled'; ?>
-            ><?php echo html_escape(set_value('description', isset($role) && $role ? $role->description : '')); ?></textarea>
+            ><?php echo html_escape(set_value('description', $role_is_edit ? $role->description : '')); ?></textarea>
         </div>
     </div>
 
@@ -137,6 +151,17 @@ foreach ((array) $permissions as $permission) {
     <?php else: ?>
         <div class="alert alert-light border mb-0">No active module permissions found.</div>
     <?php endif; ?>
+
+    <div class="mt-3">
+        <?php
+        $this->load->view('components/form/assist_note', array(
+            'assist_title' => 'Permission changes affect assigned users',
+            'assist_text' => 'Review selected chips carefully. Saving a role can immediately grant or remove access for every user assigned to it.',
+            'assist_variant' => 'warning',
+            'assist_icon' => 'bi-shield-exclamation'
+        ));
+        ?>
+    </div>
 </div>
 
 <?php
@@ -145,7 +170,7 @@ $submit_label = '';
 if ($can_edit_role || $can_manage_permissions) {
     $submit_label = (!$can_edit_role && $can_manage_permissions)
         ? 'Save Permissions'
-        : 'Save Role';
+        : ($role_is_edit ? 'Save Role' : 'Create Role');
 }
 
 $this->load->view('components/modal/footer', array(
