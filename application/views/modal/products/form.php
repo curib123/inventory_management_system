@@ -33,7 +33,9 @@ $this->load->view('components/modal/header', array(
             <select id="category_id" name="category_id" class="form-select" required>
                 <option value="">Select Category</option>
                 <?php foreach ($categories as $category): ?>
-                    <option value="<?php echo (int) $category->id; ?>" <?php echo ((string) $selected_category === (string) $category->id) ? 'selected' : ''; ?>><?php echo html_escape($category->category_name); ?></option>
+                    <option value="<?php echo (int) $category->id; ?>" <?php echo ((string) $selected_category === (string) $category->id) ? 'selected' : ''; ?>>
+                        <?php echo html_escape($category->category_name . ((int) $category->status === 1 ? '' : ' (Inactive)')); ?>
+                    </option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -44,7 +46,9 @@ $this->load->view('components/modal/header', array(
             <select id="supplier_id" name="supplier_id" class="form-select">
                 <option value="">No Supplier</option>
                 <?php foreach ($suppliers as $supplier): ?>
-                    <option value="<?php echo (int) $supplier->id; ?>" <?php echo ((string) $selected_supplier === (string) $supplier->id) ? 'selected' : ''; ?>><?php echo html_escape($supplier->supplier_name); ?></option>
+                    <option value="<?php echo (int) $supplier->id; ?>" <?php echo ((string) $selected_supplier === (string) $supplier->id) ? 'selected' : ''; ?>>
+                        <?php echo html_escape($supplier->supplier_name . ((int) $supplier->status === 1 ? '' : ' (Inactive)')); ?>
+                    </option>
                 <?php endforeach; ?>
             </select>
         </div>
