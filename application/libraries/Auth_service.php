@@ -20,7 +20,6 @@ class Auth_service {
             'username' => $user->username,
             'role_id' => $user->role_id,
             'role_name' => $user->role_name,
-            'must_change_password' => !empty($user->must_change_password),
             'logged_in' => TRUE
         );
     }
