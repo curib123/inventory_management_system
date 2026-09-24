@@ -1,0 +1,49 @@
+/*
+|--------------------------------------------------------------------------
+| Plain page / modal presentation mode
+|--------------------------------------------------------------------------
+| Bootstrap and app CSS stay loaded so a styled modal can still open on top
+| of a deliberately plain page. These rules only neutralize the surface that
+| is configured as plain.
+*/
+
+/* Restore browser-default HTML appearance outside the action modal. */
+body.app-page-plain {
+    all: revert;
+}
+
+body.app-page-plain :not(#action-modal, #action-modal *, .modal-backdrop, .modal-backdrop *) {
+    all: revert;
+}
+
+body.app-page-plain :not(#action-modal, #action-modal *, .modal-backdrop, .modal-backdrop *)::before,
+body.app-page-plain :not(#action-modal, #action-modal *, .modal-backdrop, .modal-backdrop *)::after {
+    all: revert;
+    content: none;
+}
+
+/* Keep actual hidden elements hidden even when Bootstrap display utilities reset. */
+body.app-page-plain .d-none,
+body.app-page-plain [hidden] {
+    display: none !important;
+}
+
+/*
+ * Plain-modal mode keeps Bootstrap's modal shell/backdrop functional, while
+ * the loaded action content itself renders with browser-default HTML styles.
+ */
+body.app-modal-plain #action-modal-content,
+body.app-modal-plain #action-modal-content * {
+    all: revert;
+}
+
+body.app-modal-plain #action-modal-content *::before,
+body.app-modal-plain #action-modal-content *::after {
+    all: revert;
+    content: none;
+}
+
+body.app-modal-plain #action-modal-content .d-none,
+body.app-modal-plain #action-modal-content [hidden] {
+    display: none !important;
+}
