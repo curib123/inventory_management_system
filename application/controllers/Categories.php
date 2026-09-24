@@ -94,6 +94,7 @@ class Categories extends CI_Controller {
             return;
         }
 
+        $this->session->set_flashdata('success', 'Category deleted successfully.');
         redirect('categories');
     }
 
@@ -188,6 +189,10 @@ class Categories extends CI_Controller {
             return;
         }
 
+        $this->session->set_flashdata(
+            'success',
+            $id === NULL ? 'Category created successfully.' : 'Category changes saved successfully.'
+        );
         redirect('categories');
     }
 
