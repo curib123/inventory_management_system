@@ -31,6 +31,12 @@
                     <p class="text-body-secondary mb-0">Sign in to continue</p>
                 </div>
 
+                <?php if ($this->session->flashdata('success')): ?>
+                    <div class="alert alert-success" role="alert">
+                        <?php echo html_escape($this->session->flashdata('success')); ?>
+                    </div>
+                <?php endif; ?>
+
                 <?php if (!empty($error)): ?>
                     <div class="alert alert-danger" role="alert">
                         <?php echo $error; ?>
