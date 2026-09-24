@@ -16,12 +16,6 @@ class Datatable_service
     private $max_search_length = 100;
 
     /**
-     * Maximum starting offset.
-     */
-    private $max_start = 100;
-
-
-    /**
      * Parse and sanitize DataTable request.
      *
      * @param CI_Input $input
@@ -61,12 +55,6 @@ class Datatable_service
         $start = isset($request['start'])
             ? max(0, (int) $request['start'])
             : 0;
-
-        /*
-         * Prevent extremely large offsets.
-         */
-        $start = min($start, $this->max_start);
-
 
         $length = isset($request['length'])
             ? (int) $request['length']
