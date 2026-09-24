@@ -37,7 +37,7 @@
                <?php if($this->User_model->has_permission($this->session->userdata('user_id'), 'view_dashboard')) : ?>
                  <a href="<?php echo site_url('stock/low-stock'); ?>">Low Stock</a> 
              <?php endif; ?>
-               <?php if($this->User_model->has_permission($this->session->userdata('user_id'), 'view_dashboard')) : ?>
+               <?php if($this->User_model->has_permission($this->session->userdata('user_id'), 'view_reports')) : ?>
                  <a href="<?php echo site_url('reports'); ?>">Reports</a>
              <?php endif; ?>
             <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'manage_users')): ?>
