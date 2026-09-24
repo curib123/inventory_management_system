@@ -18,6 +18,7 @@ class Products extends CI_Controller {
         $this->load->model('Supplier_model');
         $this->load->model('Category_model');
         $this->load->model('User_model');
+        $this->config->load('inventory');
     }
 
     public function index() {
@@ -183,7 +184,22 @@ class Products extends CI_Controller {
         $this->form_validation->set_rules('product_code', 'Product Code', 'trim|required|max_length[50]');
         $this->form_validation->set_rules('category_id', 'Category', 'required|integer|greater_than[0]');
         $this->form_validation->set_rules('supplier_id', 'Supplier', 'integer|greater_than[0]');
-        $this->form_validation->set_rules('unit', 'Unit', 'trim|max_length[50]');
+        $unit_options = (array) $this->config->item('product_units');
+        $allowed_units = array_keys($unit_options);
+
+        if (
+            $product &&
+            !empty($product->unit) &&
+            !in_array($product->unit, $allowed_units, TRUE)
+        ) {
+            $allowed_units[] = $product->unit;
+        }
+
+        $this->form_validation->set_rules(
+            'unit',
+            'Unit',
+            'required|in_list[' . implode(',', $allowed_units) . ']'
+        );
         $this->form_validation->set_rules('cost_price', 'Cost Price', 'required|numeric|greater_than_equal_to[0]');
         $this->form_validation->set_rules('selling_price', 'Selling Price', 'required|numeric|greater_than_equal_to[0]');
         $this->form_validation->set_rules('reorder_level', 'Reorder Level', 'required|integer|greater_than_equal_to[0]');
@@ -239,6 +255,15 @@ class Products extends CI_Controller {
         $data['categories'] = $this->Category_model->get_all();
         $data['page_title'] = $id === NULL ? 'Add Product' : 'Edit Product';
         $data['form_error'] = $form_error;
+        $data['product_units'] = (array) $this->config->item('product_units');
+
+        if (
+            $product &&
+            !empty($product->unit) &&
+            !isset($data['product_units'][$product->unit])
+        ) {
+            $data['product_units'][$product->unit] = $product->unit . ' (existing value)';
+        }
 
         $this->load->view('modal/products/form', $data);
     }
