@@ -86,6 +86,10 @@ class Product_model extends CI_Model {
     }
 
     public function save($data, $id = NULL) {
+        if (!$this->relationships_are_valid($data, $id)) {
+            return FALSE;
+        }
+
         if ($id !== NULL) {
             unset($data['stock']);
             $this->db->where('id', (int) $id);
@@ -93,6 +97,87 @@ class Product_model extends CI_Model {
         }
 
         return $this->db->insert('products', $data);
+    }
+
+    private function relationships_are_valid($data, $id = NULL) {
+        $current = NULL;
+
+        if ($id !== NULL) {
+            $current = $this->db
+                ->get_where('products', array('id' => (int) $id))
+                ->row();
+
+            if (!$current) {
+                return FALSE;
+            }
+        }
+
+        if (array_key_exists('category_id', $data)) {
+            $category_id = filter_var(
+                $data['category_id'],
+                FILTER_VALIDATE_INT,
+                array('options' => array(
+                    'min_range' => 1,
+                    'max_range' => 2147483647
+                ))
+            );
+
+            if ($category_id === FALSE) {
+                return FALSE;
+            }
+
+            $category = $this->db
+                ->get_where('categories', array('id' => (int) $category_id))
+                ->row();
+
+            $preserves_existing_category =
+                $current &&
+                (int) $current->category_id === (int) $category_id;
+
+            if (
+                !$category ||
+                (!(int) $category->status && !$preserves_existing_category)
+            ) {
+                return FALSE;
+            }
+        }
+
+        if (array_key_exists('supplier_id', $data)) {
+            $supplier_raw = $data['supplier_id'];
+
+            if ($supplier_raw !== NULL && $supplier_raw !== '') {
+                $supplier_id = filter_var(
+                    $supplier_raw,
+                    FILTER_VALIDATE_INT,
+                    array('options' => array(
+                        'min_range' => 1,
+                        'max_range' => 2147483647
+                    ))
+                );
+
+                if ($supplier_id === FALSE) {
+                    return FALSE;
+                }
+
+                $supplier = $this->db
+                    ->get_where('suppliers', array('id' => (int) $supplier_id))
+                    ->row();
+
+                $preserves_existing_supplier =
+                    $current &&
+                    $current->supplier_id !== NULL &&
+                    (int) $current->supplier_id === (int) $supplier_id;
+
+                if (
+                    !$supplier ||
+                    (!(int) $supplier->status && !$preserves_existing_supplier)
+                ) {
+                    return FALSE;
+                }
+            }
+        }
+
+        return TRUE;
     }
 
     public function delete($id) {
