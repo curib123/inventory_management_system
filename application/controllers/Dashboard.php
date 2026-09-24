@@ -20,7 +20,7 @@ class Dashboard extends CI_Controller {
     }
     // Mao ni ang main dashboard load: check access first, then kuhaon ang summary data.
     public function index() {
-        $this->require_permission('view_dashboard');
+        $this->require_permission('dashboard.view');
 
         $data['total_products'] = $this->Product_model->get_total_products();
         $data['total_stock'] = $this->Product_model->get_total_stock();
