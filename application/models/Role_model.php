@@ -24,9 +24,11 @@ class Role_model extends CI_Model {
 
     public function name_exists($name, $exclude_id = NULL) {
         $this->db->where('role_name', trim($name));
+
         if ($exclude_id !== NULL) {
             $this->db->where('id !=', (int) $exclude_id);
         }
+
         return $this->db->count_all_results('roles') > 0;
     }
 
@@ -40,20 +42,28 @@ class Role_model extends CI_Model {
             return FALSE;
         }
 
-        // Model na mismo mo-return sa new ID para dili na manghilabot ang controller sa DB object.
         return (int) $this->db->insert_id();
     }
 
     public function delete($id) {
-        $this->db->where('id', (int) $id);
-        return $this->db->delete('roles');
+        return $this->db->delete('roles', array('id' => (int) $id));
     }
 
+    // Permissions now belong to modules. Always read module data through the modules table.
     public function get_permissions() {
-        $this->db->where('status', 1);
-        $this->db->order_by('module_name', 'ASC');
-        $this->db->order_by('permission_name', 'ASC');
-        return $this->db->get('permissions')->result();
+        $this->db->select(
+            'p.id, p.module_id, p.permission_name, p.permission_key, p.action, ' .
+            'p.description, p.status, m.module_name, m.module_key, m.sort_order'
+        );
+        $this->db->from('permissions p');
+        $this->db->join('modules m', 'm.id = p.module_id', 'inner');
+        $this->db->where('p.status', 1);
+        $this->db->where('m.status', 1);
+        $this->db->order_by('m.sort_order', 'ASC');
+        $this->db->order_by('m.module_name', 'ASC');
+        $this->db->order_by('p.permission_name', 'ASC');
+
+        return $this->db->get()->result();
     }
 
     public function get_role_permissions($role_id) {
@@ -66,8 +76,31 @@ class Role_model extends CI_Model {
         }, $rows);
     }
 
+    public function get_role_permission_details($role_id) {
+        $this->db->select(
+            'p.id, p.permission_name, p.permission_key, p.action, p.description, ' .
+            'm.module_name, m.module_key, m.sort_order'
+        );
+        $this->db->from('role_permissions rp');
+        $this->db->join('permissions p', 'p.id = rp.permission_id', 'inner');
+        $this->db->join('modules m', 'm.id = p.module_id', 'inner');
+        $this->db->where('rp.role_id', (int) $role_id);
+        $this->db->where('p.status', 1);
+        $this->db->where('m.status', 1);
+        $this->db->order_by('m.sort_order', 'ASC');
+        $this->db->order_by('m.module_name', 'ASC');
+        $this->db->order_by('p.permission_name', 'ASC');
+
+        return $this->db->get()->result();
+    }
+
     public function sync_permissions($role_id, $permission_ids) {
         $role_id = (int) $role_id;
+
+        if ($role_id <= 0 || !$this->get_by_id($role_id)) {
+            return FALSE;
+        }
+
         $valid_permissions = array_map(function ($row) {
             return (int) $row->id;
         }, $this->get_permissions());
@@ -75,7 +108,8 @@ class Role_model extends CI_Model {
         $permission_ids = array_unique(array_map('intval', (array) $permission_ids));
         $permission_ids = array_values(array_intersect($permission_ids, $valid_permissions));
 
-        $this->db->trans_start();
+        $this->db->trans_begin();
+
         $this->db->delete('role_permissions', array('role_id' => $role_id));
 
         foreach ($permission_ids as $permission_id) {
@@ -83,10 +117,20 @@ class Role_model extends CI_Model {
                 'role_id' => $role_id,
                 'permission_id' => $permission_id
             ));
+
+            if ($this->db->affected_rows() < 1) {
+                $this->db->trans_rollback();
+                return FALSE;
+            }
         }
 
-        $this->db->trans_complete();
-        return $this->db->trans_status();
+        if ($this->db->trans_status() === FALSE) {
+            $this->db->trans_rollback();
+            return FALSE;
+        }
+
+        $this->db->trans_commit();
+        return TRUE;
     }
 
     public function has_users($role_id) {
