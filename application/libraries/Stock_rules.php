@@ -5,15 +5,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Stock_rules {
 
     public function calculate_stock($current_stock, $quantity, $type) {
-        $current_stock = (int) $current_stock;
-        $quantity = (int) $quantity;
-
         if (!in_array($type, array('stock_in', 'stock_out'), TRUE)) {
             throw new InvalidArgumentException('Invalid stock transaction type.');
         }
 
-        if ($quantity <= 0) {
-            throw new InvalidArgumentException('Quantity must be greater than zero.');
+        $current_stock = filter_var(
+            $current_stock,
+            FILTER_VALIDATE_INT,
+            array('options' => array('min_range' => 0))
+        );
+        $quantity = filter_var(
+            $quantity,
+            FILTER_VALIDATE_INT,
+            array('options' => array('min_range' => 1))
+        );
+
+        if ($current_stock === FALSE) {
+            throw new InvalidArgumentException(
+                'Current stock must be a non-negative whole number.'
+            );
+        }
+
+        if ($quantity === FALSE) {
+            throw new InvalidArgumentException(
+                'Quantity must be a whole number greater than zero.'
+            );
         }
 
         if ($type === 'stock_out' && $quantity > $current_stock) {
