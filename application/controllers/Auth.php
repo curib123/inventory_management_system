@@ -21,6 +21,11 @@ class Auth extends CI_Controller {
     }
 
     public function login() {
+        if ($this->User_model->count_all() === 0) {
+            redirect('setup');
+            return;
+        }
+
         if ($this->session->userdata('logged_in')) {
             $this->redirect_to_authorized_page();
             return;
