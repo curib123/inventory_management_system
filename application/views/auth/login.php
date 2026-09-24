@@ -65,7 +65,7 @@
                                 placeholder="Username"
                                 autocomplete="off"
                                 required
-                                minlength="3"
+                                minlength="2"
                                 maxlength="50"
                                 value="<?php echo html_escape(set_value('username')); ?>"
                             >
@@ -118,9 +118,6 @@
             </div>
         </div>
     
-
-
-
 <script src="<?php echo base_url('assets/js/auth/login.js'); ?>"></script>
 
 </body>
