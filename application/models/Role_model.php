@@ -7,6 +7,7 @@ class Role_model extends CI_Model {
     public function __construct() {
         parent::__construct();
         $this->load->database();
+        $this->config->load('permissions');
     }
 
     public function get_all() {
@@ -169,13 +170,48 @@ class Role_model extends CI_Model {
 
         $normalized = array_values(array_unique($normalized));
 
-        $valid_permissions = array_map(function ($row) {
-            return (int) $row->id;
-        }, $this->get_permissions());
+        $permission_rows = $this->get_permissions();
+        $valid_permissions = array();
+        $permission_id_by_key = array();
+        $permission_key_by_id = array();
+
+        foreach ($permission_rows as $permission) {
+            $permission_id = (int) $permission->id;
+            $permission_key = (string) $permission->permission_key;
+
+            $valid_permissions[] = $permission_id;
+            $permission_id_by_key[$permission_key] = $permission_id;
+            $permission_key_by_id[$permission_id] = $permission_key;
+        }
 
         if (!empty(array_diff($normalized, $valid_permissions))) {
             return FALSE;
         }
+
+        $dependencies = (array) $this->config->item('permission_dependencies');
+        $selected_keys = array();
+
+        foreach ($normalized as $permission_id) {
+            if (isset($permission_key_by_id[$permission_id])) {
+                $selected_keys[] = $permission_key_by_id[$permission_id];
+            }
+        }
+
+        foreach ($selected_keys as $permission_key) {
+            if (empty($dependencies[$permission_key])) {
+                continue;
+            }
+
+            foreach ((array) $dependencies[$permission_key] as $required_key) {
+                if (!isset($permission_id_by_key[$required_key])) {
+                    return FALSE;
+                }
+
+                $normalized[] = $permission_id_by_key[$required_key];
+            }
+        }
+
+        $normalized = array_values(array_unique($normalized));
 
         if (!$this->db->delete('role_permissions', array('role_id' => $role_id))) {
             return FALSE;
