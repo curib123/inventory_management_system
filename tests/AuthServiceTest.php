@@ -20,15 +20,29 @@ class AuthServiceTest extends TestCase {
         $user_model = $this->createMock(AuthUserModelStub::class);
         $user_model->expects($this->once())
             ->method('login')
-            ->with('admin', 'admin123')
+            ->with('admin', 'StrongPass123!')
             ->willReturn($user);
 
         $service = new Auth_service();
-        $session_data = $service->authenticate($user_model, 'admin', 'admin123');
+        $session_data = $service->authenticate($user_model, 'admin', 'StrongPass123!');
 
         $this->assertSame($user->id, $session_data['user_id']);
         $this->assertSame('admin', $session_data['username']);
         $this->assertSame('admin', $session_data['role_name']);
+        $this->assertTrue($session_data['logged_in']);
+    }
+
+    public function testSessionDataDoesNotContainLegacyPasswordChangeFlag() {
+        $user = (object) array(
+            'id' => 9,
+            'username' => 'inventory-user',
+            'role_id' => 2,
+            'role_name' => 'staff'
+        );
+
+        $session_data = (new Auth_service())->session_data($user);
+
+        $this->assertArrayNotHasKey('must_change_password', $session_data);
         $this->assertTrue($session_data['logged_in']);
     }
 
