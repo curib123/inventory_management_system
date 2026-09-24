@@ -55,6 +55,25 @@ class Stock extends CI_Controller {
         $this->transaction_form('stock_out');
     }
 
+    public function supplier_products($supplier_id) {
+        $this->require_permission('stock.stock_in');
+
+        if ($this->input->method(TRUE) !== 'GET') {
+            show_error('Invalid request method.', 405, 'Method Not Allowed');
+        }
+
+        $supplier = $this->Supplier_model->get_by_id($supplier_id);
+
+        if (!$supplier || !(int) $supplier->status) {
+            show_error('Supplier not found or inactive.', 404, 'Supplier Not Found');
+        }
+
+        $this->load->view('components/stock/product_quantity_list', array(
+            'products' => $this->Product_model->get_active_by_supplier($supplier_id),
+            'quantities' => array()
+        ));
+    }
+
     public function adjustment() {
         $this->require_permission('stock.adjust');
 
@@ -223,7 +242,7 @@ class Stock extends CI_Controller {
         $is_post = $this->input->method(TRUE) === 'POST';
         $valid = $this->form_validation->run();
         $item_error = '';
-        $items = $is_post ? $this->read_transaction_items($item_error) : array();
+        $items = $is_post ? $this->read_transaction_items($item_error, $type) : array();
 
         if ($item_error !== '') {
             $valid = FALSE;
@@ -252,11 +271,29 @@ class Stock extends CI_Controller {
     }
 
     private function render_transaction_form($type, $item_error = '') {
-        $data['products'] = $this->Product_model->get_active();
+        $data['products'] = $type === 'stock_out'
+            ? $this->Product_model->get_active()
+            : array();
+
         $data['suppliers'] = $this->Supplier_model->get_all();
         $data['transaction_type'] = $type;
         $data['page_title'] = $type === 'stock_in' ? 'Stock In' : 'Stock Out';
         $data['item_error'] = $item_error;
+        $data['stock_in_products'] = array();
+        $data['stock_in_quantities'] = array();
+
+        if ($type === 'stock_in') {
+            $supplier_id = (int) $this->input->post('supplier_id', TRUE);
+
+            if ($supplier_id > 0) {
+                $supplier = $this->Supplier_model->get_by_id($supplier_id);
+
+                if ($supplier && (int) $supplier->status === 1) {
+                    $data['stock_in_products'] = $this->Product_model->get_active_by_supplier($supplier_id);
+                    $data['stock_in_quantities'] = $this->posted_quantity_map();
+                }
+            }
+        }
 
         $this->load->view('modal/stock/transaction_form', $data);
     }
@@ -269,8 +306,7 @@ class Stock extends CI_Controller {
         $this->load->view('modal/stock/adjustment', $data);
     }
 
-    // Diri ra gi-parse ang repeated product/quantity rows para clean ang main transaction flow.
-    private function read_transaction_items(&$error) {
+    private function read_transaction_items(&$error, $type) {
         $error = '';
         $items = array();
         $product_ids = (array) $this->input->post('product_id', TRUE);
@@ -278,15 +314,29 @@ class Stock extends CI_Controller {
 
         foreach ($product_ids as $index => $product_id) {
             $product_id = (int) $product_id;
-            $quantity = isset($quantities[$index]) ? (int) $quantities[$index] : 0;
+            $raw_quantity = isset($quantities[$index]) ? trim((string) $quantities[$index]) : '';
+            $quantity = $raw_quantity === '' ? 0 : (int) $raw_quantity;
 
-            if ($product_id === 0 && $quantity === 0) {
-                continue;
-            }
+            if ($type === 'stock_in') {
+                // Stock In displays every product from one supplier.
+                // Blank/zero quantity means that product is simply not part of this transaction.
+                if ($quantity <= 0) {
+                    continue;
+                }
 
-            if ($product_id <= 0 || $quantity <= 0) {
-                $error = 'Every used item row must contain a product and a quantity greater than zero.';
-                return array();
+                if ($product_id <= 0) {
+                    $error = 'One of the selected stock-in products is invalid.';
+                    return array();
+                }
+            } else {
+                if ($product_id === 0 && $quantity === 0) {
+                    continue;
+                }
+
+                if ($product_id <= 0 || $quantity <= 0) {
+                    $error = 'Every used item row must contain a product and a quantity greater than zero.';
+                    return array();
+                }
             }
 
             $items[] = array(
@@ -296,10 +346,27 @@ class Stock extends CI_Controller {
         }
 
         if (empty($items)) {
-            $error = 'Add at least one product and quantity.';
+            $error = 'Add a quantity greater than zero for at least one product.';
         }
 
         return $items;
+    }
+
+    private function posted_quantity_map() {
+        $map = array();
+        $product_ids = (array) $this->input->post('product_id', TRUE);
+        $quantities = (array) $this->input->post('quantity', TRUE);
+
+        foreach ($product_ids as $index => $product_id) {
+            $product_id = (int) $product_id;
+            $quantity = isset($quantities[$index]) ? (int) $quantities[$index] : 0;
+
+            if ($product_id > 0 && $quantity > 0) {
+                $map[$product_id] = $quantity;
+            }
+        }
+
+        return $map;
     }
 
     private function require_permission($permission_key) {
