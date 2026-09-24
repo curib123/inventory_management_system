@@ -22,7 +22,7 @@
     >
 
     <link rel="stylesheet" href="<?php echo base_url('assets/css/sidebar.css'); ?>">
-    <link rel="stylesheet" href="<?php echo base_url('assets/css/modal.css'); ?>">
+    <link rel="stylesheet" href="<?php echo base_url('assets/css/components.css'); ?>">
 
     <title><?php echo html_escape(isset($page_title) ? $page_title : 'Inventory Management System'); ?></title>
 </head>
