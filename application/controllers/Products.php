@@ -200,9 +200,21 @@ class Products extends CI_Controller {
             'Unit',
             'required|in_list[' . implode(',', $allowed_units) . ']'
         );
-        $this->form_validation->set_rules('cost_price', 'Cost Price', 'required|numeric|greater_than_equal_to[0]');
-        $this->form_validation->set_rules('selling_price', 'Selling Price', 'required|numeric|greater_than_equal_to[0]');
-        $this->form_validation->set_rules('reorder_level', 'Reorder Level', 'required|integer|greater_than_equal_to[0]');
+        $this->form_validation->set_rules(
+            'cost_price',
+            'Cost Price',
+            'required|numeric|greater_than_equal_to[0]|less_than_equal_to[9999999999.99]'
+        );
+        $this->form_validation->set_rules(
+            'selling_price',
+            'Selling Price',
+            'required|numeric|greater_than_equal_to[0]|less_than_equal_to[9999999999.99]'
+        );
+        $this->form_validation->set_rules(
+            'reorder_level',
+            'Reorder Level',
+            'required|integer|greater_than_equal_to[0]|less_than_equal_to[2147483647]'
+        );
 
         if ($this->form_validation->run() === FALSE) {
             $this->render_product_form($id, $product);
