@@ -153,3 +153,5 @@ fix issues in stock in must follow the rule this rule phase 3
 7.Record stock movement 
 
 all pages have own branches to style make sure when merge to development no conflict
+
+proper layout in excell format and more nice table design in pdf format

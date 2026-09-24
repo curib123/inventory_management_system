@@ -18,7 +18,7 @@ class Datatable_service
     /**
      * Maximum starting offset.
      */
-    private $max_start = 1000000;
+    private $max_start = 100;
 
 
     /**

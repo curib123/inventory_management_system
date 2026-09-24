@@ -21,6 +21,10 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+
+    public function get_all_active(){
+        $thid->db->select('p.*, c.category_name, s.supplier-name');
+    }
     public function get_active($limit = NULL, $offset = 0) {
         $this->db->select('p.*, c.category_name, s.supplier_name');
         $this->db->from('products p');
