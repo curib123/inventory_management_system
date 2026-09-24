@@ -48,6 +48,23 @@ class Supplier_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    public function count_products($supplier_id) {
+        return $this->db
+            ->where('supplier_id', (int) $supplier_id)
+            ->count_all_results('products');
+    }
+
+    public function count_transactions($supplier_id) {
+        return $this->db
+            ->where('supplier_id', (int) $supplier_id)
+            ->count_all_results('stock_transactions');
+    }
+
+    public function has_dependencies($supplier_id) {
+        return $this->count_products($supplier_id) > 0 ||
+            $this->count_transactions($supplier_id) > 0;
+    }
+
     public function count_all() {
         return $this->db->count_all('suppliers');
     }
