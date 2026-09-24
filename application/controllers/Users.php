@@ -116,12 +116,16 @@ class Users extends CI_Controller {
 
         foreach ($users as $user) {
             $id = (int) $user->id;
-            $actions = '<button type="button" data-modal-url="' . site_url('users/view/' . $id) . '">View</button> ';
-            $actions .= '<button type="button" data-modal-url="' . site_url('users/edit/' . $id) . '">Edit</button> ';
+            $action_items = array(
+                array('label' => 'View', 'url' => site_url('users/view/' . $id), 'variant' => 'secondary', 'icon' => 'bi-eye'),
+                array('label' => 'Edit', 'url' => site_url('users/edit/' . $id), 'variant' => 'primary', 'icon' => 'bi-pencil')
+            );
 
             if ($id !== $current_user_id) {
-                $actions .= '<button type="button" data-modal-url="' . site_url('users/delete/' . $id) . '">Delete</button>';
+                $action_items[] = array('label' => 'Delete', 'url' => site_url('users/delete/' . $id), 'variant' => 'danger', 'icon' => 'bi-trash');
             }
+
+            $actions = ui_modal_action_group($action_items);
 
             $rows[] = array(
                 html_escape($user->first_name),
