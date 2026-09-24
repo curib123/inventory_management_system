@@ -2,24 +2,41 @@
 <?php
 $this->load->view('components/modal/header', array(
     'modal_title' => 'Delete Supplier',
-    'modal_subtitle' => 'This action permanently removes the selected supplier.',
+    'modal_subtitle' => 'Confirm this permanent action before continuing.',
     'modal_icon' => 'bi-trash3'
 ));
 ?>
 
 <div class="modal-body">
-    <p>Supplier: <strong><?php echo html_escape($supplier->supplier_name); ?></strong></p>
+    <div class="app-confirm-entity mb-3">
+        <div class="app-confirm-entity-label">Supplier</div>
+        <div class="app-confirm-entity-value"><?php echo html_escape($supplier->supplier_name); ?></div>
+    </div>
 
     <?php if (!empty($delete_error)): ?>
-        <div class="alert alert-warning mb-0"><?php echo html_escape($delete_error); ?></div>
+        <div class="alert alert-warning mb-0" role="alert">
+            <div class="fw-semibold mb-1">Deletion is not available</div>
+            <div><?php echo html_escape($delete_error); ?></div>
+        </div>
     <?php else: ?>
-        <div class="alert alert-danger mb-0">Are you sure you want to delete this supplier?</div>
+        <?php
+        $this->load->view('components/modal/confirmation', array(
+            'confirmation_variant' => 'danger',
+            'confirmation_icon' => 'bi-trash3',
+            'confirmation_title' => 'Delete Supplier?',
+            'confirmation_message' => 'Deleting removes this supplier from future supplier and Stock In selection.',
+            'confirmation_items' => array(
+                'This action cannot be undone.',
+                'Suppliers referenced by products or transactions may be protected from deletion.'
+            )
+        ));
+        ?>
     <?php endif; ?>
 </div>
 
 <?php
 $this->load->view('components/modal/footer', array(
-    'close_label' => !empty($delete_error) ? 'Close' : 'Cancel',
+    'close_label' => !empty($delete_error) ? 'Close' : 'Keep Supplier',
     'submit_label' => !empty($delete_error) ? '' : 'Delete Supplier',
     'submit_class' => 'btn-danger',
     'submit_icon' => 'bi-trash3'
