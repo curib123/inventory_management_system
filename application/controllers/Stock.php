@@ -312,41 +312,44 @@ class Stock extends CI_Controller {
         $product_ids = (array) $this->input->post('product_id', TRUE);
         $quantities = (array) $this->input->post('quantity', TRUE);
 
-        foreach ($product_ids as $index => $product_id) {
-            $product_id = (int) $product_id;
-            $raw_quantity = isset($quantities[$index]) ? trim((string) $quantities[$index]) : '';
-            $quantity = $raw_quantity === '' ? 0 : (int) $raw_quantity;
+        foreach ($product_ids as $index => $raw_product_id) {
+            $raw_product_id = trim((string) $raw_product_id);
+            $raw_quantity = isset($quantities[$index])
+                ? trim((string) $quantities[$index])
+                : '';
+
+            $product_id_is_valid = ctype_digit($raw_product_id) && (int) $raw_product_id > 0;
+            $quantity_is_blank = $raw_quantity === '' || $raw_quantity === '0';
+            $quantity_is_valid = ctype_digit($raw_quantity) && (int) $raw_quantity > 0;
 
             if ($type === 'stock_in') {
-                // Stock In displays every product from one supplier.
-                // Blank/zero quantity means that product is simply not part of this transaction.
-                if ($raw_quantity === '' || $raw_quantity === '0') {
+                // Every supplier product is rendered. Blank/zero means not included.
+                if ($quantity_is_blank) {
                     continue;
                 }
 
-                if (!ctype_digit($raw_quantity) || $quantity <= 0) {
-                    $error = 'Stock-in quantities must be whole numbers greater than zero.';
-                    return array();
-                }
-
-                if ($product_id <= 0) {
-                    $error = 'One of the selected stock-in products is invalid.';
+                if (!$product_id_is_valid || !$quantity_is_valid) {
+                    $error =
+                        'Stock-in product IDs and quantities must be positive whole numbers.';
                     return array();
                 }
             } else {
-                if ($product_id === 0 && $quantity === 0) {
+                $product_is_blank = $raw_product_id === '' || $raw_product_id === '0';
+
+                if ($product_is_blank && $quantity_is_blank) {
                     continue;
                 }
 
-                if ($product_id <= 0 || $quantity <= 0) {
-                    $error = 'Every used item row must contain a product and a quantity greater than zero.';
+                if (!$product_id_is_valid || !$quantity_is_valid) {
+                    $error =
+                        'Every used stock-out row must contain a valid product and a positive whole-number quantity.';
                     return array();
                 }
             }
 
             $items[] = array(
-                'product_id' => $product_id,
-                'quantity' => $quantity
+                'product_id' => (int) $raw_product_id,
+                'quantity' => (int) $raw_quantity
             );
         }
 
