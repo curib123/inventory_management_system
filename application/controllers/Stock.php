@@ -25,7 +25,7 @@ class Stock extends CI_Controller {
     }
 
     public function history() {
-        $this->require_permission('view_reports');
+        $this->require_permission('stock.history');
 
         $data['page_title'] = 'Stock Movement History';
         $this->load->view('templates/header', $data);
@@ -34,7 +34,7 @@ class Stock extends CI_Controller {
     }
 
     public function details($id) {
-        $this->require_permission('view_reports');
+        $this->require_permission('stock.history');
 
         $data['transaction'] = $this->Stock_model->get_transaction($id);
         if (!$data['transaction']) {
@@ -46,17 +46,17 @@ class Stock extends CI_Controller {
     }
 
     public function stock_in() {
-        $this->require_permission('manage_stock_in');
+        $this->require_permission('stock.stock_in');
         $this->transaction_form('stock_in');
     }
 
     public function stock_out() {
-        $this->require_permission('manage_stock_out');
+        $this->require_permission('stock.stock_out');
         $this->transaction_form('stock_out');
     }
 
     public function adjustment() {
-        $this->require_permission('manage_adjustments');
+        $this->require_permission('stock.adjust');
 
         $this->form_validation->set_rules('product_id', 'Product', 'required|integer|greater_than[0]');
         $this->form_validation->set_rules('actual_stock', 'Actual Stock', 'required|integer|greater_than_equal_to[0]');
@@ -84,7 +84,7 @@ class Stock extends CI_Controller {
     }
 
     public function adjustments() {
-        $this->require_permission('manage_adjustments');
+        $this->require_permission('stock.adjust');
 
         $data['page_title'] = 'Stock Adjustments';
         $this->load->view('templates/header', $data);
@@ -93,7 +93,7 @@ class Stock extends CI_Controller {
     }
 
     public function low_stock() {
-        $this->require_permission('view_dashboard');
+        $this->require_permission('stock.view');
 
         $data['page_title'] = 'Low Stock Monitoring';
         $this->load->view('templates/header', $data);
@@ -102,7 +102,7 @@ class Stock extends CI_Controller {
     }
 
     public function history_datatable() {
-        $this->require_permission('view_reports');
+        $this->require_permission('stock.history');
 
         $columns = array('t.transaction_no', 't.type', 's.supplier_name', 'u.username', 't.created_at', NULL);
         $request = $this->datatable_service->request($this->input, $columns, 't.created_at', 'desc');
@@ -144,7 +144,7 @@ class Stock extends CI_Controller {
     }
 
     public function adjustments_datatable() {
-        $this->require_permission('manage_adjustments');
+        $this->require_permission('stock.adjust');
 
         $columns = array('p.product_name', 'a.system_stock', 'a.actual_stock', 'a.difference', 'a.reason', 'u.username', 'a.created_at');
         $request = $this->datatable_service->request($this->input, $columns, 'a.created_at', 'desc');
@@ -180,7 +180,7 @@ class Stock extends CI_Controller {
     }
 
     public function low_stock_datatable() {
-        $this->require_permission('view_dashboard');
+        $this->require_permission('stock.view');
 
         $columns = array('p.product_code', 'p.product_name', 'p.stock', 'p.reorder_level', 'p.unit');
         $request = $this->datatable_service->request($this->input, $columns, 'p.stock', 'asc');
