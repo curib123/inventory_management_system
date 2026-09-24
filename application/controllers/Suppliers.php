@@ -90,8 +90,6 @@ class Suppliers extends CI_Controller {
             's.phone',
             's.address',
             's.status',
-            's.created_at',
-            's.updated_at',
             NULL
         );
 
