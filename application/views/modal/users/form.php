@@ -1,4 +1,19 @@
-<?php echo form_open(current_url(), array('data-modal-form' => '1')); ?>
+<?php
+$user_is_edit = isset($user) && $user;
+$user_confirmation = array(
+    'title' => $user_is_edit ? 'Save user changes?' : 'Create this user account?',
+    'message' => $user_is_edit
+        ? 'Review the user profile, role, status, and password changes before saving.'
+        : 'Review the account details and assigned role before creating access.',
+    'impact' => 'Role and status changes control what this user can access. Password changes take effect immediately after saving.',
+    'assist' => 'Confirm the person, username, assigned role, account status, and whether a password change is intended.',
+    'label' => $user_is_edit ? 'Save User Changes' : 'Create User',
+    'variant' => 'primary',
+    'icon' => 'bi-person-check'
+);
+
+echo form_open(current_url(), ui_modal_form_attributes($user_confirmation));
+?>
 <?php
 $this->load->view('components/modal/header', array(
     'modal_title' => $page_title,
@@ -19,57 +34,76 @@ $this->load->view('components/modal/header', array(
     <div class="row g-3">
         <div class="col-12 col-md-6">
             <label for="first_name" class="form-label">First Name</label>
-            <input type="text" id="first_name" name="first_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('first_name', isset($user) && $user ? $user->first_name : '')); ?>">
+            <input type="text" id="first_name" name="first_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('first_name', $user_is_edit ? $user->first_name : '')); ?>">
         </div>
 
         <div class="col-12 col-md-6">
             <label for="middle_name" class="form-label">Middle Name</label>
-            <input type="text" id="middle_name" name="middle_name" class="form-control" maxlength="100" value="<?php echo html_escape(set_value('middle_name', isset($user) && $user ? $user->middle_name : '')); ?>">
+            <input type="text" id="middle_name" name="middle_name" class="form-control" maxlength="100" value="<?php echo html_escape(set_value('middle_name', $user_is_edit ? $user->middle_name : '')); ?>">
         </div>
 
         <div class="col-12 col-md-6">
             <label for="last_name" class="form-label">Last Name</label>
-            <input type="text" id="last_name" name="last_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('last_name', isset($user) && $user ? $user->last_name : '')); ?>">
+            <input type="text" id="last_name" name="last_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('last_name', $user_is_edit ? $user->last_name : '')); ?>">
         </div>
 
         <div class="col-12 col-md-6">
             <label for="username" class="form-label">Username</label>
-            <input type="text" id="username" name="username" class="form-control" required minlength="3" maxlength="50" value="<?php echo html_escape(set_value('username', isset($user) && $user ? $user->username : '')); ?>">
+            <input type="text" id="username" name="username" class="form-control" required minlength="3" maxlength="50" value="<?php echo html_escape(set_value('username', $user_is_edit ? $user->username : '')); ?>">
+            <div class="form-text">Use a unique username the user can identify and remember.</div>
         </div>
 
         <div class="col-12">
             <label for="password" class="form-label">
-                Password<?php echo isset($user) && $user ? ' (leave blank to keep current password)' : ''; ?>
+                Password<?php echo $user_is_edit ? ' (leave blank to keep current password)' : ''; ?>
             </label>
-            <input type="password" id="password" name="password" class="form-control" <?php echo isset($user) && $user ? '' : 'required'; ?> minlength="8" maxlength="255" autocomplete="new-password">
+            <input type="password" id="password" name="password" class="form-control" <?php echo $user_is_edit ? '' : 'required'; ?> minlength="8" maxlength="255" autocomplete="new-password">
+            <div class="form-text">
+                <?php echo $user_is_edit
+                    ? 'Only enter a password when you intentionally want to replace the current one.'
+                    : 'Use at least 8 characters. The user can sign in with this password after the account is created.'; ?>
+            </div>
         </div>
 
         <div class="col-12 col-md-6">
             <label for="role_id" class="form-label">Role</label>
-            <?php $selected_role = set_value('role_id', isset($user) && $user ? $user->role_id : ''); ?>
+            <?php $selected_role = set_value('role_id', $user_is_edit ? $user->role_id : ''); ?>
             <select id="role_id" name="role_id" class="form-select" required>
                 <option value="">Select Role</option>
                 <?php foreach ($roles as $role): ?>
                     <option value="<?php echo (int) $role->id; ?>" <?php echo ((string) $selected_role === (string) $role->id) ? 'selected' : ''; ?>><?php echo html_escape($role->role_name); ?></option>
                 <?php endforeach; ?>
             </select>
+            <div class="form-text">The selected role determines the modules and actions this user can access.</div>
         </div>
 
         <div class="col-12 col-md-6">
             <label for="status" class="form-label">Status</label>
-            <?php $selected_status = set_value('status', isset($user) && $user ? $user->status : 1); ?>
+            <?php $selected_status = set_value('status', $user_is_edit ? $user->status : 1); ?>
             <select id="status" name="status" class="form-select">
                 <option value="1" <?php echo ((string) $selected_status === '1') ? 'selected' : ''; ?>>Active</option>
                 <option value="0" <?php echo ((string) $selected_status === '0') ? 'selected' : ''; ?>>Inactive</option>
             </select>
+            <div class="form-text">Inactive users cannot use the account for normal system access.</div>
         </div>
+    </div>
+
+    <div class="mt-3">
+        <?php
+        $this->load->view('components/form/assist_note', array(
+            'assist_title' => 'Access check',
+            'assist_text' => 'Confirm the assigned role carefully. Role and status changes can immediately change what this account can access.',
+            'assist_variant' => 'warning',
+            'assist_icon' => 'bi-shield-exclamation'
+        ));
+        ?>
     </div>
 </div>
 
 <?php
 $this->load->view('components/modal/footer', array(
     'close_label' => 'Cancel',
-    'submit_label' => 'Save User',
+    'submit_label' => $user_is_edit ? 'Save User' : 'Create User',
     'submit_icon' => 'bi-check-lg'
 ));
 ?>
