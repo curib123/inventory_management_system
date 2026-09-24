@@ -122,7 +122,14 @@ class Stock extends CI_Controller {
                 html_escape($transaction->supplier_name ?: 'N/A'),
                 html_escape($transaction->username),
                 html_escape($transaction->created_at),
-                '<button type="button" data-modal-url="' . site_url('stock/details/' . (int) $transaction->id) . '">Details</button>'
+                ui_modal_action_group(array(
+                    array(
+                        'label' => 'Details',
+                        'url' => site_url('stock/details/' . (int) $transaction->id),
+                        'variant' => 'secondary',
+                        'icon' => 'bi-eye'
+                    )
+                ))
             );
         }
 
