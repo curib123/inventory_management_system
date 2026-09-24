@@ -1,15 +1,19 @@
 <?php
+$page_actions = array();
+
+if ($this->User_model->has_permission($this->session->userdata('user_id'), 'users.create')) {
+    $page_actions[] = array(
+        'label' => 'Add User',
+        'icon' => 'bi-person-plus',
+        'class' => 'btn-primary',
+        'modal_url' => site_url('users/add')
+    );
+}
+
 $this->load->view('components/page_header', array(
     'title' => 'User Management',
     'description' => 'Manage user accounts, names, roles, access status, and account activity.',
-    'actions' => array(
-        array(
-            'label' => 'Add User',
-            'icon' => 'bi-person-plus',
-            'class' => 'btn-primary',
-            'modal_url' => site_url('users/add')
-        )
-    )
+    'actions' => $page_actions
 ));
 
 $this->load->view('components/data_table', array(
