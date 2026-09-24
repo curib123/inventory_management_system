@@ -43,51 +43,51 @@
         <div class="sidebar-heading">Main Menu</div>
 
         <nav class="nav flex-column" aria-label="Main navigation">
-            <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'view_dashboard')): ?>
+            <?php $current_user_id = (int) $this->session->userdata('user_id'); ?>
+
+            <?php if ($this->User_model->has_permission($current_user_id, 'dashboard.view')): ?>
                 <a class="nav-link" href="<?php echo site_url('dashboard'); ?>">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
             <?php endif; ?>
 
-            <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'manage_products')): ?>
+            <?php if ($this->User_model->has_permission($current_user_id, 'products.view')): ?>
                 <a class="nav-link" href="<?php echo site_url('products'); ?>">
                     <i class="bi bi-box"></i>
                     <span>Products</span>
                 </a>
+            <?php endif; ?>
 
+            <?php if ($this->User_model->has_permission($current_user_id, 'categories.view')): ?>
                 <a class="nav-link" href="<?php echo site_url('categories'); ?>">
                     <i class="bi bi-tags"></i>
                     <span>Categories</span>
                 </a>
             <?php endif; ?>
 
-            <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'manage_suppliers')): ?>
+            <?php if ($this->User_model->has_permission($current_user_id, 'suppliers.view')): ?>
                 <a class="nav-link" href="<?php echo site_url('suppliers'); ?>">
                     <i class="bi bi-truck"></i>
                     <span>Suppliers</span>
                 </a>
             <?php endif; ?>
 
-            <?php if (
-                $this->User_model->has_permission($this->session->userdata('user_id'), 'view_reports') ||
-                $this->User_model->has_permission($this->session->userdata('user_id'), 'manage_stock_in') ||
-                $this->User_model->has_permission($this->session->userdata('user_id'), 'manage_stock_out')
-            ): ?>
+            <?php if ($this->User_model->has_permission($current_user_id, 'stock.history')): ?>
                 <a class="nav-link" href="<?php echo site_url('stock'); ?>">
                     <i class="bi bi-arrow-left-right"></i>
                     <span>Stock History</span>
                 </a>
             <?php endif; ?>
 
-            <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'view_dashboard')): ?>
+            <?php if ($this->User_model->has_permission($current_user_id, 'stock.view')): ?>
                 <a class="nav-link" href="<?php echo site_url('stock/low-stock'); ?>">
                     <i class="bi bi-exclamation-triangle"></i>
                     <span>Low Stock</span>
                 </a>
             <?php endif; ?>
 
-            <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'view_reports')): ?>
+            <?php if ($this->User_model->has_permission($current_user_id, 'reports.view')): ?>
                 <div class="sidebar-heading">Reports</div>
 
                 <a class="nav-link" href="<?php echo site_url('reports'); ?>">
@@ -96,18 +96,22 @@
                 </a>
             <?php endif; ?>
 
-            <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'manage_users')): ?>
+            <?php if ($this->User_model->has_any_permission($current_user_id, array('users.view', 'roles.view'))): ?>
                 <div class="sidebar-heading">Administration</div>
 
-                <a class="nav-link" href="<?php echo site_url('users'); ?>">
-                    <i class="bi bi-people"></i>
-                    <span>Users</span>
-                </a>
+                <?php if ($this->User_model->has_permission($current_user_id, 'users.view')): ?>
+                    <a class="nav-link" href="<?php echo site_url('users'); ?>">
+                        <i class="bi bi-people"></i>
+                        <span>Users</span>
+                    </a>
+                <?php endif; ?>
 
-                <a class="nav-link" href="<?php echo site_url('roles'); ?>">
-                    <i class="bi bi-shield-lock"></i>
-                    <span>Roles</span>
-                </a>
+                <?php if ($this->User_model->has_permission($current_user_id, 'roles.view')): ?>
+                    <a class="nav-link" href="<?php echo site_url('roles'); ?>">
+                        <i class="bi bi-shield-lock"></i>
+                        <span>Roles</span>
+                    </a>
+                <?php endif; ?>
             <?php endif; ?>
         </nav>
 
