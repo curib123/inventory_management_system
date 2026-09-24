@@ -63,7 +63,7 @@
                                 id="username"
                                 class="form-control"
                                 placeholder="Username"
-                                autocomplete="username"
+                                autocomplete="off"
                                 required
                                 minlength="3"
                                 maxlength="50"
@@ -86,20 +86,13 @@
                                 id="password"
                                 class="form-control"
                                 placeholder="Password"
-                                autocomplete="current-password"
+                                autocomplete="off"
                                 required
                                 minlength="6"
                                 maxlength="255"
                             >
 
-                            <button
-                                type="button"
-                                class="btn btn-outline-secondary"
-                                id="togglePassword"
-                                aria-label="Show password"
-                            >
-                                <i id="eyeIcon" class="bi bi-eye"></i>
-                            </button>
+                           
                         </div>
                     </div>
 
@@ -126,7 +119,10 @@
         </div>
     
 
-<script src="<?php echo base_url('assets/js/login.js'); ?>"></script>
+
+
+<script src="<?php echo base_url('assets/js/auth/login.js'); ?>"></script>
+
 </body>
 </html>
 

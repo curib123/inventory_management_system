@@ -57,19 +57,22 @@ document.addEventListener('DOMContentLoaded', () => {
         buttonText.textContent = loading ? 'Signing in...' : 'Sign In';
     };
 
-    // Password visibility
-    togglePassword.addEventListener('click', () => {
-        const show = password.type === 'password';
+    // // Password visibility
+    // togglePassword.addEventListener('click', () => {
+    //     const show = password.type === 'password';
+    //     let click_count = 0;
 
-        password.type = show ? 'text' : 'password';
-        eyeIcon.classList.toggle('bi-eye', !show);
-        eyeIcon.classList.toggle('bi-eye-slash', show);
+    //     console.log(click_count++);
 
-        togglePassword.setAttribute(
-            'aria-label',
-            show ? 'Hide password' : 'Show password'
-        );
-    });
+    //     password.type = show ? 'text' : 'password';
+    //     eyeIcon.classList.toggle('bi-eye', !show);
+    //     eyeIcon.classList.toggle('bi-eye-slash', show);
+
+    //     togglePassword.setAttribute(
+    //         'aria-label',
+    //         show ? 'Hide password' : 'Show password'
+    //     );
+    // });
 
     // AJAX Login
     form.addEventListener('submit', async (event) => {
