@@ -16,8 +16,20 @@ class Stock_model extends CI_Model {
         }
 
         $supplier_id = ($supplier_id === '' || $supplier_id === NULL) ? NULL : (int) $supplier_id;
+
         if ($type === 'stock_in' && !$supplier_id) {
             return array('success' => FALSE, 'message' => 'A supplier is required for stock-in transactions.');
+        }
+
+        if ($type === 'stock_in') {
+            $active_supplier = $this->db
+                ->where('id', $supplier_id)
+                ->where('status', 1)
+                ->count_all_results('suppliers') > 0;
+
+            if (!$active_supplier) {
+                return array('success' => FALSE, 'message' => 'The selected supplier is invalid or inactive.');
+            }
         }
 
         // Normalize first para duplicate product rows ma-combine before stock update.
