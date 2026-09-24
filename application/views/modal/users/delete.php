@@ -1,12 +1,28 @@
-<h2>Delete User</h2>
-<p>User: <?php echo html_escape($user->first_name . ' ' . $user->last_name); ?> (<?php echo html_escape($user->username); ?>)</p>
-<?php if (!empty($delete_error)): ?>
-    <p><?php echo html_escape($delete_error); ?></p>
-    <button type="button" data-modal-close>Close</button>
-<?php else: ?>
-    <p>Are you sure you want to delete this user?</p>
-    <?php echo form_open(current_url(), array('data-modal-form' => '1')); ?>
-        <button type="submit">Delete User</button>
-        <button type="button" data-modal-close>Cancel</button>
-    <?php echo form_close(); ?>
-<?php endif; ?>
+<?php echo form_open(current_url(), array('data-modal-form' => '1')); ?>
+<?php
+$this->load->view('components/modal/header', array(
+    'modal_title' => 'Delete User',
+    'modal_subtitle' => 'This action permanently removes the selected user.',
+    'modal_icon' => 'bi-trash3'
+));
+?>
+
+<div class="modal-body">
+    <p>User: <strong><?php echo html_escape($user->first_name . ' ' . $user->last_name); ?></strong> (<?php echo html_escape($user->username); ?>)</p>
+
+    <?php if (!empty($delete_error)): ?>
+        <div class="alert alert-warning mb-0"><?php echo html_escape($delete_error); ?></div>
+    <?php else: ?>
+        <div class="alert alert-danger mb-0">Are you sure you want to delete this user?</div>
+    <?php endif; ?>
+</div>
+
+<?php
+$this->load->view('components/modal/footer', array(
+    'close_label' => !empty($delete_error) ? 'Close' : 'Cancel',
+    'submit_label' => !empty($delete_error) ? '' : 'Delete User',
+    'submit_class' => 'btn-danger',
+    'submit_icon' => 'bi-trash3'
+));
+?>
+<?php echo form_close(); ?>
