@@ -18,43 +18,108 @@ CREATE TABLE roles (
     UNIQUE KEY uq_roles_name (role_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- -------------------------------------------------------------------
--- Permissions ni — defines unsay pwede buhaton per module.
--- -------------------------------------------------------------------
-CREATE TABLE permissions (
+
+-- ============================================================
+-- MODULES
+-- Parent/group of permissions
+-- ============================================================
+
+CREATE TABLE modules (
     id INT NOT NULL AUTO_INCREMENT,
-    permission_name VARCHAR(100) NOT NULL,
     module_name VARCHAR(100) NOT NULL,
+    module_key VARCHAR(100) NOT NULL,
     description VARCHAR(255) DEFAULT NULL,
     status TINYINT(1) NOT NULL DEFAULT 1,
+    sort_order INT NOT NULL DEFAULT 0,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id),
-    UNIQUE KEY uq_permissions_name (permission_name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
 
--- -------------------------------------------------------------------
--- Role permissions mapping ni — mao ni ang link sa roles ug permissions.
--- -------------------------------------------------------------------
-CREATE TABLE role_permissions (
-    id INT NOT NULL AUTO_INCREMENT,
-    role_id INT NOT NULL,
-    permission_id INT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    UNIQUE KEY uq_role_permission (role_id, permission_id),
-    KEY idx_role_permissions_role (role_id),
-    KEY idx_role_permissions_permission (permission_id),
-    CONSTRAINT fk_role_permissions_role
-        FOREIGN KEY (role_id) REFERENCES roles(id)
-        ON UPDATE CASCADE
-        ON DELETE CASCADE,
-    CONSTRAINT fk_role_permissions_permission
-        FOREIGN KEY (permission_id) REFERENCES permissions(id)
+    UNIQUE KEY uq_modules_name (module_name),
+    UNIQUE KEY uq_modules_key (module_key)
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================
+-- PERMISSIONS
+-- Child actions belonging to a module
+-- ============================================================
+
+CREATE TABLE permissions (
+    id INT NOT NULL AUTO_INCREMENT,
+    module_id INT NOT NULL,
+
+    permission_name VARCHAR(100) NOT NULL,
+    permission_key VARCHAR(100) NOT NULL,
+    action VARCHAR(50) NOT NULL,
+
+    description VARCHAR(255) DEFAULT NULL,
+    status TINYINT(1) NOT NULL DEFAULT 1,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_permissions_key (permission_key),
+    UNIQUE KEY uq_module_action (module_id, action),
+
+    KEY idx_permissions_module (module_id),
+
+    CONSTRAINT fk_permissions_module
+        FOREIGN KEY (module_id)
+        REFERENCES modules(id)
         ON UPDATE CASCADE
         ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+
+-- ============================================================
+-- ROLE PERMISSIONS
+-- Assign permissions to roles
+-- ============================================================
+
+CREATE TABLE role_permissions (
+    id INT NOT NULL AUTO_INCREMENT,
+
+    role_id INT NOT NULL,
+    permission_id INT NOT NULL,
+
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id),
+
+    UNIQUE KEY uq_role_permission (role_id, permission_id),
+
+    KEY idx_role_permissions_role (role_id),
+    KEY idx_role_permissions_permission (permission_id),
+
+    CONSTRAINT fk_role_permissions_role
+        FOREIGN KEY (role_id)
+        REFERENCES roles(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE,
+
+    CONSTRAINT fk_role_permissions_permission
+        FOREIGN KEY (permission_id)
+        REFERENCES permissions(id)
+        ON UPDATE CASCADE
+        ON DELETE CASCADE
+
+) ENGINE=InnoDB
+  DEFAULT CHARSET=utf8mb4
+  COLLATE=utf8mb4_unicode_ci;
+
+
 
 -- -------------------------------------------------------------------
 -- Users table ni — account ug basic profile data diri ma-store.
@@ -238,47 +303,314 @@ CREATE TABLE activity_logs (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
--- Seed data ni for roles ug permissions para ready-to-use dayon ang fresh setup.
+-- Seed data ni for roles, modules, and permissions
+-- para ready-to-use dayon ang fresh setup.
+-- -------------------------------------------------------------------
+
+-- -------------------------------------------------------------------
+-- Roles
 -- -------------------------------------------------------------------
 INSERT INTO roles (role_name, description, status) VALUES
 ('admin', 'Full system access', 1),
 ('staff', 'Limited inventory access', 1)
-ON DUPLICATE KEY UPDATE role_name = role_name;
+ON DUPLICATE KEY UPDATE
+    description = VALUES(description),
+    status = VALUES(status);
 
-INSERT INTO permissions (permission_name, module_name, description, status) VALUES
-('view_dashboard', 'dashboard', 'View dashboard overview', 1),
-('manage_products', 'products', 'Create, edit, and delete products', 1),
-('manage_categories', 'category', 'Create, edit, and delete category', 1),
-('manage_suppliers', 'suppliers', 'Create, edit, and delete suppliers', 1),
-('manage_stock_in', 'stock_in', 'Process stock-in transactions', 1),
-('manage_stock_out', 'stock_out', 'Process stock-out transactions', 1),
-('manage_adjustments', 'stock_adjustment', 'Adjust inventory records', 1),
-('view_reports', 'reports', 'View and export reports', 1),
-('manage_users', 'users', 'Manage system users and roles', 1)
-ON DUPLICATE KEY UPDATE permission_name = permission_name;
 
+-- -------------------------------------------------------------------
+-- Modules
+-- -------------------------------------------------------------------
+INSERT INTO modules
+(module_name, module_key, description, status, sort_order)
+VALUES
+('Dashboard',  'dashboard',  'Dashboard overview', 1, 10),
+('Products',   'products',   'Product management', 1, 20),
+('Categories', 'categories', 'Category management', 1, 30),
+('Suppliers',  'suppliers',  'Supplier management', 1, 40),
+('Stock',      'stock',      'Inventory stock management', 1, 50),
+('Reports',    'reports',    'Inventory reports', 1, 60),
+('Users',      'users',      'User management', 1, 70),
+('Roles',      'roles',      'Role and permission management', 1, 80)
+ON DUPLICATE KEY UPDATE
+    description = VALUES(description),
+    status = VALUES(status),
+    sort_order = VALUES(sort_order);
+
+
+-- -------------------------------------------------------------------
+-- Dashboard permissions
+-- -------------------------------------------------------------------
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT
+    id,
+    'View Dashboard',
+    'dashboard.view',
+    'view',
+    'View dashboard overview',
+    1
+FROM modules
+WHERE module_key = 'dashboard'
+ON DUPLICATE KEY UPDATE
+    description = VALUES(description),
+    status = VALUES(status);
+
+
+-- -------------------------------------------------------------------
+-- Product permissions
+-- -------------------------------------------------------------------
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'View Products', 'products.view', 'view',
+       'View products', 1
+FROM modules WHERE module_key = 'products'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Create Products', 'products.create', 'create',
+       'Add products', 1
+FROM modules WHERE module_key = 'products'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Edit Products', 'products.edit', 'edit',
+       'Edit products', 1
+FROM modules WHERE module_key = 'products'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Delete Products', 'products.delete', 'delete',
+       'Delete products', 1
+FROM modules WHERE module_key = 'products'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+
+-- -------------------------------------------------------------------
+-- Category permissions
+-- -------------------------------------------------------------------
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'View Categories', 'categories.view', 'view',
+       'View categories', 1
+FROM modules WHERE module_key = 'categories'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Create Categories', 'categories.create', 'create',
+       'Add categories', 1
+FROM modules WHERE module_key = 'categories'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Edit Categories', 'categories.edit', 'edit',
+       'Edit categories', 1
+FROM modules WHERE module_key = 'categories'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Delete Categories', 'categories.delete', 'delete',
+       'Delete categories', 1
+FROM modules WHERE module_key = 'categories'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+
+-- -------------------------------------------------------------------
+-- Supplier permissions
+-- -------------------------------------------------------------------
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'View Suppliers', 'suppliers.view', 'view',
+       'View suppliers', 1
+FROM modules WHERE module_key = 'suppliers'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Create Suppliers', 'suppliers.create', 'create',
+       'Add suppliers', 1
+FROM modules WHERE module_key = 'suppliers'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Edit Suppliers', 'suppliers.edit', 'edit',
+       'Edit suppliers', 1
+FROM modules WHERE module_key = 'suppliers'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Delete Suppliers', 'suppliers.delete', 'delete',
+       'Delete suppliers', 1
+FROM modules WHERE module_key = 'suppliers'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+
+-- -------------------------------------------------------------------
+-- Stock permissions
+-- -------------------------------------------------------------------
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'View Stock', 'stock.view', 'view',
+       'View current stock', 1
+FROM modules WHERE module_key = 'stock'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Stock In', 'stock.stock_in', 'stock_in',
+       'Process stock-in transactions', 1
+FROM modules WHERE module_key = 'stock'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Stock Out', 'stock.stock_out', 'stock_out',
+       'Process stock-out transactions', 1
+FROM modules WHERE module_key = 'stock'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Adjust Stock', 'stock.adjust', 'adjust',
+       'Adjust inventory records', 1
+FROM modules WHERE module_key = 'stock'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'View Stock History', 'stock.history', 'history',
+       'View stock transaction history', 1
+FROM modules WHERE module_key = 'stock'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+
+-- -------------------------------------------------------------------
+-- Report permissions
+-- -------------------------------------------------------------------
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'View Reports', 'reports.view', 'view',
+       'View reports', 1
+FROM modules WHERE module_key = 'reports'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Export Reports', 'reports.export', 'export',
+       'Export reports', 1
+FROM modules WHERE module_key = 'reports'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+
+-- -------------------------------------------------------------------
+-- User permissions
+-- -------------------------------------------------------------------
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'View Users', 'users.view', 'view',
+       'View system users', 1
+FROM modules WHERE module_key = 'users'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Create Users', 'users.create', 'create',
+       'Create system users', 1
+FROM modules WHERE module_key = 'users'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Edit Users', 'users.edit', 'edit',
+       'Edit system users', 1
+FROM modules WHERE module_key = 'users'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'Delete Users', 'users.delete', 'delete',
+       'Delete system users', 1
+FROM modules WHERE module_key = 'users'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+
+-- -------------------------------------------------------------------
+-- Role permissions: ADMIN
+-- Admin gets all active permissions.
+-- -------------------------------------------------------------------
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM roles r
-JOIN permissions p ON 1=1
+CROSS JOIN permissions p
 WHERE r.role_name = 'admin'
-ON DUPLICATE KEY UPDATE role_id = role_id;
+  AND p.status = 1
+ON DUPLICATE KEY UPDATE
+    role_id = VALUES(role_id);
 
+
+-- -------------------------------------------------------------------
+-- Role permissions: STAFF
+-- Staff gets limited inventory permissions.
+-- -------------------------------------------------------------------
 INSERT INTO role_permissions (role_id, permission_id)
 SELECT r.id, p.id
 FROM roles r
-JOIN permissions p ON p.permission_name IN ('view_dashboard', 'manage_products', 'manage_suppliers', 'manage_stock_in', 'manage_stock_out', 'view_reports')
+JOIN permissions p
+    ON p.permission_key IN (
+        'dashboard.view',
+
+        'products.view',
+
+        'categories.view',
+
+        'suppliers.view',
+
+        'stock.view',
+        'stock.stock_in',
+        'stock.stock_out',
+        'stock.history',
+
+        'reports.view'
+    )
 WHERE r.role_name = 'staff'
-ON DUPLICATE KEY UPDATE role_id = role_id;
+ON DUPLICATE KEY UPDATE
+    role_id = VALUES(role_id);
+
 
 -- -------------------------------------------------------------------
--- Default admin account ni for initial setup; ilisi dayon ang password sa real deployment.
+-- Default admin account ni for initial setup.
+-- Ilisi dayon ang password sa real deployment.
 -- -------------------------------------------------------------------
-INSERT INTO users (first_name, middle_name, last_name, username, password, role_id, status)
-SELECT 'System', NULL, 'Administrator', 'admin', '$2y$12$sDusIfJlzofgxJf6D7cAbetKPOSUzw.CpIxK/kVxXLSWESpynCEtm', r.id, 1
+INSERT INTO users (
+    first_name,
+    middle_name,
+    last_name,
+    username,
+    password,
+    role_id,
+    status
+)
+SELECT
+    'System',
+    NULL,
+    'Administrator',
+    'admin',
+    '$2y$12$sDusIfJlzofgxJf6D7cAbetKPOSUzw.CpIxK/kVxXLSWESpynCEtm',
+    r.id,
+    1
 FROM roles r
 WHERE r.role_name = 'admin'
-ON DUPLICATE KEY UPDATE username = username;
+ON DUPLICATE KEY UPDATE
+    username = username;
+
 
 -- -------------------------------------------------------------------
 -- Optional starter categories ni; pwede ra nimo ilisan based sa actual inventory.
