@@ -21,7 +21,7 @@ class Products extends CI_Controller {
     }
 
     public function index() {
-        $this->require_permission('manage_products');
+        $this->require_permission('products.view');
 
         $data['page_title'] = 'Products';
         $this->load->view('templates/header', $data);
@@ -30,12 +30,12 @@ class Products extends CI_Controller {
     }
 
     public function add() {
-        $this->require_permission('manage_products');
+        $this->require_permission('products.create');
         $this->product_form();
     }
 
     public function view($id) {
-        $this->require_permission('manage_products');
+        $this->require_permission('products.view');
 
         $data['product'] = $this->Product_model->get_by_id($id);
         if (!$data['product']) {
@@ -46,7 +46,7 @@ class Products extends CI_Controller {
     }
 
     public function edit($id) {
-        $this->require_permission('manage_products');
+        $this->require_permission('products.edit');
 
         $product = $this->Product_model->get_by_id($id);
         if (!$product) {
@@ -57,7 +57,7 @@ class Products extends CI_Controller {
     }
 
     public function delete($id) {
-        $this->require_permission('manage_products');
+        $this->require_permission('products.delete');
 
         $product = $this->Product_model->get_by_id($id);
         if (!$product) {
@@ -97,7 +97,7 @@ class Products extends CI_Controller {
     }
 
     public function datatable() {
-        $this->require_permission('manage_products');
+        $this->require_permission('products.view');
 
         $columns = array(
             'p.id',
