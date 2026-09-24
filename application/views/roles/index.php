@@ -1,17 +1,28 @@
-<h2>Roles and Permissions</h2>
-<p><button type="button" data-modal-url="<?php echo site_url('roles/add'); ?>">Add Role</button></p>
+<?php
+$this->load->view('components/page_header', array(
+    'title' => 'Roles and Permissions',
+    'description' => 'Create roles and control which parts of the inventory system each role can access.',
+    'actions' => array(
+        array(
+            'label' => 'Add Role',
+            'icon' => 'bi-shield-plus',
+            'class' => 'btn-primary',
+            'modal_url' => site_url('roles/add')
+        )
+    )
+));
 
-<table data-datatable-server data-source="<?php echo site_url('roles/datatable'); ?>">
-    <thead>
-        <tr>
-            <th>Role</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Users</th>
-            <th data-orderable="false">Actions</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+$this->load->view('components/data_table', array(
+    'source' => site_url('roles/datatable'),
+    'table_id' => 'roles-table',
+    'columns' => array(
+        'Role',
+        'Description',
+        'Status',
+        'Users',
+        array('label' => 'Actions', 'orderable' => false)
+    )
+));
 
-<?php $this->load->view('modal/container'); ?>
+$this->load->view('modal/container');
+?>
