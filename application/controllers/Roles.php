@@ -99,6 +99,7 @@ class Roles extends CI_Controller {
             return;
         }
 
+        $this->session->set_flashdata('success', 'Role deleted successfully.');
         redirect('roles');
     }
 
@@ -303,6 +304,15 @@ class Roles extends CI_Controller {
             }
         }
 
+        if (!$can_edit_role && $can_manage_permissions) {
+            $success_message = 'Role permissions updated successfully.';
+        } elseif ($id === NULL) {
+            $success_message = 'Role created successfully.';
+        } else {
+            $success_message = 'Role changes saved successfully.';
+        }
+
+        $this->session->set_flashdata('success', $success_message);
         redirect('roles');
     }
 
