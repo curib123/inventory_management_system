@@ -94,6 +94,7 @@ class Suppliers extends CI_Controller {
             return;
         }
 
+        $this->session->set_flashdata('success', 'Supplier deleted successfully.');
         redirect('suppliers');
     }
 
@@ -197,6 +198,10 @@ class Suppliers extends CI_Controller {
             return;
         }
 
+        $this->session->set_flashdata(
+            'success',
+            $id === NULL ? 'Supplier created successfully.' : 'Supplier changes saved successfully.'
+        );
         redirect('suppliers');
     }
 
