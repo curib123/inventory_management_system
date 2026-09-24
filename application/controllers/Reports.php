@@ -4,15 +4,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Reports extends CI_Controller {
 
-
     public function __construct() {
         parent::__construct();
         $this->load->library('session');
         $this->load->helper(array('url', 'html'));
         $this->load->library('Datatable_service');
+
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
+
         $this->load->model('User_model');
         $this->load->library('Report_rules');
         $this->require_permission('reports.view');
@@ -50,11 +51,14 @@ class Reports extends CI_Controller {
 
         $fields = array_keys($this->get_report_columns($report));
         $data_rows = array();
+
         foreach ($rows as $row) {
             $values = array();
+
             foreach ($fields as $field) {
                 $values[] = html_escape(isset($row[$field]) ? (string) $row[$field] : '');
             }
+
             $data_rows[] = $values;
         }
 
@@ -65,28 +69,45 @@ class Reports extends CI_Controller {
             $data_rows
         );
 
-        $this->output->set_content_type('application/json')->set_output(json_encode($payload));
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode($payload));
     }
 
     public function export($report, $format = 'csv') {
         $this->require_permission('reports.export');
+
         $format = strtolower((string) $format);
+
         if (!$this->report_rules->export_format_is_supported($format)) {
-            show_error('Unsupported export format.', 400, 'Export Error');
+            show_error(
+                'That export format is not supported. Use CSV, Excel, or PDF.',
+                400,
+                'Export Format Not Supported'
+            );
         }
 
         $definition = $this->get_definition($report);
-        $rows = $this->get_rows($definition);
 
-        if ($format === 'csv') {
-            $this->export_csv($definition['title'], $rows);
-            return;
+        try {
+            $rows = $this->get_rows($definition);
+            $columns = $this->get_report_columns($report);
+            $meta = $this->build_report_meta($report, $definition['title'], $rows);
+
+            if ($format === 'csv') {
+                $this->export_csv($definition['title'], $columns, $rows, $meta);
+                return;
+            }
+
+            if ($format === 'xlsx') {
+                $this->export_xlsx($definition['title'], $columns, $rows, $meta);
+                return;
+            }
+
+            $this->export_pdf($definition['title'], $columns, $rows, $meta);
+        } catch (Throwable $exception) {
+            $this->handle_export_failure($exception, $definition['title']);
         }
-        if ($format === 'xlsx') {
-            $this->export_xlsx($definition['title'], $rows);
-            return;
-        }
-        $this->export_pdf($definition['title'], $rows);
     }
 
     private function show_report($report) {
@@ -95,6 +116,7 @@ class Reports extends CI_Controller {
         $data['report_key'] = $report;
         $data['columns'] = $this->get_report_columns($report);
         $data['page_title'] = $definition['title'];
+
         $this->load->view('templates/header', $data);
         $this->load->view('reports/index', $data);
         $this->load->view('templates/footer');
@@ -184,109 +206,579 @@ class Reports extends CI_Controller {
         if ($report === 'inventory' || $report === 'valuation') {
             return array('column' => 'p.product_name', 'dir' => 'asc');
         }
+
         if ($report === 'low-stock') {
             return array('column' => 'p.stock', 'dir' => 'asc');
         }
+
         return array('column' => 't.created_at', 'dir' => 'desc');
     }
 
     private function get_definition($report) {
         try {
-            $definition = $this->report_rules->get($report);
+            return $this->report_rules->get($report);
         } catch (InvalidArgumentException $exception) {
             show_404();
             exit;
         }
-        return $definition;
     }
 
     private function get_rows($definition) {
         $method = $definition['method'];
+
         if (!method_exists($this->Report_model, $method)) {
-            show_error('Report method is unavailable.', 500, 'Report Error');
+            throw new RuntimeException('The configured report data method is unavailable.');
         }
+
         if (isset($definition['type']) && $definition['type'] !== NULL) {
             return $this->Report_model->{$method}($definition['type']);
         }
+
         return $this->Report_model->{$method}();
     }
 
-    private function export_csv($title, $rows) {
-        $filename = url_title($title, '-', TRUE) . '-' . date('Y-m-d') . '.csv';
+    private function build_report_meta($report, $title, $rows) {
+        return array(
+            'system_name' => 'Inventory Management System',
+            'report_key' => $report,
+            'report_title' => $title,
+            'generated_at' => date('F j, Y g:i A'),
+            'prepared_by' => (string) $this->session->userdata('username'),
+            'record_count' => count($rows),
+            'summary' => $this->build_report_summary($report, $rows)
+        );
+    }
+
+    private function build_report_summary($report, $rows) {
+        $summary = array('Records' => number_format(count($rows)));
+
+        if ($report === 'inventory' || $report === 'valuation') {
+            $total_stock = 0;
+            $total_value = 0.0;
+
+            foreach ($rows as $row) {
+                $total_stock += isset($row['stock']) ? (int) $row['stock'] : 0;
+                $total_value += isset($row['inventory_value']) ? (float) $row['inventory_value'] : 0;
+            }
+
+            $summary['Total Stock'] = number_format($total_stock);
+            $summary['Inventory Value'] = number_format($total_value, 2);
+            return $summary;
+        }
+
+        if ($report === 'low-stock') {
+            $shortage = 0;
+
+            foreach ($rows as $row) {
+                $shortage += isset($row['shortage']) ? (int) $row['shortage'] : 0;
+            }
+
+            $summary['Total Shortage'] = number_format($shortage);
+            return $summary;
+        }
+
+        $total_quantity = 0;
+        $movement_value = 0.0;
+
+        foreach ($rows as $row) {
+            $quantity = isset($row['quantity']) ? (int) $row['quantity'] : 0;
+            $cost_price = isset($row['cost_price']) ? (float) $row['cost_price'] : 0;
+            $total_quantity += $quantity;
+            $movement_value += $quantity * $cost_price;
+        }
+
+        $summary['Total Quantity'] = number_format($total_quantity);
+        $summary['Movement Value'] = number_format($movement_value, 2);
+
+        return $summary;
+    }
+
+    private function export_csv($title, $columns, $rows, $meta) {
+        $filename = $this->report_filename($title, 'csv');
+
         header('Content-Type: text/csv; charset=UTF-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
+        header('Cache-Control: no-store, no-cache, must-revalidate');
+        header('X-Content-Type-Options: nosniff');
+
         $handle = fopen('php://output', 'w');
+
         if ($handle === FALSE) {
-            show_error('Unable to open CSV output.', 500, 'Export Error');
+            throw new RuntimeException('Unable to open the CSV output stream.');
         }
-        if (!empty($rows)) {
-            fputcsv($handle, array_keys($rows[0]));
-            foreach ($rows as $row) {
-                fputcsv($handle, $row);
+
+        // Excel-compatible UTF-8 BOM.
+        fwrite($handle, "\xEF\xBB\xBF");
+
+        $this->write_csv_row($handle, array($meta['system_name']));
+        $this->write_csv_row($handle, array($title));
+        $this->write_csv_row($handle, array('Generated', $meta['generated_at']));
+        $this->write_csv_row($handle, array('Prepared By', $meta['prepared_by'] ?: 'System User'));
+
+        foreach ($meta['summary'] as $label => $value) {
+            $this->write_csv_row($handle, array($label, $value));
+        }
+
+        $this->write_csv_row($handle, array());
+        $this->write_csv_row($handle, array_values($columns));
+
+        foreach ($rows as $row) {
+            $values = array();
+
+            foreach ($columns as $field => $label) {
+                $value = array_key_exists($field, $row) ? $row[$field] : '';
+                $values[] = $this->csv_safe_value($value);
             }
+
+            $this->write_csv_row($handle, $values);
         }
+
         fclose($handle);
         exit;
     }
 
-    private function export_xlsx($title, $rows) {
-        $this->load_composer();
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
-        $sheet->setTitle(substr($title, 0, 31));
-        $row_number = 1;
+    private function write_csv_row($handle, $values) {
+        if (fputcsv($handle, $values, ',', '"', '') === FALSE) {
+            throw new RuntimeException('Unable to write the CSV report.');
+        }
+    }
 
-        if (!empty($rows)) {
-            $headers = array_keys($rows[0]);
-            foreach ($headers as $column => $header) {
-                $column_letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column + 1);
-                $sheet->setCellValue($column_letter . $row_number, $header);
-            }
-            $row_number++;
-            foreach ($rows as $row) {
-                foreach (array_values($row) as $column => $value) {
-                    $column_letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column + 1);
-                    $sheet->setCellValue($column_letter . $row_number, $value);
-                }
-                $row_number++;
-            }
-            foreach (range(1, count($headers)) as $column) {
-                $column_letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column);
-                $sheet->getColumnDimension($column_letter)->setAutoSize(TRUE);
+    private function csv_safe_value($value) {
+        if ($value === NULL) {
+            return '';
+        }
+
+        if (is_int($value) || is_float($value)) {
+            return $value;
+        }
+
+        $value = (string) $value;
+        $trimmed = ltrim($value);
+
+        if ($trimmed !== '' && !is_numeric($trimmed)) {
+            $first = substr($trimmed, 0, 1);
+
+            if (in_array($first, array('=', '+', '-', '@'), TRUE)) {
+                return "'" . $value;
             }
         }
 
-        $filename = url_title($title, '-', TRUE) . '-' . date('Y-m-d') . '.xlsx';
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: max-age=0');
-        (new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet))->save('php://output');
+        return $value;
+    }
+
+    private function export_xlsx($title, $columns, $rows, $meta) {
+        $this->load_composer();
+
+        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        $spreadsheet->getProperties()
+            ->setCreator($meta['prepared_by'] ?: $meta['system_name'])
+            ->setTitle($title)
+            ->setSubject('Inventory business report')
+            ->setDescription('Professional report export generated by ' . $meta['system_name']);
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle(substr($title, 0, 31));
+        $sheet->getSheetView()->setShowGridLines(FALSE);
+        $sheet->getSheetView()->setZoomScale(90);
+
+        $column_count = max(1, count($columns));
+        $last_column = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column_count);
+        $header_row = 6;
+        $data_start_row = 7;
+
+        $sheet->mergeCells('A1:' . $last_column . '1');
+        $sheet->setCellValue('A1', $meta['system_name']);
+
+        $sheet->mergeCells('A2:' . $last_column . '2');
+        $sheet->setCellValue('A2', $title);
+
+        $sheet->mergeCells('A3:' . $last_column . '3');
+        $sheet->setCellValue(
+            'A3',
+            'Generated: ' . $meta['generated_at'] .
+            '   |   Prepared by: ' . ($meta['prepared_by'] ?: 'System User')
+        );
+
+        $summary_parts = array();
+
+        foreach ($meta['summary'] as $label => $value) {
+            $summary_parts[] = $label . ': ' . $value;
+        }
+
+        $sheet->mergeCells('A4:' . $last_column . '4');
+        $sheet->setCellValue('A4', implode('   |   ', $summary_parts));
+
+        foreach ($columns as $field => $label) {
+            $column_index = array_search($field, array_keys($columns), TRUE) + 1;
+            $column_letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column_index);
+            $sheet->setCellValue($column_letter . $header_row, $label);
+        }
+
+        $row_number = $data_start_row;
+
+        foreach ($rows as $row) {
+            $column_index = 1;
+
+            foreach ($columns as $field => $label) {
+                $coordinate = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column_index) . $row_number;
+                $value = array_key_exists($field, $row) ? $row[$field] : '';
+
+                $this->set_excel_cell_value($sheet, $coordinate, $field, $value);
+                $column_index++;
+            }
+
+            $row_number++;
+        }
+
+        if (empty($rows)) {
+            $sheet->mergeCells('A7:' . $last_column . '7');
+            $sheet->setCellValue('A7', 'No report data found for this report.');
+            $sheet->getStyle('A7')->getFont()->setItalic(TRUE);
+            $sheet->getStyle('A7')->getFont()->getColor()->setARGB('64748B');
+            $row_number = 8;
+        }
+
+        $last_data_row = max($header_row, $row_number - 1);
+
+        $sheet->getStyle('A1:' . $last_column . '1')->applyFromArray(array(
+            'font' => array(
+                'bold' => TRUE,
+                'size' => 16,
+                'color' => array('argb' => 'FFFFFF')
+            ),
+            'fill' => array(
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => array('argb' => '0F172A')
+            ),
+            'alignment' => array(
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+            )
+        ));
+
+        $sheet->getRowDimension(1)->setRowHeight(30);
+        $sheet->getStyle('A2:' . $last_column . '2')->getFont()->setBold(TRUE)->setSize(13);
+        $sheet->getStyle('A3:' . $last_column . '4')->getFont()->getColor()->setARGB('64748B');
+        $sheet->getStyle('A3:' . $last_column . '4')->getFont()->setSize(9);
+
+        $sheet->getStyle('A' . $header_row . ':' . $last_column . $header_row)->applyFromArray(array(
+            'font' => array(
+                'bold' => TRUE,
+                'color' => array('argb' => 'FFFFFF')
+            ),
+            'fill' => array(
+                'fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID,
+                'startColor' => array('argb' => '2563EB')
+            ),
+            'alignment' => array(
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+            )
+        ));
+
+        $sheet->getRowDimension($header_row)->setRowHeight(24);
+
+        if (!empty($rows)) {
+            $data_range = 'A' . $data_start_row . ':' . $last_column . $last_data_row;
+
+            $sheet->getStyle($data_range)->applyFromArray(array(
+                'borders' => array(
+                    'allBorders' => array(
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_HAIR,
+                        'color' => array('argb' => 'E2E8F0')
+                    )
+                ),
+                'alignment' => array(
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP
+                )
+            ));
+
+            for ($row = $data_start_row; $row <= $last_data_row; $row++) {
+                if (($row - $data_start_row) % 2 === 1) {
+                    $sheet->getStyle('A' . $row . ':' . $last_column . $row)
+                        ->getFill()
+                        ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                        ->getStartColor()
+                        ->setARGB('F8FAFC');
+                }
+            }
+        }
+
+        $sheet->getStyle('A' . $header_row . ':' . $last_column . $last_data_row)
+            ->getAlignment()
+            ->setWrapText(TRUE);
+
+        $column_index = 1;
+
+        foreach ($columns as $field => $label) {
+            $column_letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column_index);
+            $sheet->getColumnDimension($column_letter)->setWidth($this->excel_column_width($field));
+            $column_index++;
+        }
+
+        $sheet->freezePane('A' . $data_start_row);
+        $sheet->setAutoFilter('A' . $header_row . ':' . $last_column . $header_row);
+        $sheet->getPageSetup()
+            ->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE)
+            ->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4)
+            ->setFitToPage(TRUE)
+            ->setFitToWidth(1)
+            ->setFitToHeight(0);
+
+        $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd(1, $header_row);
+        $sheet->getPageMargins()
+            ->setTop(0.45)
+            ->setRight(0.35)
+            ->setBottom(0.55)
+            ->setLeft(0.35);
+
+        $sheet->getHeaderFooter()->setOddFooter(
+            '&L' . $meta['system_name'] . '&CPage &P of &N&R' . date('Y-m-d')
+        );
+        $sheet->getPageSetup()->setPrintArea('A1:' . $last_column . $last_data_row);
+
+        $filename = $this->report_filename($title, 'xlsx');
+        $temp_file = tempnam(sys_get_temp_dir(), 'inventory-report-');
+
+        if ($temp_file === FALSE) {
+            throw new RuntimeException('Unable to create a temporary Excel report file.');
+        }
+
+        try {
+            $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->save($temp_file);
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment; filename="' . $filename . '"');
+            header('Content-Length: ' . filesize($temp_file));
+            header('Cache-Control: no-store, no-cache, must-revalidate');
+            header('X-Content-Type-Options: nosniff');
+
+            readfile($temp_file);
+        } finally {
+            if (is_file($temp_file)) {
+                @unlink($temp_file);
+            }
+
+            $spreadsheet->disconnectWorksheets();
+        }
+
         exit;
     }
 
-    private function export_pdf($title, $rows) {
+    private function set_excel_cell_value($sheet, $coordinate, $field, $value) {
+        $integer_fields = array('stock', 'reorder_level', 'shortage', 'quantity');
+        $decimal_fields = array('cost_price', 'inventory_value');
+        $identifier_fields = array('product_code', 'transaction_no');
+
+        if ($value === NULL) {
+            $value = '';
+        }
+
+        if (in_array($field, $integer_fields, TRUE) && is_numeric($value)) {
+            $sheet->setCellValue($coordinate, (int) $value);
+            $sheet->getStyle($coordinate)->getNumberFormat()->setFormatCode('#,##0');
+            return;
+        }
+
+        if (in_array($field, $decimal_fields, TRUE) && is_numeric($value)) {
+            $sheet->setCellValue($coordinate, (float) $value);
+            $sheet->getStyle($coordinate)->getNumberFormat()->setFormatCode('#,##0.00');
+            return;
+        }
+
+        if ($field === 'created_at' && trim((string) $value) !== '') {
+            try {
+                $date = new DateTime((string) $value);
+                $sheet->setCellValue(
+                    $coordinate,
+                    \PhpOffice\PhpSpreadsheet\Shared\Date::PHPToExcel($date)
+                );
+                $sheet->getStyle($coordinate)
+                    ->getNumberFormat()
+                    ->setFormatCode('mmm d, yyyy h:mm AM/PM');
+                return;
+            } catch (Exception $exception) {
+                // Keep the original text if the stored date cannot be parsed.
+            }
+        }
+
+        if ($field === 'type') {
+            $value = ucwords(str_replace('_', ' ', (string) $value));
+        }
+
+        $sheet->setCellValueExplicit(
+            $coordinate,
+            (string) $value,
+            \PhpOffice\PhpSpreadsheet\Cell\DataType::TYPE_STRING
+        );
+
+        if (in_array($field, $identifier_fields, TRUE)) {
+            $sheet->getStyle($coordinate)
+                ->getNumberFormat()
+                ->setFormatCode(\PhpOffice\PhpSpreadsheet\Style\NumberFormat::FORMAT_TEXT);
+        }
+    }
+
+    private function excel_column_width($field) {
+        $widths = array(
+            'transaction_no' => 19,
+            'type' => 13,
+            'product_code' => 16,
+            'product_name' => 28,
+            'category_name' => 21,
+            'supplier_name' => 24,
+            'unit' => 12,
+            'stock' => 12,
+            'quantity' => 12,
+            'reorder_level' => 15,
+            'shortage' => 12,
+            'cost_price' => 15,
+            'inventory_value' => 18,
+            'username' => 18,
+            'remarks' => 32,
+            'created_at' => 22
+        );
+
+        return isset($widths[$field]) ? $widths[$field] : 18;
+    }
+
+    private function export_pdf($title, $columns, $rows, $meta) {
         $this->load_composer();
-        $html = $this->load->view('reports/export_pdf', array('report_title' => $title, 'rows' => $rows), TRUE);
-        $dompdf = new \Dompdf\Dompdf();
-        $dompdf->loadHtml($html);
+
+        $display_rows = $this->prepare_display_rows($columns, $rows);
+        $html = $this->load->view('reports/export_pdf', array(
+            'report_title' => $title,
+            'columns' => $columns,
+            'rows' => $display_rows,
+            'report_meta' => $meta
+        ), TRUE);
+
+        $options = new \Dompdf\Options();
+        $options->set('defaultFont', 'Helvetica');
+        $options->set('isRemoteEnabled', FALSE);
+
+        $dompdf = new \Dompdf\Dompdf($options);
+        $dompdf->loadHtml($html, 'UTF-8');
         $dompdf->setPaper('A4', 'landscape');
         $dompdf->render();
-        $dompdf->stream(url_title($title, '-', TRUE) . '-' . date('Y-m-d') . '.pdf', array('Attachment' => TRUE));
+
+        $font = $dompdf->getFontMetrics()->getFont('Helvetica', 'normal');
+        $canvas = $dompdf->getCanvas();
+        $canvas->page_text(
+            700,
+            570,
+            'Page {PAGE_NUM} of {PAGE_COUNT}',
+            $font,
+            8,
+            array(0.39, 0.45, 0.55)
+        );
+
+        $dompdf->stream(
+            $this->report_filename($title, 'pdf'),
+            array('Attachment' => TRUE)
+        );
+
         exit;
+    }
+
+    private function prepare_display_rows($columns, $rows) {
+        $prepared = array();
+
+        foreach ($rows as $row) {
+            $display_row = array();
+
+            foreach ($columns as $field => $label) {
+                $value = array_key_exists($field, $row) ? $row[$field] : '';
+                $display_row[$field] = $this->format_display_value($field, $value);
+            }
+
+            $prepared[] = $display_row;
+        }
+
+        return $prepared;
+    }
+
+    private function format_display_value($field, $value) {
+        if ($value === NULL || $value === '') {
+            return '—';
+        }
+
+        if (in_array($field, array('stock', 'quantity', 'reorder_level', 'shortage'), TRUE) && is_numeric($value)) {
+            return number_format((float) $value, 0);
+        }
+
+        if (in_array($field, array('cost_price', 'inventory_value'), TRUE) && is_numeric($value)) {
+            return number_format((float) $value, 2);
+        }
+
+        if ($field === 'type') {
+            return ucwords(str_replace('_', ' ', (string) $value));
+        }
+
+        if ($field === 'created_at') {
+            $timestamp = strtotime((string) $value);
+
+            if ($timestamp !== FALSE) {
+                return date('M j, Y g:i A', $timestamp);
+            }
+        }
+
+        return (string) $value;
+    }
+
+    private function report_filename($title, $extension) {
+        $base = url_title($title, '-', TRUE);
+
+        if ($base === '') {
+            $base = 'report';
+        }
+
+        return $base . '-' . date('Y-m-d-His') . '.' . $extension;
     }
 
     private function load_composer() {
         $autoload = FCPATH . 'vendor/autoload.php';
+
         if (!is_file($autoload)) {
-            show_error('Composer dependencies are not installed. Run composer install in the project root.', 500, 'Export Error');
+            throw new RuntimeException(
+                'Composer dependencies are missing. Run composer install in the project root.'
+            );
         }
+
         require_once $autoload;
+    }
+
+    private function handle_export_failure($exception, $title) {
+        $reference = strtoupper(substr(hash(
+            'sha256',
+            microtime(TRUE) . '|' . get_class($exception) . '|' . $exception->getMessage()
+        ), 0, 10));
+
+        log_message(
+            'error',
+            'Report export failed [' . $reference . '] ' .
+            $title . ': ' .
+            get_class($exception) . ': ' .
+            $exception->getMessage()
+        );
+
+        header('X-Error-Reference: ' . $reference);
+
+        show_error(
+            'The report could not be generated. Possible causes include missing export dependencies, a temporary server or file-system problem, or invalid report data. Please retry. If it continues, give support reference ' . $reference . ' to the administrator.',
+            500,
+            'Report Export Failed'
+        );
     }
 
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
+
         if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
-            show_error('You do not have permission to access this page.', 403, 'Access Denied');
+            show_error(
+                'You do not have permission to access this page.',
+                403,
+                'Access Denied'
+            );
         }
     }
 }
