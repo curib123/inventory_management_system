@@ -27,6 +27,13 @@ class Role_model extends CI_Model {
         return $this->db->get_where('roles', array('id' => (int) $id))->row();
     }
 
+    public function get_by_name($name) {
+        return $this->db->get_where(
+            'roles',
+            array('role_name' => trim((string) $name))
+        )->row();
+    }
+
     public function name_exists($name, $exclude_id = NULL) {
         $this->db->where('role_name', trim($name));
 
