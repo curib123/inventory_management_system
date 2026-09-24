@@ -1,18 +1,19 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
-$safe_heading = htmlspecialchars(strip_tags(isset($heading) ? (string) $heading : 'PHP Error'), ENT_QUOTES, 'UTF-8');
-$safe_message = htmlspecialchars(strip_tags(isset($message) ? (string) $message : 'An application error occurred.'), ENT_QUOTES, 'UTF-8');
-?>
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <title><?php echo $safe_heading; ?></title>
-</head>
-<body>
-    <h1><?php echo $safe_heading; ?></h1>
-    <p><?php echo $safe_message; ?></p>
-</body>
-</html>
+
+$app_error_heading = 'Application Runtime Error';
+$app_error_message = (defined('ENVIRONMENT') && ENVIRONMENT === 'development' && isset($message))
+    ? (string) $message
+    : 'The application encountered a runtime problem while processing the request.';
+$app_error_code = http_response_code() ?: 500;
+$app_error_causes = array(
+    'A PHP runtime error may have stopped the request.',
+    'A required file, configuration value, or dependency may be missing.',
+    'Unexpected data may have reached application code that could not process it.'
+);
+$app_error_steps = array(
+    'Retry the action once after refreshing the page.',
+    'If the problem continues, review the application log and the affected controller or service.'
+);
+
+require __DIR__ . '/_app_error.php';
