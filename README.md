@@ -136,3 +136,20 @@ Tech Stack to use
 6. Ajax 
 7. DataTables
 8. Chart.js
+
+
+issuess:
+
+styling of all pages and modal use bootstrap on it
+
+fix issues in stock in must follow the rule this rule phase 3
+
+1.Create Stock in Trasaction
+2.Transaction number
+3.When Select supplier when supplier selected it will fetch all product connected to that supplier selected
+4.It will add multiple products in 1 transaction
+5.Quantity received from each product selected and show old stock , and total new stock preview 
+6.Increase product stock automatically
+7.Record stock movement 
+
+all pages have own branches to style make sure when merge to development no conflict
