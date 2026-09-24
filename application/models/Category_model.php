@@ -17,6 +17,12 @@ class Category_model extends CI_Model {
         return $this->db->get('categories')->result();
     }
 
+    public function get_active() {
+        $this->db->where('status', 1);
+        $this->db->order_by('category_name', 'ASC');
+        return $this->db->get('categories')->result();
+    }
+
     public function count_all() {
         return $this->db->count_all('categories');
     }
