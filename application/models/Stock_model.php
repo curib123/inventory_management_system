@@ -15,13 +15,24 @@ class Stock_model extends CI_Model {
             return array('success' => FALSE, 'message' => 'A valid stock transaction with at least one item is required.');
         }
 
-        $supplier_id = ($supplier_id === '' || $supplier_id === NULL) ? NULL : (int) $supplier_id;
-
-        if ($type === 'stock_in' && !$supplier_id) {
-            return array('success' => FALSE, 'message' => 'A supplier is required for stock-in transactions.');
-        }
-
         if ($type === 'stock_in') {
+            $supplier_id = filter_var(
+                $supplier_id,
+                FILTER_VALIDATE_INT,
+                array('options' => array(
+                    'min_range' => 1,
+                    'max_range' => Stock_rules::MAX_STOCK
+                ))
+            );
+
+            if ($supplier_id === FALSE) {
+                return array(
+                    'success' => FALSE,
+                    'message' => 'A valid supplier is required for stock-in transactions.'
+                );
+            }
+
+            $supplier_id = (int) $supplier_id;
             $active_supplier = $this->db
                 ->where('id', $supplier_id)
                 ->where('status', 1)
@@ -100,15 +111,49 @@ class Stock_model extends CI_Model {
     }
 
     public function create_adjustment($product_id, $actual_stock, $reason, $user_id) {
+        $product_id = filter_var(
+            $product_id,
+            FILTER_VALIDATE_INT,
+            array('options' => array(
+                'min_range' => 1,
+                'max_range' => Stock_rules::MAX_STOCK
+            ))
+        );
+
+        if ($product_id === FALSE) {
+            return array(
+                'success' => FALSE,
+                'message' => 'A valid product is required for the stock adjustment.'
+            );
+        }
+
+        try {
+            $actual_stock = $this->stock_rules->validate_stock_value($actual_stock);
+        } catch (InvalidArgumentException $exception) {
+            return array(
+                'success' => FALSE,
+                'message' => $exception->getMessage()
+            );
+        }
+
         $product_id = (int) $product_id;
-        $actual_stock = (int) $actual_stock;
         $reason = trim((string) $reason);
+
+        if ($reason === '') {
+            return array(
+                'success' => FALSE,
+                'message' => 'A reason is required for the stock adjustment.'
+            );
+        }
 
         $this->db->trans_begin();
         $product = $this->get_product_for_update($product_id);
-        if (!$product || !$product->status || $actual_stock < 0 || $reason === '') {
+        if (!$product || !(int) $product->status) {
             $this->db->trans_rollback();
-            return array('success' => FALSE, 'message' => 'An active product, non-negative stock, and reason are required.');
+            return array(
+                'success' => FALSE,
+                'message' => 'An active product is required for the stock adjustment.'
+            );
         }
 
         $difference = $actual_stock - (int) $product->stock;
