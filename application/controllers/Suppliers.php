@@ -62,10 +62,26 @@ class Suppliers extends CI_Controller {
             show_404();
         }
 
+        $delete_error = '';
+
+        if ($this->Supplier_model->has_dependencies($id)) {
+            $delete_error =
+                'This supplier is used by products or stock transaction history. ' .
+                'Set the supplier to inactive instead of deleting it.';
+        }
+
         if ($this->input->method(TRUE) !== 'POST') {
             $this->load->view('modal/suppliers/delete', array(
                 'supplier' => $supplier,
-                'delete_error' => ''
+                'delete_error' => $delete_error
+            ));
+            return;
+        }
+
+        if ($delete_error !== '') {
+            $this->load->view('modal/suppliers/delete', array(
+                'supplier' => $supplier,
+                'delete_error' => $delete_error
             ));
             return;
         }
