@@ -5,6 +5,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class User_model extends CI_Model {
 
     private $permission_key_cache = array();
+    private $password_change_cache = array();
 
     public function __construct() {
         parent::__construct();
@@ -165,13 +166,26 @@ class User_model extends CI_Model {
     }
 
     public function requires_password_change($user_id) {
+        $user_id = (int) $user_id;
+
+        if ($user_id <= 0) {
+            return FALSE;
+        }
+
+        if (array_key_exists($user_id, $this->password_change_cache)) {
+            return $this->password_change_cache[$user_id];
+        }
+
         $row = $this->db
             ->select('password')
-            ->where('id', (int) $user_id)
+            ->where('id', $user_id)
             ->get('users')
             ->row();
 
-        return $row && password_verify('admin123', $row->password);
+        $this->password_change_cache[$user_id] =
+            (bool) ($row && password_verify('admin123', $row->password));
+
+        return $this->password_change_cache[$user_id];
     }
 
     public function verify_password($user_id, $password) {
@@ -187,6 +201,7 @@ class User_model extends CI_Model {
 
     public function update_password($user_id, $password) {
         unset($this->permission_key_cache[(int) $user_id]);
+        $this->password_change_cache[(int) $user_id] = FALSE;
 
         return $this->db->update(
             'users',
