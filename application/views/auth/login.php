@@ -16,7 +16,8 @@
     <link
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-    >\n    <?php endif; ?>
+    >
+    <?php endif; ?>
 
     <title>Login | Inventory Management System</title>
 </head>
