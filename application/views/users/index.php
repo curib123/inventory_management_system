@@ -1,21 +1,29 @@
-<h2>User Management</h2>
-<p><button type="button" data-modal-url="<?php echo site_url('users/add'); ?>">Add User</button></p>
-
-<table data-datatable-server data-source="<?php echo site_url('users/datatable'); ?>">
-    <thead>
-        <tr>
-            <th>First Name</th>
-            <th>Middle Name</th>
-            <th>Last Name</th>
-            <th>Username</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Created</th>
-            <th>Updated</th>
-            <th data-orderable="false">Actions</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<?php
+$this->load->view('components/datatable', array(
+    'title' => 'User Management',
+    'subtitle' => 'Create, view, update, and manage system user accounts.',
+    'data_source' => site_url('users/datatable'),
+    'actions' => array(
+        array(
+            'label' => 'Add User',
+            'url' => site_url('users/add'),
+            'icon' => 'bi-person-plus',
+            'variant' => 'primary',
+            'mode' => 'modal'
+        )
+    ),
+    'columns' => array(
+        'First Name',
+        'Middle Name',
+        'Last Name',
+        'Username',
+        'Role',
+        'Status',
+        'Created',
+        'Updated',
+        array('label' => 'Actions', 'orderable' => FALSE)
+    )
+));
+?>
 
 <?php $this->load->view('modal/container'); ?>
