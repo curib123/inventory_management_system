@@ -15,10 +15,11 @@ class Users extends CI_Controller {
         }
 
         $this->load->model('User_model');
-        $this->require_permission('manage_users');
     }
 
     public function index() {
+        $this->require_permission('users.view');
+
         $data['page_title'] = 'User Management';
         $this->load->view('templates/header', $data);
         $this->load->view('users/index', $data);
@@ -26,10 +27,13 @@ class Users extends CI_Controller {
     }
 
     public function add() {
+        $this->require_permission('users.create');
         $this->user_form();
     }
 
     public function view($id) {
+        $this->require_permission('users.view');
+
         $data['user'] = $this->User_model->get_by_id($id);
         if (!$data['user']) {
             show_404();
@@ -39,6 +43,8 @@ class Users extends CI_Controller {
     }
 
     public function edit($id) {
+        $this->require_permission('users.edit');
+
         $user = $this->User_model->get_by_id($id);
         if (!$user) {
             show_404();
@@ -48,6 +54,8 @@ class Users extends CI_Controller {
     }
 
     public function delete($id) {
+        $this->require_permission('users.delete');
+
         $id = (int) $id;
         $user = $this->User_model->get_by_id($id);
         if (!$user) {
@@ -89,6 +97,8 @@ class Users extends CI_Controller {
     }
 
     public function datatable() {
+        $this->require_permission('users.view');
+
         $columns = array(
             'u.first_name',
             'u.middle_name',
@@ -117,11 +127,17 @@ class Users extends CI_Controller {
         foreach ($users as $user) {
             $id = (int) $user->id;
             $action_items = array(
-                array('label' => 'View', 'url' => site_url('users/view/' . $id), 'variant' => 'secondary', 'icon' => 'bi-eye'),
-                array('label' => 'Edit', 'url' => site_url('users/edit/' . $id), 'variant' => 'primary', 'icon' => 'bi-pencil')
+                array('label' => 'View', 'url' => site_url('users/view/' . $id), 'variant' => 'secondary', 'icon' => 'bi-eye')
             );
 
-            if ($id !== $current_user_id) {
+            if ($this->User_model->has_permission($current_user_id, 'users.edit')) {
+                $action_items[] = array('label' => 'Edit', 'url' => site_url('users/edit/' . $id), 'variant' => 'primary', 'icon' => 'bi-pencil');
+            }
+
+            if (
+                $id !== $current_user_id &&
+                $this->User_model->has_permission($current_user_id, 'users.delete')
+            ) {
                 $action_items[] = array('label' => 'Delete', 'url' => site_url('users/delete/' . $id), 'variant' => 'danger', 'icon' => 'bi-trash');
             }
 
