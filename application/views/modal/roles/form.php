@@ -82,7 +82,7 @@ foreach ((array) $permissions as $permission) {
         <div>
             <h3 class="h6 mb-1">Permissions by Module</h3>
             <p class="text-body-secondary small mb-0">
-                Filled chips are selected. Outline chips are not selected.
+                Filled chips are selected. Outline chips are not selected. Required view access is added automatically for action permissions.
             </p>
         </div>
         <span class="badge text-bg-primary"><?php echo count((array) $permissions); ?> available</span>
