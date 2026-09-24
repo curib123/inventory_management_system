@@ -1,14 +1,18 @@
-<h2>Low Stock Monitoring</h2>
+<?php
+$this->load->view('components/page_header', array(
+    'title' => 'Low Stock Monitoring',
+    'description' => 'Monitor products that have reached or fallen below their reorder level.'
+));
 
-<table data-datatable-server data-source="<?php echo site_url('stock/low-stock/datatable'); ?>">
-    <thead>
-        <tr>
-            <th>Code</th>
-            <th>Product</th>
-            <th>Current Stock</th>
-            <th>Reorder Level</th>
-            <th>Unit</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+$this->load->view('components/data_table', array(
+    'source' => site_url('stock/low-stock/datatable'),
+    'table_id' => 'low-stock-table',
+    'columns' => array(
+        'Code',
+        'Product',
+        'Current Stock',
+        'Reorder Level',
+        'Unit'
+    )
+));
+?>
