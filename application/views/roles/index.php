@@ -1,17 +1,25 @@
-<h2>Roles and Permissions</h2>
-<p><button type="button" data-modal-url="<?php echo site_url('roles/add'); ?>">Add Role</button></p>
-
-<table data-datatable-server data-source="<?php echo site_url('roles/datatable'); ?>">
-    <thead>
-        <tr>
-            <th>Role</th>
-            <th>Description</th>
-            <th>Status</th>
-            <th>Users</th>
-            <th data-orderable="false">Actions</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<?php
+$this->load->view('components/datatable', array(
+    'title' => 'Roles and Permissions',
+    'subtitle' => 'Control system access through reusable roles and permissions.',
+    'data_source' => site_url('roles/datatable'),
+    'actions' => array(
+        array(
+            'label' => 'Add Role',
+            'url' => site_url('roles/add'),
+            'icon' => 'bi-shield-plus',
+            'variant' => 'primary',
+            'mode' => 'modal'
+        )
+    ),
+    'columns' => array(
+        'Role',
+        'Description',
+        'Status',
+        'Users',
+        array('label' => 'Actions', 'orderable' => FALSE)
+    )
+));
+?>
 
 <?php $this->load->view('modal/container'); ?>
