@@ -10,6 +10,8 @@ $quantities = isset($quantities) && is_array($quantities) ? $quantities : array(
             $product_id = (int) $product->id;
             $is_low_stock = (int) $product->stock <= (int) $product->reorder_level;
             $quantity = isset($quantities[$product_id]) ? (int) $quantities[$product_id] : '';
+            $preview_quantity = $quantity === '' ? 0 : (int) $quantity;
+            $new_stock = (int) $product->stock + $preview_quantity;
             ?>
             <div class="app-stock-product <?php echo $is_low_stock ? 'is-low-stock' : ''; ?>">
                 <div>
@@ -24,8 +26,23 @@ $quantities = isset($quantities) && is_array($quantities) ? $quantities : array(
                     </div>
 
                     <div class="app-stock-product-meta">
-                        <span>Current: <strong><?php echo (int) $product->stock; ?></strong> <?php echo html_escape($product->unit ?: 'unit'); ?></span>
-                        <span>Reorder: <strong><?php echo (int) $product->reorder_level; ?></strong></span>
+                        <span>
+                            Current:
+                            <strong><?php echo (int) $product->stock; ?></strong>
+                            <?php echo html_escape($product->unit ?: 'unit'); ?>
+                        </span>
+                        <span>
+                            Reorder:
+                            <strong><?php echo (int) $product->reorder_level; ?></strong>
+                        </span>
+                        <span class="app-stock-preview">
+                            New:
+                            <strong
+                                data-stock-new
+                                data-current-stock="<?php echo (int) $product->stock; ?>"
+                            ><?php echo $new_stock; ?></strong>
+                            <?php echo html_escape($product->unit ?: 'unit'); ?>
+                        </span>
                     </div>
                 </div>
 
@@ -41,6 +58,7 @@ $quantities = isset($quantities) && is_array($quantities) ? $quantities : array(
                         id="stock_in_quantity_<?php echo $product_id; ?>"
                         name="quantity[]"
                         class="form-control"
+                        data-stock-quantity
                         min="0"
                         step="1"
                         inputmode="numeric"
