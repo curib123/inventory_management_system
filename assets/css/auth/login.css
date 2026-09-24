@@ -1,0 +1,87 @@
+
+/* ---------------------------------------------------------
+   Login Page
+--------------------------------------------------------- */
+
+body {
+    background-color: #f8f9fa;
+    
+}
+
+
+/* Login Card */
+
+.login-card {
+    border: 0;
+    min-width: 350px;
+    border-radius: 1rem;
+    overflow: hidden;
+}
+
+
+/* Inventory Logo */
+
+.login-logo {
+    width: 64px;
+    height: 64px;
+}
+
+
+/* Form */
+
+.login-form .input-group-text {
+    min-width: 50px;
+    justify-content: center;
+}
+
+.login-form .form-control:focus {
+    box-shadow: none;
+}
+
+
+/* Login Button */
+
+#loginButton {
+    transition: all 0.2s ease;
+}
+
+#loginButton:disabled {
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+
+/* Loading Animation */
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* Alert */
+
+#loginAlert {
+    transition: all 0.2s ease;
+}
+
+
+/* Mobile */
+
+@media (max-width: 576px) {
+
+    .login-card {
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.08) !important;
+    }
+
+}
+
