@@ -1,15 +1,19 @@
 <?php
+$page_actions = array();
+
+if ($this->User_model->has_permission($this->session->userdata('user_id'), 'categories.create')) {
+    $page_actions[] = array(
+        'label' => 'Add Category',
+        'icon' => 'bi-plus-lg',
+        'class' => 'btn-primary',
+        'modal_url' => site_url('categories/add')
+    );
+}
+
 $this->load->view('components/page_header', array(
     'title' => 'Categories',
     'description' => 'Organize products into manageable inventory groups.',
-    'actions' => array(
-        array(
-            'label' => 'Add Category',
-            'icon' => 'bi-plus-lg',
-            'class' => 'btn-primary',
-            'modal_url' => site_url('categories/add')
-        )
-    )
+    'actions' => $page_actions
 ));
 
 $this->load->view('components/data_table', array(
