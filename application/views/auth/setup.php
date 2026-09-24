@@ -1,11 +1,19 @@
-<?php $ui_styling_enabled = $this->config->item('ui_styling_enabled') !== FALSE; ?>
+<?php
+$ui_page_styled = $this->config->item('ui_styling_enabled') !== FALSE;
+$ui_page_styled = $ui_page_styled && ui_style_enabled_for(
+    (array) $this->config->item('ui_page_styles'),
+    'setup',
+    'index',
+    TRUE
+);
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <?php if ($ui_styling_enabled): ?>
+    <?php if ($ui_page_styled): ?>
     <link
         href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
         rel="stylesheet"
@@ -21,9 +29,9 @@
 
     <title>Initial Setup | Inventory Management System</title>
 </head>
-<body class="bg-body-tertiary">
+<body class="<?php echo $ui_page_styled ? 'bg-body-tertiary' : ''; ?>">
     <main class="container min-vh-100 d-flex align-items-center justify-content-center py-4">
-        <div class="card shadow-sm border-0 w-100"<?php echo $ui_styling_enabled ? ' style="max-width: 640px;"' : ''; ?>>
+        <div class="card shadow-sm border-0 w-100"<?php echo $ui_page_styled ? ' style="max-width: 640px;"' : ''; ?>>
             <div class="card-body p-4 p-md-5">
                 <div class="text-center mb-4">
                     <div class="display-6 text-primary mb-2">
