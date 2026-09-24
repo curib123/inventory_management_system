@@ -1,28 +1,26 @@
-<h2><?php echo html_escape($report_title); ?></h2>
+<?php
+$report_actions = array(
+    array('label' => 'Inventory', 'url' => site_url('reports/inventory'), 'icon' => 'bi-boxes', 'variant' => 'outline-secondary', 'mode' => 'link'),
+    array('label' => 'Stock In', 'url' => site_url('reports/stock-in'), 'icon' => 'bi-box-arrow-in-down', 'variant' => 'outline-secondary', 'mode' => 'link'),
+    array('label' => 'Stock Out', 'url' => site_url('reports/stock-out'), 'icon' => 'bi-box-arrow-up', 'variant' => 'outline-secondary', 'mode' => 'link'),
+    array('label' => 'Movement', 'url' => site_url('reports/movement'), 'icon' => 'bi-arrow-left-right', 'variant' => 'outline-secondary', 'mode' => 'link'),
+    array('label' => 'Low Stock', 'url' => site_url('reports/low-stock'), 'icon' => 'bi-exclamation-triangle', 'variant' => 'outline-secondary', 'mode' => 'link'),
+    array('label' => 'Valuation', 'url' => site_url('reports/valuation'), 'icon' => 'bi-cash-stack', 'variant' => 'outline-secondary', 'mode' => 'link'),
+    array('label' => 'CSV', 'url' => site_url('reports/export/' . $report_key . '/csv'), 'icon' => 'bi-filetype-csv', 'variant' => 'outline-success', 'mode' => 'link'),
+    array('label' => 'Excel', 'url' => site_url('reports/export/' . $report_key . '/xlsx'), 'icon' => 'bi-file-earmark-excel', 'variant' => 'outline-success', 'mode' => 'link'),
+    array('label' => 'PDF', 'url' => site_url('reports/export/' . $report_key . '/pdf'), 'icon' => 'bi-file-earmark-pdf', 'variant' => 'outline-danger', 'mode' => 'link')
+);
 
-<p>
-    <a href="<?php echo site_url('reports/inventory'); ?>">Inventory</a> |
-    <a href="<?php echo site_url('reports/stock-in'); ?>">Stock In</a> |
-    <a href="<?php echo site_url('reports/stock-out'); ?>">Stock Out</a> |
-    <a href="<?php echo site_url('reports/movement'); ?>">Movement</a> |
-    <a href="<?php echo site_url('reports/low-stock'); ?>">Low Stock</a> |
-    <a href="<?php echo site_url('reports/valuation'); ?>">Valuation</a>
-</p>
+$report_columns = array();
+foreach ($columns as $label) {
+    $report_columns[] = $label;
+}
 
-<p>
-    Export:
-    <a href="<?php echo site_url('reports/export/' . $report_key . '/csv'); ?>">CSV</a> |
-    <a href="<?php echo site_url('reports/export/' . $report_key . '/xlsx'); ?>">Excel</a> |
-    <a href="<?php echo site_url('reports/export/' . $report_key . '/pdf'); ?>">PDF</a>
-</p>
-
-<table data-datatable-server data-source="<?php echo site_url('reports/datatable/' . $report_key); ?>">
-    <thead>
-        <tr>
-            <?php foreach ($columns as $label): ?>
-                <th><?php echo html_escape($label); ?></th>
-            <?php endforeach; ?>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+$this->load->view('components/datatable', array(
+    'title' => $report_title,
+    'subtitle' => 'View server-side report data and export the complete report.',
+    'data_source' => site_url('reports/datatable/' . $report_key),
+    'actions' => $report_actions,
+    'columns' => $report_columns
+));
+?>
