@@ -102,15 +102,41 @@ class Suppliers extends CI_Controller {
             $request['order_dir']
         );
 
+        $current_user_id = (int) $this->session->userdata('user_id');
+        $can_edit = $this->User_model->has_permission($current_user_id, 'suppliers.edit');
+        $can_delete = $this->User_model->has_permission($current_user_id, 'suppliers.delete');
+
         $rows = array();
         foreach ($suppliers as $supplier) {
             $id = (int) $supplier->id;
-            $actions = ui_modal_action_group(array(
-                array('label' => 'View', 'url' => site_url('suppliers/view/' . $id), 'variant' => 'secondary', 'icon' => 'bi-eye'),
-                array('label' => 'Edit', 'url' => site_url('suppliers/edit/' . $id), 'variant' => 'primary', 'icon' => 'bi-pencil'),
-                array('label' => 'Delete', 'url' => site_url('suppliers/delete/' . $id), 'variant' => 'danger', 'icon' => 'bi-trash')
-            ));
+            $action_items = array(
+                array(
+                    'label' => 'View',
+                    'url' => site_url('suppliers/view/' . $id),
+                    'variant' => 'secondary',
+                    'icon' => 'bi-eye'
+                )
+            );
 
+            if ($can_edit) {
+                $action_items[] = array(
+                    'label' => 'Edit',
+                    'url' => site_url('suppliers/edit/' . $id),
+                    'variant' => 'primary',
+                    'icon' => 'bi-pencil'
+                );
+            }
+
+            if ($can_delete) {
+                $action_items[] = array(
+                    'label' => 'Delete',
+                    'url' => site_url('suppliers/delete/' . $id),
+                    'variant' => 'danger',
+                    'icon' => 'bi-trash'
+                );
+            }
+
+            $actions = ui_modal_action_group($action_items);
             $rows[] = array(
                 html_escape($supplier->supplier_name),
                 html_escape($supplier->contact_person),
