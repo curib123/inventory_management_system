@@ -287,6 +287,23 @@ class Stock_model extends CI_Model {
         return $row ? (float) $row->inventory_value : 0;
     }
 
+    public function get_stock_health_summary() {
+        $this->db->select(
+            'SUM(CASE WHEN status = 1 AND stock > reorder_level THEN 1 ELSE 0 END) AS healthy, ' .
+            'SUM(CASE WHEN status = 1 AND stock > 0 AND stock <= reorder_level THEN 1 ELSE 0 END) AS low_stock, ' .
+            'SUM(CASE WHEN status = 1 AND stock <= 0 THEN 1 ELSE 0 END) AS out_of_stock',
+            FALSE
+        );
+
+        $row = $this->db->get('products')->row();
+
+        return array(
+            'healthy' => $row ? (int) $row->healthy : 0,
+            'low_stock' => $row ? (int) $row->low_stock : 0,
+            'out_of_stock' => $row ? (int) $row->out_of_stock : 0
+        );
+    }
+
     public function get_stock_by_category() {
         $this->db->select('c.category_name, COUNT(p.id) AS product_count, COALESCE(SUM(p.stock), 0) AS total_stock');
         $this->db->from('categories c');
