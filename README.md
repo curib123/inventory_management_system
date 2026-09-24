@@ -155,3 +155,47 @@ fix issues in stock in must follow the rule this rule phase 3
 all pages have own branches to style make sure when merge to development no conflict
 
 proper layout in excell format and more nice table design in pdf format
+
+## Automated Unit Testing
+
+This project uses PHPUnit for automated regression testing of important business rules.
+
+Run the professional readable test report:
+
+```bash
+composer test
+```
+
+Or run PHPUnit directly:
+
+```bash
+vendor/bin/phpunit --testdox
+```
+
+On Windows PowerShell or Command Prompt:
+
+```powershell
+vendor\bin\phpunit --testdox
+```
+
+The TestDox report prints each business rule as a readable passed check, for example:
+
+```text
+Auth Service
+ ✔ Authenticate returns session data for valid credentials
+ ✔ Session data does not contain legacy password change flag
+ ✔ Authenticate returns false for invalid credentials
+ ✔ Session data contains role information
+
+Stock Rules
+ ✔ Stock in adds quantity to current stock
+ ✔ Stock out subtracts quantity from current stock
+ ✔ Stock out rejects insufficient inventory
+ ✔ Fractional quantity is rejected instead of truncated
+ ✔ Stock in rejects database integer overflow
+
+OK (tests and assertions passed)
+```
+
+Current unit-test areas include authentication/session behavior, DataTables request/pagination rules, report definitions/export formats, and stock calculation/validation rules. PHPUnit is configured to display TestDox output by default and to fail the run on warnings or risky tests.
+
