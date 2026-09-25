@@ -285,6 +285,9 @@ class Stock extends CI_Controller {
         $data['item_error'] = $item_error;
         $data['stock_in_products'] = array();
         $data['stock_in_quantities'] = array();
+        $data['stock_out_quantities'] = $type === 'stock_out'
+            ? $this->posted_quantity_map()
+            : array();
 
         if ($type === 'stock_in') {
             $supplier_id = (int) $this->input->post('supplier_id', TRUE);
@@ -326,29 +329,17 @@ class Stock extends CI_Controller {
             $quantity_is_blank = $raw_quantity === '' || $raw_quantity === '0';
             $quantity_is_valid = ctype_digit($raw_quantity) && (int) $raw_quantity > 0;
 
-            if ($type === 'stock_in') {
-                // Every supplier product is rendered. Blank/zero means not included.
-                if ($quantity_is_blank) {
-                    continue;
-                }
+            // Stock In and Stock Out render product rows ahead of submission.
+            // Blank/zero quantity means that product is not part of this transaction.
+            if ($quantity_is_blank) {
+                continue;
+            }
 
-                if (!$product_id_is_valid || !$quantity_is_valid) {
-                    $error =
-                        'Stock-in product IDs and quantities must be positive whole numbers.';
-                    return array();
-                }
-            } else {
-                $product_is_blank = $raw_product_id === '' || $raw_product_id === '0';
-
-                if ($product_is_blank && $quantity_is_blank) {
-                    continue;
-                }
-
-                if (!$product_id_is_valid || !$quantity_is_valid) {
-                    $error =
-                        'Every used stock-out row must contain a valid product and a positive whole-number quantity.';
-                    return array();
-                }
+            if (!$product_id_is_valid || !$quantity_is_valid) {
+                $error = $type === 'stock_in'
+                    ? 'Stock-in product IDs and quantities must be positive whole numbers.'
+                    : 'Stock-out product IDs and quantities must be positive whole numbers.';
+                return array();
             }
 
             $items[] = array(
