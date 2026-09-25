@@ -6,6 +6,19 @@ $is_stock_out = $mode === 'stock_out';
 ?>
 
 <?php if (!empty($products)): ?>
+    <div class="app-stock-product-list-summary">
+        <span>
+            <i class="bi bi-boxes me-1" aria-hidden="true"></i>
+            <strong data-stock-result-count data-total="<?php echo count($products); ?>">
+                <?php echo count($products); ?>
+            </strong>
+            of <?php echo count($products); ?> products shown
+        </span>
+        <span class="text-body-secondary">
+            Blank or zero quantity = not included
+        </span>
+    </div>
+
     <div class="app-stock-product-list" data-stock-product-list>
         <?php foreach ($products as $product): ?>
             <?php
