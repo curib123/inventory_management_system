@@ -3,7 +3,7 @@
 use PHPUnit\Framework\TestCase;
 
 class AuthUserModelStub {
-    public function login($username, $password) {
+    public function find_active_by_username($username) {
         return FALSE;
     }
 }
@@ -15,12 +15,14 @@ class AuthServiceTest extends TestCase {
             'id' => 7,
             'username' => 'admin',
             'role_id' => 1,
-            'role_name' => 'admin'
+            'role_name' => 'admin',
+            'password' => password_hash('StrongPass123!', PASSWORD_DEFAULT),
+            'must_change_password' => 0
         );
         $user_model = $this->createMock(AuthUserModelStub::class);
         $user_model->expects($this->once())
-            ->method('login')
-            ->with('admin', 'StrongPass123!')
+            ->method('find_active_by_username')
+            ->with('admin')
             ->willReturn($user);
 
         $service = new Auth_service();
@@ -49,11 +51,19 @@ class AuthServiceTest extends TestCase {
     }
 
     public function testAuthenticateReturnsFalseForInvalidCredentials() {
+        $user = (object) array(
+            'id' => 7,
+            'username' => 'admin',
+            'role_id' => 1,
+            'role_name' => 'admin',
+            'password' => password_hash('StrongPass123!', PASSWORD_DEFAULT),
+            'must_change_password' => 0
+        );
         $user_model = $this->createMock(AuthUserModelStub::class);
         $user_model->expects($this->once())
-            ->method('login')
-            ->with('admin', 'wrong-password')
-            ->willReturn(FALSE);
+            ->method('find_active_by_username')
+            ->with('admin')
+            ->willReturn($user);
 
         $service = new Auth_service();
 
