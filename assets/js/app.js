@@ -1445,6 +1445,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            if (response.headers.get('X-Modal-Close') === '1') {
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+
+                if (response.headers.get('X-Page-Reload') === '1') {
+                    window.location.reload();
+                }
+
+                return;
+            }
+
             modalContent.innerHTML = html;
             enhanceFeedback(modalContent);
         } catch (error) {
