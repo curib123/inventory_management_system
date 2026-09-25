@@ -206,8 +206,8 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function get_datatable($start, $length, $search, $order_column, $order_dir) {
-        $this->build_datatable_query($search);
+    public function get_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
+        $this->build_datatable_query($search, $filters);
         $this->db->select(
             'p.id, p.product_code, p.product_name, c.category_name, ' .
             's.supplier_name, p.stock, p.selling_price, p.status'
@@ -221,15 +221,32 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function count_datatable_filtered($search) {
-        $this->build_datatable_query($search);
+    public function count_datatable_filtered($search, $filters = array()) {
+        $this->build_datatable_query($search, $filters);
         return $this->db->count_all_results();
     }
 
-    private function build_datatable_query($search) {
+    private function build_datatable_query($search, $filters = array()) {
         $this->db->from('products p');
         $this->db->join('categories c', 'c.id = p.category_id', 'left');
         $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
+
+        $status = isset($filters['status']) ? strtolower((string) $filters['status']) : '';
+        if ($status === 'active') {
+            $this->db->where('p.status', 1);
+        } elseif ($status === 'inactive') {
+            $this->db->where('p.status', 0);
+        }
+
+        $stock = isset($filters['stock']) ? strtolower((string) $filters['stock']) : '';
+        if ($stock === 'out') {
+            $this->db->where('p.stock <=', 0);
+        } elseif ($stock === 'low') {
+            $this->db->where('p.stock >', 0);
+            $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
+        } elseif ($stock === 'healthy') {
+            $this->db->where('p.stock > p.reorder_level', NULL, FALSE);
+        }
 
         if ($search === '') {
             return;
