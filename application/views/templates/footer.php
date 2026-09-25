@@ -3,6 +3,8 @@
 <?php if ($this->session->userdata('user_id')): ?>
     </div>
 </div>
+
+<?php $this->load->view('modal/container'); ?>
 <?php endif; ?>
 
 <script
