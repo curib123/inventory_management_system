@@ -273,15 +273,24 @@ class Users extends CI_Controller {
         }
 
         if ($temporary_password !== NULL) {
+            if ($this->input->is_ajax_request()) {
+                $this->load->view('modal/users/created', array(
+                    'username' => $username,
+                    'temporary_password' => $temporary_password
+                ));
+                return;
+            }
+
             $this->session->set_flashdata('temporary_password', $temporary_password);
             $this->session->set_flashdata(
                 'success',
                 'User account created successfully. Copy the temporary password below and share it securely with the user.'
             );
-        } else {
-            $this->session->set_flashdata('success', 'User changes saved successfully.');
+            redirect('users');
+            return;
         }
 
+        $this->session->set_flashdata('success', 'User changes saved successfully.');
         redirect('users');
     }
 
