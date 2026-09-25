@@ -38,6 +38,37 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    public function search_active($query = '', $supplier_id = NULL, $limit = 20) {
+        $query = trim((string) $query);
+        $limit = max(1, min(50, (int) $limit));
+
+        $this->db->select(
+            'p.id, p.product_code, p.product_name, p.unit, p.stock, ' .
+            'p.reorder_level, p.supplier_id, s.supplier_name'
+        );
+        $this->db->from('products p');
+        $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
+        $this->db->where('p.status', 1);
+
+        if ($supplier_id !== NULL && (int) $supplier_id > 0) {
+            $this->db->where('p.supplier_id', (int) $supplier_id);
+        }
+
+        if ($query !== '') {
+            $this->db->group_start();
+            $this->db->like('p.product_code', $query);
+            $this->db->or_like('p.product_name', $query);
+            $this->db->or_like('p.unit', $query);
+            $this->db->or_like('s.supplier_name', $query);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by('p.product_name', 'ASC');
+        $this->db->limit($limit);
+
+        return $this->db->get()->result();
+    }
+
     public function get_active_by_supplier($supplier_id, $mode = 'stock_in') {
         $this->db->select(
             'p.id, p.product_code, p.product_name, p.unit, p.stock, ' .
