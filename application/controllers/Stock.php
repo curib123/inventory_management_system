@@ -109,10 +109,30 @@ class Stock extends CI_Controller {
         }
 
         $query = trim((string) $this->input->get('q', TRUE));
-        $supplier_id = (int) $this->input->get('supplier_id', TRUE);
+        $supplier_scope = trim((string) $this->input->get('supplier_id', TRUE));
+
+        if ($supplier_scope === '') {
+            $this->output
+                ->set_content_type('application/json')
+                ->set_output(json_encode(array('items' => array())));
+            return;
+        }
+
+        if ($supplier_scope !== 'unassigned') {
+            if (!ctype_digit($supplier_scope) || (int) $supplier_scope <= 0) {
+                show_error('Invalid supplier selection.', 400, 'Invalid Supplier');
+            }
+
+            $supplier = $this->Supplier_model->get_by_id((int) $supplier_scope);
+
+            if (!$supplier || !(int) $supplier->status) {
+                show_error('Supplier not found or inactive.', 404, 'Supplier Not Found');
+            }
+        }
+
         $products = $this->Product_model->search_active(
             $query,
-            $supplier_id > 0 ? $supplier_id : NULL,
+            $supplier_scope,
             20
         );
         $items = array();
@@ -170,6 +190,7 @@ class Stock extends CI_Controller {
     public function adjustment() {
         $this->require_permission('stock.adjust');
 
+        $this->form_validation->set_rules('supplier_filter', 'Supplier', 'trim|required|max_length[32]');
         $this->form_validation->set_rules('product_id', 'Product', 'required|integer|greater_than[0]');
         $this->form_validation->set_rules(
             'actual_stock',
@@ -183,8 +204,43 @@ class Stock extends CI_Controller {
             return;
         }
 
+        $supplier_scope = trim((string) $this->input->post('supplier_filter', TRUE));
+        $product_id = (int) $this->input->post('product_id', TRUE);
+        $product = $this->Product_model->get_by_id($product_id);
+
+        if (!$product || !(int) $product->status) {
+            $this->render_adjustment_form('The selected product is invalid or inactive.');
+            return;
+        }
+
+        if ($supplier_scope === 'unassigned') {
+            if ($product->supplier_id !== NULL) {
+                $this->render_adjustment_form('The selected product is not an unassigned product.');
+                return;
+            }
+        } else {
+            if (!ctype_digit($supplier_scope) || (int) $supplier_scope <= 0) {
+                $this->render_adjustment_form('Select a valid supplier before choosing a product.');
+                return;
+            }
+
+            $supplier_id = (int) $supplier_scope;
+            $supplier = $this->Supplier_model->get_by_id($supplier_id);
+
+            if (
+                !$supplier ||
+                !(int) $supplier->status ||
+                (int) $product->supplier_id !== $supplier_id
+            ) {
+                $this->render_adjustment_form(
+                    'The selected product does not belong to the selected supplier.'
+                );
+                return;
+            }
+        }
+
         $result = $this->Stock_model->create_adjustment(
-            $this->input->post('product_id', TRUE),
+            $product_id,
             $this->input->post('actual_stock', TRUE),
             $this->input->post('reason', TRUE),
             $this->session->userdata('user_id')
@@ -400,11 +456,11 @@ class Stock extends CI_Controller {
         $data['page_title'] = 'Stock Adjustment';
         $data['form_error'] = $form_error;
 
-        $supplier_id = (int) $this->input->post('supplier_filter', TRUE);
+        $supplier_scope = trim((string) $this->input->post('supplier_filter', TRUE));
         $product_id = (int) $this->input->post('product_id', TRUE);
 
-        if ($supplier_id > 0) {
-            $supplier = $this->Supplier_model->get_by_id($supplier_id);
+        if ($supplier_scope !== '' && $supplier_scope !== 'unassigned' && ctype_digit($supplier_scope)) {
+            $supplier = $this->Supplier_model->get_by_id((int) $supplier_scope);
 
             if ($supplier && (int) $supplier->status === 1) {
                 $data['suppliers'] = array($supplier);
