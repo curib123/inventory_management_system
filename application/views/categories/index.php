@@ -19,10 +19,23 @@ $this->load->view('components/page_header', array(
 $this->load->view('components/data_table', array(
     'source' => site_url('categories/datatable'),
     'table_id' => 'categories-table',
+    'search_placeholder' => 'Search category name...',
+    'filters' => array(
+        array(
+            'name' => 'status',
+            'label' => 'Status',
+            'icon' => 'bi-toggle-on',
+            'options' => array(
+                '' => 'All statuses',
+                'active' => 'Active',
+                'inactive' => 'Inactive'
+            )
+        )
+    ),
     'columns' => array(
         array('label' => 'ID', 'visible' => false, 'orderable' => false),
         'Category',
-        array('label' => 'Status', 'class' => 'text-center text-nowrap'),
+        array('label' => 'Status', 'class' => 'text-center text-nowrap', 'render' => 'status'),
         array('label' => 'Products', 'class' => 'text-end text-nowrap'),
         array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')
     )
