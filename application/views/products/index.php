@@ -20,15 +20,15 @@ $this->load->view('components/data_table', array(
     'source' => site_url('products/datatable'),
     'table_id' => 'products-table',
     'columns' => array(
-        'ID',
+        array('label' => 'ID', 'visible' => false, 'orderable' => false),
         'Code',
         'Name',
         'Category',
         'Supplier',
-        'Stock',
-        'Selling Price',
-        'Status',
-        array('label' => 'Actions', 'orderable' => false)
+        array('label' => 'Stock', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Selling Price', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Status', 'class' => 'text-center text-nowrap'),
+        array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')
     )
 ));
 
