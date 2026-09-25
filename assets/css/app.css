@@ -904,3 +904,34 @@ body {
     }
 }
 
+/* --------------------------------------------------------------------------
+   Centralized searchable selects
+   -------------------------------------------------------------------------- */
+.app-searchable-select {
+    display: grid;
+    gap: 0.4rem;
+}
+
+.app-searchable-select-search {
+    width: 100%;
+    min-width: 0;
+}
+
+.app-searchable-select .form-select {
+    width: 100%;
+}
+
+.app-stock-filter {
+    width: min(100%, 22rem);
+}
+
+.app-stock-product.d-none {
+    display: none !important;
+}
+
+@media (max-width: 575.98px) {
+    .app-stock-filter {
+        width: 100%;
+    }
+}
+
