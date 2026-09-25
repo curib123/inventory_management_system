@@ -57,7 +57,10 @@ $this->load->view('components/modal/header', array(
             name="supplier_id"
             class="form-select"
             required
-            data-stock-in-supplier
+            data-stock-supplier
+            data-searchable-select
+            data-search-placeholder="Search supplier by name..."
+            data-stock-mode="<?php echo html_escape($transaction_type); ?>"
             data-products-url="<?php echo site_url('stock/supplier-products'); ?>"
         >
             <option value="">Select Supplier</option>
@@ -75,14 +78,14 @@ $this->load->view('components/modal/header', array(
         </select>
 
         <div class="form-text">
-            Select one supplier first. Only products assigned to that supplier will be shown.
+            Search and select one supplier. All active products assigned to that supplier will be loaded below.
         </div>
     </div>
 
 
     <!-- Products -->
-    <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-2">
-        <div>
+    <div class="app-stock-products-heading mb-3">
+        <div class="app-stock-products-heading-copy">
             <h3 class="h6 mb-1">
                 <?php echo $transaction_type === 'stock_in'
                     ? 'Supplier Products'
@@ -91,9 +94,21 @@ $this->load->view('components/modal/header', array(
 
             <p class="small text-body-secondary mb-0">
                 <?php echo $transaction_type === 'stock_in'
-                    ? 'Low-stock products appear first. Leave quantity blank or zero for products not included in this transaction.'
-                    : 'Enter quantities only for products leaving inventory. Leave quantity blank or zero for products not included in this transaction.'; ?>
+                    ? 'All active supplier products are shown. Low-stock items appear first; enter quantities only for items being received.'
+                    : 'All active supplier products are shown. Enter quantities only for items being released; stock cannot go below zero.'; ?>
             </p>
+        </div>
+
+        <div class="app-stock-product-search">
+            <i class="bi bi-search" aria-hidden="true"></i>
+            <input
+                type="search"
+                class="form-control form-control-sm"
+                placeholder="Search product code, name, or unit..."
+                data-stock-product-filter
+                autocomplete="off"
+                aria-label="Search supplier products"
+            >
         </div>
     </div>
 
@@ -104,12 +119,8 @@ $this->load->view('components/modal/header', array(
 
             <?php
             $this->load->view('components/stock/product_quantity_list', array(
-                'products' => $transaction_type === 'stock_in'
-                    ? $stock_in_products
-                    : $stock_out_products,
-                'quantities' => $transaction_type === 'stock_in'
-                    ? $stock_in_quantities
-                    : $stock_out_quantities,
+                'products' => $supplier_products,
+                'quantities' => $transaction_quantities,
                 'mode' => $transaction_type
             ));
             ?>
