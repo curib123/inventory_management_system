@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Roles extends CI_Controller {
 
+    // Setup ni sa Roles controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
@@ -18,6 +19,7 @@ class Roles extends CI_Controller {
         $this->load->model('User_model');
     }
 
+    // Mao ni ang index flow sa Roles; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() {
         $this->require_permission('roles.view');
 
@@ -27,11 +29,13 @@ class Roles extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
+    // Mao ni ang add flow sa Roles; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function add() {
         $this->require_permission('roles.create');
         $this->role_form();
     }
 
+    // Mao ni ang view flow sa Roles; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function view($id) {
         $this->require_permission('roles.view');
 
@@ -48,6 +52,7 @@ class Roles extends CI_Controller {
         ));
     }
 
+    // Mao ni ang edit flow sa Roles; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function edit($id) {
         $this->require_any_permission(array('roles.edit', 'roles.permissions'));
 
@@ -60,6 +65,7 @@ class Roles extends CI_Controller {
         $this->role_form((int) $id, $role);
     }
 
+    // Mao ni ang delete flow sa Roles; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function delete($id) {
         $this->require_permission('roles.delete');
 
@@ -103,6 +109,7 @@ class Roles extends CI_Controller {
         redirect('roles');
     }
 
+    // Mao ni ang datatable flow sa Roles; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function datatable() {
         $this->require_permission('roles.view');
 
@@ -182,6 +189,7 @@ class Roles extends CI_Controller {
             ->set_output(json_encode($payload));
     }
 
+    // Internal helper ni para role form; tawagon ra sulod application/controllers/Roles.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function role_form($id = NULL, $role = NULL) {
         $current_user_id = (int) $this->session->userdata('user_id');
 
@@ -317,6 +325,7 @@ class Roles extends CI_Controller {
         redirect('roles');
     }
 
+    // Internal helper ni para render role form; tawagon ra sulod application/controllers/Roles.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function render_role_form(
         $id,
         $role,
@@ -344,6 +353,7 @@ class Roles extends CI_Controller {
         $this->load->view('modal/roles/form', $data);
     }
 
+    // Internal helper ni para require permission; tawagon ra sulod application/controllers/Roles.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = (int) $this->session->userdata('user_id');
 
@@ -352,6 +362,7 @@ class Roles extends CI_Controller {
         }
     }
 
+    // Internal helper ni para require any permission; tawagon ra sulod application/controllers/Roles.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_any_permission($permission_keys) {
         $user_id = (int) $this->session->userdata('user_id');
 
