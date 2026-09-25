@@ -38,7 +38,7 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function get_active_by_supplier($supplier_id) {
+    public function get_active_by_supplier($supplier_id, $mode = 'stock_in') {
         $this->db->select(
             'p.id, p.product_code, p.product_name, p.unit, p.stock, ' .
             'p.reorder_level, p.cost_price, p.selling_price, p.supplier_id'
@@ -47,10 +47,16 @@ class Product_model extends CI_Model {
         $this->db->where('p.supplier_id', (int) $supplier_id);
         $this->db->where('p.status', 1);
 
-        // Low-stock products first, then the lowest stock, then product name.
-        $this->db->order_by('(p.stock <= p.reorder_level)', 'DESC', FALSE);
-        $this->db->order_by('p.stock', 'ASC');
-        $this->db->order_by('p.product_name', 'ASC');
+        if ($mode === 'stock_out') {
+            // For releases, products with available stock should be easiest to reach.
+            $this->db->order_by('(p.stock > 0)', 'DESC', FALSE);
+            $this->db->order_by('p.product_name', 'ASC');
+        } else {
+            // For receiving, low-stock items deserve attention first.
+            $this->db->order_by('(p.stock <= p.reorder_level)', 'DESC', FALSE);
+            $this->db->order_by('p.stock', 'ASC');
+            $this->db->order_by('p.product_name', 'ASC');
+        }
 
         return $this->db->get()->result();
     }
