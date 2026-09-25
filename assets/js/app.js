@@ -495,14 +495,70 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    function renderTableCell(renderType, value) {
+        var raw = value === null || value === undefined ? '' : String(value);
+        var normalized = raw.trim().toLowerCase();
+
+        if (renderType === 'status') {
+            var active = normalized === 'active' || normalized === '1' || normalized === 'enabled';
+            return '<span class="badge rounded-pill app-table-badge ' +
+                (active ? 'app-table-badge-success' : 'app-table-badge-secondary') + '">' +
+                escapeHtml(raw || (active ? 'Active' : 'Inactive')) +
+            '</span>';
+        }
+
+        if (renderType === 'movement') {
+            var movementClass = 'app-table-badge-info';
+            var movementLabel = raw.replace(/_/g, ' ');
+
+            if (normalized === 'stock_in') {
+                movementClass = 'app-table-badge-success';
+                movementLabel = 'Stock In';
+            } else if (normalized === 'stock_out') {
+                movementClass = 'app-table-badge-danger';
+                movementLabel = 'Stock Out';
+            } else if (normalized === 'adjustment') {
+                movementClass = 'app-table-badge-warning';
+                movementLabel = 'Adjustment';
+            }
+
+            return '<span class="badge rounded-pill app-table-badge ' + movementClass + '">' +
+                escapeHtml(movementLabel) +
+            '</span>';
+        }
+
+        if (renderType === 'stock_alert') {
+            var stock = Number(raw);
+            var stockClass = stock <= 0 ? 'app-table-badge-danger' : 'app-table-badge-warning';
+            return '<span class="app-table-number-badge ' + stockClass + '">' +
+                escapeHtml(raw) +
+            '</span>';
+        }
+
+        if (renderType === 'difference') {
+            var difference = Number(raw);
+            var differenceClass = difference > 0
+                ? 'app-table-badge-success'
+                : (difference < 0 ? 'app-table-badge-danger' : 'app-table-badge-secondary');
+            var prefix = difference > 0 ? '+' : '';
+
+            return '<span class="badge rounded-pill app-table-badge ' + differenceClass + '">' +
+                escapeHtml(prefix + raw) +
+            '</span>';
+        }
+
+        return raw;
+    }
+
     if (window.DataTable && DataTable.ext) {
         DataTable.ext.errMode = 'none';
     }
 
     document.querySelectorAll('table[data-datatable-server]').forEach(function (table) {
         var source = table.getAttribute('data-source');
+        var card = table.closest('.app-table-card');
 
-        if (!source) {
+        if (!source || !card) {
             return;
         }
 
@@ -532,6 +588,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 configured = true;
             }
 
+            var renderType = th.getAttribute('data-render');
+
+            if (renderType) {
+                definition.render = function (data, type) {
+                    if (type !== 'display') {
+                        return data;
+                    }
+
+                    return renderTableCell(renderType, data);
+                };
+                configured = true;
+            }
+
             if (configured) {
                 columnDefinitions.push(definition);
             }
@@ -543,6 +612,20 @@ document.addEventListener('DOMContentLoaded', function () {
             ajax: {
                 url: source,
                 type: 'GET',
+                data: function (payload) {
+                    var filters = {};
+
+                    card.querySelectorAll('[data-table-filter]').forEach(function (select) {
+                        var name = select.getAttribute('data-table-filter');
+                        var value = select.value;
+
+                        if (name && value !== '') {
+                            filters[name] = value;
+                        }
+                    });
+
+                    payload.table_filters = filters;
+                },
                 error: function (xhr) {
                     var problem = responseProblem(
                         xhr ? {
@@ -565,15 +648,18 @@ document.addEventListener('DOMContentLoaded', function () {
             searchDelay: 300,
             order: [],
             layout: {
-                topStart: 'search',
-                topEnd: 'pageLength',
+                topStart: null,
+                topEnd: null,
                 bottomStart: 'info',
                 bottomEnd: 'paging'
             },
             language: {
-                search: '',
-                searchPlaceholder: 'Search records...',
-                lengthMenu: '_MENU_ per page'
+                emptyTable: 'No records found.',
+                info: 'Showing _START_ to _END_ of _TOTAL_ records',
+                infoEmpty: 'No records to show',
+                infoFiltered: '',
+                processing: 'Loading records...',
+                zeroRecords: 'No matching records found.'
             }
         };
 
@@ -581,7 +667,90 @@ document.addEventListener('DOMContentLoaded', function () {
             options.columnDefs = columnDefinitions;
         }
 
-        table._dataTable = new DataTable(table, options);
+        var dataTable = new DataTable(table, options);
+        table._dataTable = dataTable;
+
+        var searchInput = card.querySelector('[data-table-search]');
+        var searchClear = card.querySelector('[data-table-search-clear]');
+        var lengthSelect = card.querySelector('[data-table-length]');
+        var resetButton = card.querySelector('[data-table-reset]');
+        var filterCount = card.querySelector('[data-table-filter-count]');
+        var searchTimer = null;
+
+        function updateToolbarState() {
+            var activeFilters = 0;
+
+            card.querySelectorAll('[data-table-filter]').forEach(function (select) {
+                if (select.value !== '') {
+                    activeFilters++;
+                }
+            });
+
+            var hasSearch = searchInput && searchInput.value.trim() !== '';
+
+            if (filterCount) {
+                filterCount.textContent = activeFilters + (activeFilters === 1 ? ' active' : ' active');
+                filterCount.classList.toggle('d-none', activeFilters === 0);
+            }
+
+            if (resetButton) {
+                resetButton.classList.toggle('d-none', activeFilters === 0 && !hasSearch);
+            }
+
+            if (searchClear) {
+                searchClear.classList.toggle('d-none', !hasSearch);
+            }
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function () {
+                window.clearTimeout(searchTimer);
+                updateToolbarState();
+
+                searchTimer = window.setTimeout(function () {
+                    dataTable.search(searchInput.value.trim()).draw();
+                }, 300);
+            });
+        }
+
+        if (searchClear && searchInput) {
+            searchClear.addEventListener('click', function () {
+                searchInput.value = '';
+                updateToolbarState();
+                searchInput.focus();
+                dataTable.search('').draw();
+            });
+        }
+
+        card.querySelectorAll('[data-table-filter]').forEach(function (select) {
+            select.addEventListener('change', function () {
+                updateToolbarState();
+                dataTable.ajax.reload(null, true);
+            });
+        });
+
+        if (lengthSelect) {
+            lengthSelect.addEventListener('change', function () {
+                dataTable.page.len(Number(lengthSelect.value) || 10).draw();
+            });
+        }
+
+        if (resetButton) {
+            resetButton.addEventListener('click', function () {
+                card.querySelectorAll('[data-table-filter]').forEach(function (select) {
+                    select.value = '';
+                });
+
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+
+                updateToolbarState();
+                dataTable.search('').page.len(lengthSelect ? Number(lengthSelect.value) || 10 : 10).draw();
+            });
+        }
+
+        updateToolbarState();
     });
 
     async function loadModal(url) {
