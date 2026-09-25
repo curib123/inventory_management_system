@@ -191,6 +191,7 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
             $flash_error = $this->session->flashdata('error');
             $flash_warning = $this->session->flashdata('warning');
             $flash_success = $this->session->flashdata('success');
+            $flash_temporary_password = $this->session->flashdata('temporary_password');
             ?>
 
             <?php if ($flash_error): ?>
@@ -230,6 +231,33 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
                         </div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($flash_temporary_password): ?>
+                <div class="alert alert-warning app-feedback-alert" role="status">
+                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                        <div class="d-flex align-items-start gap-2">
+                            <i class="bi bi-key-fill mt-1"></i>
+                            <div>
+                                <div class="fw-semibold">Temporary password — shown once</div>
+                                <div class="small mb-2">
+                                    Copy this password now and share it securely with the new user.
+                                </div>
+                                <code
+                                    class="d-inline-block px-3 py-2 rounded bg-body border fs-6 user-select-all"
+                                    data-temporary-password
+                                ><?php echo html_escape($flash_temporary_password); ?></code>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            class="btn btn-sm btn-outline-dark"
+                            data-copy-temporary-password
+                        >
+                            <i class="bi bi-copy me-1" aria-hidden="true"></i>Copy Password
+                        </button>
+                    </div>
                 </div>
             <?php endif; ?>
 
