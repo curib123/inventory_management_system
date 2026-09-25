@@ -98,8 +98,7 @@
     min-width: 10.5rem;
 }
 
-.app-table-filter label,
-.app-table-page-size label {
+.app-table-filter label {
     display: block;
     margin-bottom: 0.3rem;
     color: var(--bs-secondary-color);
@@ -111,8 +110,7 @@
     margin-right: 0.25rem;
 }
 
-.app-table-filter .form-select,
-.app-table-page-size .form-select {
+.app-table-filter .form-select {
     min-height: 2.35rem;
     border-color: rgba(var(--bs-secondary-rgb), 0.2);
     border-radius: 0.65rem;
@@ -132,10 +130,6 @@
     color: var(--bs-primary-text-emphasis);
     background: var(--bs-primary-bg-subtle);
     border: 1px solid rgba(var(--bs-primary-rgb), 0.15);
-}
-
-.app-table-page-size {
-    width: 5.5rem;
 }
 
 .app-table-scroll {
@@ -358,5 +352,49 @@
     .app-data-table tbody td {
         padding-right: 0.8rem;
         padding-left: 0.8rem;
+    }
+}
+
+
+/* Pagination footer: keep the row limit beside the table info and paging controls. */
+.app-table-card .dt-layout-row:last-child {
+    gap: 1rem;
+}
+
+.app-table-card .dt-layout-start {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+}
+
+.app-table-card .dt-length {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.82rem;
+    white-space: nowrap;
+}
+
+.app-table-card .dt-length label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0;
+}
+
+.app-table-card .dt-length select {
+    min-width: 4.8rem;
+    border-color: rgba(var(--bs-secondary-rgb), 0.2);
+    border-radius: 0.6rem;
+    background-color: var(--bs-body-bg);
+    font-size: 0.82rem;
+}
+
+@media (max-width: 767.98px) {
+    .app-table-card .dt-layout-start {
+        width: 100%;
+        justify-content: space-between;
     }
 }
