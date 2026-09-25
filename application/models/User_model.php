@@ -6,11 +6,13 @@ class User_model extends CI_Model {
 
     private $permission_key_cache = array();
 
+    // Setup ni sa User_model; CodeIgniter mo-run ani when gi-load ang model, with main integration sa application/controllers/Auth.php ug permission checks across application/controllers/.
     public function __construct() {
         parent::__construct();
         $this->load->database();
     }
 
+    // Data helper ni para login; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function login($username, $password) {
         $this->db->select('u.*, r.role_name');
         $this->db->from('users u');
@@ -31,6 +33,7 @@ class User_model extends CI_Model {
         return FALSE;
     }
 
+    // Data helper ni para get all; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function get_all() {
         $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.role_id, u.status, u.created_at, u.updated_at, r.role_name');
         $this->db->from('users u');
@@ -40,6 +43,7 @@ class User_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para get by id; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function get_by_id($id) {
         $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.role_id, u.status, u.created_at, u.updated_at, r.role_name');
         $this->db->from('users u');
@@ -48,16 +52,19 @@ class User_model extends CI_Model {
         return $this->db->get()->row();
     }
 
+    // Data helper ni para get active roles; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function get_active_roles() {
         $this->db->where('status', 1);
         $this->db->order_by('role_name', 'ASC');
         return $this->db->get('roles')->result();
     }
 
+    // Data helper ni para get role by id; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function get_role_by_id($id) {
         return $this->db->get_where('roles', array('id' => (int) $id))->row();
     }
 
+    // Data helper ni para search active roles; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function search_active_roles($query = '', $limit = 20) {
         $query = trim((string) $query);
         $limit = max(1, min(50, (int) $limit));
@@ -79,6 +86,7 @@ class User_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para username exists; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function username_exists($username, $exclude_id = NULL) {
         $this->db->where('username', trim($username));
 
@@ -89,6 +97,7 @@ class User_model extends CI_Model {
         return $this->db->count_all_results('users') > 0;
     }
 
+    // Data helper ni para save; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function save($data, $id = NULL) {
         if ($id !== NULL) {
             $this->db->where('id', (int) $id);
@@ -104,6 +113,7 @@ class User_model extends CI_Model {
         return $this->db->insert('users', $data);
     }
 
+    // Data helper ni para has history; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function has_history($id) {
         $id = (int) $id;
         $tables = array(
@@ -121,11 +131,13 @@ class User_model extends CI_Model {
         return FALSE;
     }
 
+    // Data helper ni para delete; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function delete($id) {
         unset($this->permission_key_cache[(int) $id]);
         return $this->db->delete('users', array('id' => (int) $id));
     }
 
+    // Data helper ni para get user permissions; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function get_user_permissions($user_id) {
         $this->db->distinct();
         $this->db->select(
@@ -148,6 +160,7 @@ class User_model extends CI_Model {
         return $this->db->get()->result_array();
     }
 
+    // Data helper ni para get user permission keys; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function get_user_permission_keys($user_id) {
         $user_id = (int) $user_id;
 
@@ -172,6 +185,7 @@ class User_model extends CI_Model {
         return $this->permission_key_cache[$user_id];
     }
 
+    // Data helper ni para has permission; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function has_permission($user_id, $permission_key) {
         return in_array(
             (string) $permission_key,
@@ -180,6 +194,7 @@ class User_model extends CI_Model {
         );
     }
 
+    // Data helper ni para verify password; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function verify_password($user_id, $password) {
         $row = $this->db
             ->select('password')
@@ -191,6 +206,7 @@ class User_model extends CI_Model {
         return $row && password_verify((string) $password, $row->password);
     }
 
+    // Data helper ni para update password; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function update_password($user_id, $password, $require_change = FALSE) {
         unset($this->permission_key_cache[(int) $user_id]);
 
@@ -204,6 +220,7 @@ class User_model extends CI_Model {
         );
     }
 
+    // Data helper ni para password change required; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function password_change_required($user_id) {
         $row = $this->db
             ->select('must_change_password')
@@ -215,6 +232,7 @@ class User_model extends CI_Model {
         return $row && (int) $row->must_change_password === 1;
     }
 
+    // Data helper ni para has any permission; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function has_any_permission($user_id, $permission_keys) {
         $user_permissions = $this->get_user_permission_keys($user_id);
 
@@ -227,10 +245,12 @@ class User_model extends CI_Model {
         return FALSE;
     }
 
+    // Data helper ni para count all; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function count_all() {
         return $this->db->count_all('users');
     }
 
+    // Data helper ni para get datatable; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function get_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
         $this->build_datatable_query($search, $filters);
         $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.status, u.created_at, u.updated_at, r.role_name');
@@ -244,11 +264,13 @@ class User_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para count datatable filtered; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function count_datatable_filtered($search, $filters = array()) {
         $this->build_datatable_query($search, $filters);
         return $this->db->count_all_results();
     }
 
+    // Data helper ni para build datatable query; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     private function build_datatable_query($search, $filters = array()) {
         $this->db->from('users u');
         $this->db->join('roles r', 'r.id = u.role_id', 'left');
