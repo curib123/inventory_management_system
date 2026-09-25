@@ -9,7 +9,7 @@ class Categories extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
-        $this->load->library('Datatable_service');
+        $this->load->library(array('Datatable_service', 'Category_service'));
 
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -71,31 +71,13 @@ class Categories extends CI_Controller {
             show_404();
         }
 
-        $delete_error = '';
-        if ($this->Category_model->count_products($id) > 0) {
-            $delete_error = 'This category is assigned to products. Reassign those products before deleting the category.';
-        }
+        $execute = $this->input->method(TRUE) === 'POST';
+        $result = $this->category_service->delete($id, $execute);
 
-        if ($this->input->method(TRUE) !== 'POST') {
+        if (!$execute || !$result['success']) {
             $this->load->view('modal/categories/delete', array(
                 'category' => $category,
-                'delete_error' => $delete_error
-            ));
-            return;
-        }
-
-        if ($delete_error !== '') {
-            $this->load->view('modal/categories/delete', array(
-                'category' => $category,
-                'delete_error' => $delete_error
-            ));
-            return;
-        }
-
-        if (!$this->Category_model->delete($id)) {
-            $this->load->view('modal/categories/delete', array(
-                'category' => $category,
-                'delete_error' => 'The category could not be deleted.'
+                'delete_error' => $result['success'] ? '' : $result['message']
             ));
             return;
         }
@@ -182,19 +164,14 @@ class Categories extends CI_Controller {
             return;
         }
 
-        $name = trim($this->input->post('category_name', TRUE));
-        if ($this->Category_model->name_exists($name, $id)) {
-            $this->render_category_form($id, $category, 'That category name already exists.');
-            return;
-        }
-
-        $data = array(
-            'category_name' => $name,
-            'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
+        $result = $this->category_service->save(
+            $id,
+            $this->input->post('category_name', TRUE),
+            $this->input->post('status', TRUE)
         );
 
-        if (!$this->Category_model->save($data, $id)) {
-            $this->render_category_form($id, $category, 'The category could not be saved.');
+        if (!$result['success']) {
+            $this->render_category_form($id, $category, $result['message']);
             return;
         }
 
