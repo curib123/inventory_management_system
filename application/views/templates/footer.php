@@ -5,6 +5,17 @@
 </div>
 
 <?php $this->load->view('modal/container'); ?>
+
+<?php if (
+    $this->session->userdata('must_change_password') &&
+    !$this->session->userdata('password_change_deferred')
+): ?>
+    <div
+        class="d-none"
+        data-password-change-prompt-url="<?php echo html_escape(site_url('account/change-password')); ?>"
+        aria-hidden="true"
+    ></div>
+<?php endif; ?>
 <?php endif; ?>
 
 <script
