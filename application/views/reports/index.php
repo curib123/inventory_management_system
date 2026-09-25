@@ -86,16 +86,30 @@ if ($report_key === 'inventory' || $report_key === 'valuation') {
             'low' => 'Low but available'
         )
     );
-} elseif ($report_key === 'movement') {
+} elseif (in_array($report_key, array('stock-in', 'stock-out', 'movement'), TRUE)) {
+    if ($report_key === 'movement') {
+        $table_filters[] = array(
+            'name' => 'type',
+            'label' => 'Movement type',
+            'icon' => 'bi-arrow-left-right',
+            'options' => array(
+                '' => 'All movements',
+                'stock_in' => 'Stock In',
+                'stock_out' => 'Stock Out',
+                'adjustment' => 'Adjustment'
+            )
+        );
+    }
+
     $table_filters[] = array(
-        'name' => 'type',
-        'label' => 'Movement type',
-        'icon' => 'bi-arrow-left-right',
+        'name' => 'period',
+        'label' => 'Period',
+        'icon' => 'bi-calendar3',
         'options' => array(
-            '' => 'All movements',
-            'stock_in' => 'Stock In',
-            'stock_out' => 'Stock Out',
-            'adjustment' => 'Adjustment'
+            '' => 'All dates',
+            'today' => 'Today',
+            '7_days' => 'Last 7 days',
+            '30_days' => 'Last 30 days'
         )
     );
 }
