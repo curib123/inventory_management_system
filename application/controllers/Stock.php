@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Stock extends CI_Controller {
 
+    // Setup ni sa Stock controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
@@ -20,10 +21,12 @@ class Stock extends CI_Controller {
         $this->load->model('User_model');
     }
 
+    // Mao ni ang index flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() {
         $this->history();
     }
 
+    // Mao ni ang history flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function history() {
         $this->require_permission('stock.history');
 
@@ -33,6 +36,7 @@ class Stock extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
+    // Mao ni ang details flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function details($id) {
         $this->require_permission('stock.history');
 
@@ -45,16 +49,19 @@ class Stock extends CI_Controller {
         $this->load->view('modal/stock/details', $data);
     }
 
+    // Mao ni ang stock in flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function stock_in() {
         $this->require_permission('stock.stock_in');
         $this->transaction_form('stock_in');
     }
 
+    // Mao ni ang stock out flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function stock_out() {
         $this->require_permission('stock.stock_out');
         $this->transaction_form('stock_out');
     }
 
+    // Mao ni ang supplier search flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function supplier_search() {
         $mode = strtolower(trim((string) $this->input->get('mode', TRUE)));
 
@@ -101,6 +108,7 @@ class Stock extends CI_Controller {
             ->set_output(json_encode(array('items' => $items)));
     }
 
+    // Mao ni ang adjustment products search flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function adjustment_products_search() {
         $this->require_permission('stock.adjust');
 
@@ -162,6 +170,7 @@ class Stock extends CI_Controller {
             ->set_output(json_encode(array('items' => $items)));
     }
 
+    // Mao ni ang supplier products flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function supplier_products($supplier_id) {
         $mode = strtolower(trim((string) $this->input->get('mode', TRUE)));
         $mode = $mode === 'stock_out' ? 'stock_out' : 'stock_in';
@@ -187,6 +196,7 @@ class Stock extends CI_Controller {
         ));
     }
 
+    // Mao ni ang adjustment flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function adjustment() {
         $this->require_permission('stock.adjust');
 
@@ -255,6 +265,7 @@ class Stock extends CI_Controller {
         redirect('stock/adjustments');
     }
 
+    // Mao ni ang adjustments flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function adjustments() {
         $this->require_permission('stock.adjust');
 
@@ -264,6 +275,7 @@ class Stock extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
+    // Mao ni ang low stock flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function low_stock() {
         $this->require_permission('stock.view');
 
@@ -273,6 +285,7 @@ class Stock extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
+    // Mao ni ang history datatable flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function history_datatable() {
         $this->require_permission('stock.history');
 
@@ -316,6 +329,7 @@ class Stock extends CI_Controller {
         $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
+    // Mao ni ang adjustments datatable flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function adjustments_datatable() {
         $this->require_permission('stock.adjust');
 
@@ -353,6 +367,7 @@ class Stock extends CI_Controller {
         $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
+    // Mao ni ang low stock datatable flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function low_stock_datatable() {
         $this->require_permission('stock.view');
 
@@ -388,6 +403,7 @@ class Stock extends CI_Controller {
         $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
+    // Internal helper ni para transaction form; tawagon ra sulod application/controllers/Stock.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function transaction_form($type) {
         $this->form_validation->set_rules(
             'supplier_id',
@@ -428,6 +444,7 @@ class Stock extends CI_Controller {
         redirect('stock/history');
     }
 
+    // Internal helper ni para render transaction form; tawagon ra sulod application/controllers/Stock.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function render_transaction_form($type, $item_error = '') {
         $data['suppliers'] = array();
         $data['transaction_type'] = $type;
@@ -450,6 +467,7 @@ class Stock extends CI_Controller {
         $this->load->view('modal/stock/transaction_form', $data);
     }
 
+    // Internal helper ni para render adjustment form; tawagon ra sulod application/controllers/Stock.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function render_adjustment_form($form_error = '') {
         $data['products'] = array();
         $data['suppliers'] = array();
@@ -478,6 +496,7 @@ class Stock extends CI_Controller {
         $this->load->view('modal/stock/adjustment', $data);
     }
 
+    // Internal helper ni para read transaction items; tawagon ra sulod application/controllers/Stock.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function read_transaction_items(&$error, $type) {
         $error = '';
         $items = array();
@@ -520,6 +539,7 @@ class Stock extends CI_Controller {
         return $items;
     }
 
+    // Internal helper ni para posted quantity map; tawagon ra sulod application/controllers/Stock.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function posted_quantity_map() {
         $map = array();
         $product_ids = (array) $this->input->post('product_id', TRUE);
@@ -537,6 +557,7 @@ class Stock extends CI_Controller {
         return $map;
     }
 
+    // Internal helper ni para require permission; tawagon ra sulod application/controllers/Stock.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
         if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
