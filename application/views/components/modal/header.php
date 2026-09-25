@@ -20,7 +20,7 @@ $modal_eyebrow = isset($modal_eyebrow) ? trim((string) $modal_eyebrow) : '';
                 <div class="app-modal-eyebrow"><?php echo html_escape($modal_eyebrow); ?></div>
             <?php endif; ?>
 
-            <h2 class="modal-title app-modal-title"><?php echo html_escape($modal_title); ?></h2>
+            <h2 class="modal-title app-modal-title" id="action-modal-title"><?php echo html_escape($modal_title); ?></h2>
 
             <?php if ($modal_subtitle !== ''): ?>
                 <p class="app-modal-subtitle"><?php echo html_escape($modal_subtitle); ?></p>
