@@ -205,12 +205,18 @@ Current unit-test areas include authentication/session behavior, DataTables requ
 
 
 
-# new issues to fix
+# Resolved QA Issues
 
-# The Stock out must be like the stock in modal but in reverse.  (pending)
-# DataTable design left the search must be maximize the free space width and right the limit. (pending)
-# DataTable must organize and align perfectly hide ID in datatables tables. (pending)
-# create a centralized searchable dropdown if the data to fetch have possible more data to handle like product and supplier. (pending)
-# stock adjustment must have searchable dropdown for supplier first when select the supplier all product of supplier is show but this is  optional only in next of it below of it must have searchable product dropdown when select.(pending)
+- [x] Stock Out now uses the same multi-product quantity-list workflow as Stock In, but in reverse. It shows current stock, live new-stock preview, enforces available-stock limits in the UI, and the server still blocks negative stock.
+- [x] Centralized DataTable layout now places a full-width search control on the left and the page-length selector on the right, with responsive stacking on smaller screens.
+- [x] DataTable columns are centrally aligned through column metadata. Internal Product and Category IDs remain available to the server/actions but are hidden from users.
+- [x] Added a centralized searchable-select enhancement for large relationship lists. It is currently used for Stock In suppliers, Product category/supplier selection, and Stock Adjustment supplier/product selection.
+- [x] Stock Adjustment now has an optional searchable Supplier filter first. Selecting a supplier limits the searchable Product dropdown to active products assigned to that supplier; leaving Supplier blank keeps all active products available.
+- [x] CSV and Excel remain downloadable report files. Excel output is hardened against buffered-output corruption and uses the same professional blue-header, bordered, zebra-row table language as PDF.
+- [x] PDF is now a print-focused export: it opens inline in a new tab as an A4 landscape report instead of forcing a file download.
+- [x] Stock In continues to follow Phase 3: supplier selection fetches only that supplier's active products, supports multiple products in one transaction, shows old/new stock, updates inventory atomically, creates a transaction number, and records movement history.
+- [x] Bootstrap/custom styling remains centralized through shared page, table, modal, form, stock, sidebar, and report components to reduce page-specific merge conflicts.
 
-# excel not working export and export csv/excell and print only directly pdf excell must have same table design like in pdf table design. (pending)
+## QA note
+
+The current branch passed a JavaScript parse check and structural checks on the changed PHP files. A full local PHPUnit/browser/MySQL execution could not be run from the assistant environment because outbound GitHub DNS resolution is unavailable there. Run `composer test` plus the normal Stock In/Out and export smoke tests on the deployment machine before production release.
