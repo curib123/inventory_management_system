@@ -9,7 +9,7 @@ class Roles extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
-        $this->load->library('Datatable_service');
+        $this->load->library(array('Datatable_service', 'Role_service'));
 
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -75,32 +75,13 @@ class Roles extends CI_Controller {
             show_404();
         }
 
-        $delete_error = '';
+        $execute = $this->input->method(TRUE) === 'POST';
+        $result = $this->role_service->delete($id, $execute);
 
-        if ($this->Role_model->has_users($id)) {
-            $delete_error = 'This role cannot be deleted while users are assigned to it.';
-        }
-
-        if ($this->input->method(TRUE) !== 'POST') {
+        if (!$execute || !$result['success']) {
             $this->load->view('modal/roles/delete', array(
                 'role' => $role,
-                'delete_error' => $delete_error
-            ));
-            return;
-        }
-
-        if ($delete_error !== '') {
-            $this->load->view('modal/roles/delete', array(
-                'role' => $role,
-                'delete_error' => $delete_error
-            ));
-            return;
-        }
-
-        if (!$this->Role_model->delete($id)) {
-            $this->load->view('modal/roles/delete', array(
-                'role' => $role,
-                'delete_error' => 'The role could not be deleted.'
+                'delete_error' => $result['success'] ? '' : $result['message']
             ));
             return;
         }
@@ -243,85 +224,36 @@ class Roles extends CI_Controller {
             return;
         }
 
-        $role_id = $id;
         $role_data = NULL;
-        $permission_ids = $can_manage_permissions
-            ? $this->input->post('permissions', TRUE)
-            : array();
 
         if ($can_edit_role) {
-            $role_name = trim((string) $this->input->post('role_name', TRUE));
-
-            if ($this->Role_model->name_exists($role_name, $id)) {
-                $this->render_role_form(
-                    $id,
-                    $role,
-                    'That role name already exists.',
-                    $can_edit_role,
-                    $can_manage_permissions
-                );
-                return;
-            }
-
             $role_data = array(
-                'role_name' => $role_name,
+                'role_name' => trim((string) $this->input->post('role_name', TRUE)),
                 'description' => trim((string) $this->input->post('description', TRUE)),
                 'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
             );
         }
 
-        if ($can_edit_role && $can_manage_permissions) {
-            $role_id = $this->Role_model->save_with_permissions(
-                $role_data,
-                $permission_ids,
-                $id
+        $result = $this->role_service->save(
+            $id,
+            $role_data,
+            $can_manage_permissions ? $this->input->post('permissions', TRUE) : array(),
+            $can_edit_role,
+            $can_manage_permissions
+        );
+
+        if (!$result['success']) {
+            $this->render_role_form(
+                $id,
+                $role,
+                $result['message'],
+                $can_edit_role,
+                $can_manage_permissions
             );
-
-            if ($role_id === FALSE) {
-                $this->render_role_form(
-                    $id,
-                    $role,
-                    'The role and permissions could not be saved. No changes were committed.',
-                    $can_edit_role,
-                    $can_manage_permissions
-                );
-                return;
-            }
-        } elseif ($can_edit_role) {
-            $role_id = $this->Role_model->save($role_data, $id);
-
-            if ($role_id === FALSE) {
-                $this->render_role_form(
-                    $id,
-                    $role,
-                    'The role could not be saved.',
-                    $can_edit_role,
-                    $can_manage_permissions
-                );
-                return;
-            }
-        } elseif ($can_manage_permissions) {
-            if (!$this->Role_model->sync_permissions($role_id, $permission_ids)) {
-                $this->render_role_form(
-                    $id,
-                    $role,
-                    'The role permissions could not be saved.',
-                    $can_edit_role,
-                    $can_manage_permissions
-                );
-                return;
-            }
+            return;
         }
 
-        if (!$can_edit_role && $can_manage_permissions) {
-            $success_message = 'Role permissions updated successfully.';
-        } elseif ($id === NULL) {
-            $success_message = 'Role created successfully.';
-        } else {
-            $success_message = 'Role changes saved successfully.';
-        }
-
-        $this->session->set_flashdata('success', $success_message);
+        $this->session->set_flashdata('success', $result['message']);
         redirect('roles');
     }
 
