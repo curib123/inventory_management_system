@@ -116,6 +116,11 @@ class MY_Exceptions extends CI_Exceptions {
         $plain_message = is_array($message)
             ? implode(' | ', array_map('strip_tags', $message))
             : strip_tags((string) $message);
+        $public_message = $plain_message;
+
+        if ($template === 'error_db') {
+            $public_message = 'The application could not complete the requested database operation. Use the Error ID below to find the detailed database error in the application log.';
+        }
 
         log_message(
             'error',
@@ -132,7 +137,7 @@ class MY_Exceptions extends CI_Exceptions {
         ob_start();
         $this->render_app_error(
             $heading,
-            $plain_message,
+            $public_message,
             $status_code,
             $category,
             $error_id
