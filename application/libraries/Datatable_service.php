@@ -93,6 +93,33 @@ class Datatable_service
 
         /*
          * ---------------------------------------------------------
+         * Table filters
+         * ---------------------------------------------------------
+         */
+        $filters = array();
+
+        if (isset($request['table_filters']) && is_array($request['table_filters'])) {
+            foreach ($request['table_filters'] as $key => $value) {
+                $safe_key = preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) $key);
+
+                if ($safe_key === '' || !is_scalar($value)) {
+                    continue;
+                }
+
+                $safe_value = trim((string) $value);
+
+                if (strlen($safe_value) > 50) {
+                    $safe_value = substr($safe_value, 0, 50);
+                }
+
+                if ($safe_value !== '') {
+                    $filters[$safe_key] = $safe_value;
+                }
+            }
+        }
+
+        /*
+         * ---------------------------------------------------------
          * Ordering
          * ---------------------------------------------------------
          */
@@ -157,6 +184,7 @@ class Datatable_service
             'start'        => $start,
             'length'       => $length,
             'search'       => $search,
+            'filters'      => $filters,
             'order_column' => $order_column,
             'order_dir'    => $order_dir
         );
