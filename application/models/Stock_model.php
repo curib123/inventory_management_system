@@ -8,202 +8,46 @@ class Stock_model extends CI_Model {
     public function __construct() {
         parent::__construct();
         $this->load->database();
-        $this->load->library('Stock_rules');
     }
 
-    // Data helper ni para create transaction; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
-    public function create_transaction($type, $supplier_id, $remarks, $user_id, $items) {
-        if (!in_array($type, array('stock_in', 'stock_out'), TRUE) || empty($items)) {
-            return array('success' => FALSE, 'message' => 'A valid stock transaction with at least one item is required.');
+    // Persistence helper ni para insert transaction header; application/libraries/Stock_service.php ang caller, business rules didto tanan.
+    public function insert_transaction($data) {
+        if (!$this->db->insert('stock_transactions', $data)) {
+            return 0;
         }
 
-        $supplier_id = filter_var(
-            $supplier_id,
-            FILTER_VALIDATE_INT,
-            array('options' => array(
-                'min_range' => 1,
-                'max_range' => Stock_rules::MAX_STOCK
-            ))
-        );
-
-        if ($supplier_id === FALSE) {
-            return array(
-                'success' => FALSE,
-                'message' => 'A valid supplier is required for stock transactions.'
-            );
-        }
-
-        $supplier_id = (int) $supplier_id;
-        $active_supplier = $this->db
-            ->where('id', $supplier_id)
-            ->where('status', 1)
-            ->count_all_results('suppliers') > 0;
-
-        if (!$active_supplier) {
-            return array('success' => FALSE, 'message' => 'The selected supplier is invalid or inactive.');
-        }
-
-        // Normalize first para duplicate product rows ma-combine before stock update.
-        $normalized = $this->normalize_items($items);
-
-        if ($normalized === FALSE || empty($normalized)) {
-            return array(
-                'success' => FALSE,
-                'message' => 'Every stock item must contain a valid product and a positive whole-number quantity.'
-            );
-        }
-
-        $this->db->trans_begin();
-        $transaction_no = strtoupper($type) . '-' . date('YmdHis') . '-' . strtoupper(substr(uniqid(), -6));
-        $this->db->insert('stock_transactions', array(
-            'transaction_no' => $transaction_no,
-            'type' => $type,
-            'supplier_id' => $supplier_id,
-            'remarks' => trim((string) $remarks),
-            'created_by' => (int) $user_id
-        ));
-        $transaction_id = (int) $this->db->insert_id();
-
-        if ($transaction_id <= 0) {
-            $this->db->trans_rollback();
-            return array('success' => FALSE, 'message' => 'Unable to create the stock transaction.');
-        }
-
-        foreach ($normalized as $product_id => $quantity) {
-            $product = $this->get_product_for_update($product_id);
-            if (!$product || !(int) $product->status) {
-                $this->db->trans_rollback();
-                return array('success' => FALSE, 'message' => 'One of the selected products is invalid or inactive.');
-            }
-
-            if ((int) $product->supplier_id !== $supplier_id) {
-                $this->db->trans_rollback();
-                return array(
-                    'success' => FALSE,
-                    'message' => $product->product_name . ' is not assigned to the selected supplier.'
-                );
-            }
-
-            try {
-                $new_stock = $this->stock_rules->calculate_stock($product->stock, $quantity, $type);
-            } catch (UnderflowException $exception) {
-                $this->db->trans_rollback();
-                return array('success' => FALSE, 'message' => 'Insufficient stock for ' . $product->product_name . '.');
-            } catch (InvalidArgumentException $exception) {
-                $this->db->trans_rollback();
-                return array('success' => FALSE, 'message' => $exception->getMessage());
-            }
-
-            $this->db->insert('stock_transaction_items', array(
-                'transaction_id' => $transaction_id,
-                'product_id' => $product_id,
-                'quantity' => $quantity,
-                'cost_price' => $product->cost_price
-            ));
-            $this->db->update('products', array('stock' => $new_stock), array('id' => $product_id));
-        }
-
-        $this->log_activity($user_id, $type, 'Processed ' . $transaction_no);
-        if ($this->db->trans_status() === FALSE) {
-            $this->db->trans_rollback();
-            return array('success' => FALSE, 'message' => 'The stock transaction could not be completed.');
-        }
-
-        $this->db->trans_commit();
-        return array('success' => TRUE, 'transaction_no' => $transaction_no);
+        return (int) $this->db->insert_id();
     }
 
-    // Data helper ni para create adjustment; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
-    public function create_adjustment($product_id, $actual_stock, $reason, $user_id) {
-        $product_id = filter_var(
-            $product_id,
-            FILTER_VALIDATE_INT,
-            array('options' => array(
-                'min_range' => 1,
-                'max_range' => Stock_rules::MAX_STOCK
-            ))
+    // Persistence helper ni para insert transaction item; application/libraries/Stock_service.php ang caller after service validation.
+    public function insert_transaction_item($data) {
+        return $this->db->insert('stock_transaction_items', $data);
+    }
+
+    // Persistence helper ni para insert adjustment audit row; application/libraries/Stock_service.php ang caller after reconciliation rules pass.
+    public function insert_adjustment($data) {
+        return $this->db->insert('stock_adjustments', $data);
+    }
+
+    // Persistence helper ni para update product stock; application/libraries/Stock_service.php ang caller after Stock_rules calculation.
+    public function update_product_stock($product_id, $stock) {
+        return $this->db->update(
+            'products',
+            array('stock' => (int) $stock),
+            array('id' => (int) $product_id)
         );
+    }
 
-        if ($product_id === FALSE) {
-            return array(
-                'success' => FALSE,
-                'message' => 'A valid product is required for the stock adjustment.'
-            );
-        }
+    // Persistence helper ni para lock product row; application/libraries/Stock_service.php ang caller inside DB transaction para safe concurrent stock update.
+    public function get_product_for_update($product_id) {
+        return $this->db
+            ->query('SELECT * FROM products WHERE id = ? FOR UPDATE', array((int) $product_id))
+            ->row();
+    }
 
-        try {
-            $actual_stock = $this->stock_rules->validate_stock_value($actual_stock);
-        } catch (InvalidArgumentException $exception) {
-            return array(
-                'success' => FALSE,
-                'message' => $exception->getMessage()
-            );
-        }
-
-        $product_id = (int) $product_id;
-        $reason = trim((string) $reason);
-
-        if ($reason === '') {
-            return array(
-                'success' => FALSE,
-                'message' => 'A reason is required for the stock adjustment.'
-            );
-        }
-
-        $this->db->trans_begin();
-        $product = $this->get_product_for_update($product_id);
-        if (!$product || !(int) $product->status) {
-            $this->db->trans_rollback();
-            return array(
-                'success' => FALSE,
-                'message' => 'An active product is required for the stock adjustment.'
-            );
-        }
-
-        $difference = $actual_stock - (int) $product->stock;
-        if ($difference === 0) {
-            $this->db->trans_rollback();
-            return array('success' => FALSE, 'message' => 'Actual stock is already equal to system stock. No adjustment is needed.');
-        }
-
-        $transaction_no = 'ADJUSTMENT-' . date('YmdHis') . '-' . strtoupper(substr(uniqid(), -6));
-        $this->db->insert('stock_transactions', array(
-            'transaction_no' => $transaction_no,
-            'type' => 'adjustment',
-            'supplier_id' => NULL,
-            'remarks' => $reason,
-            'created_by' => (int) $user_id
-        ));
-        $transaction_id = (int) $this->db->insert_id();
-        if ($transaction_id <= 0) {
-            $this->db->trans_rollback();
-            return array('success' => FALSE, 'message' => 'Unable to create the adjustment transaction.');
-        }
-
-        $this->db->insert('stock_adjustments', array(
-            'product_id' => $product_id,
-            'system_stock' => $product->stock,
-            'actual_stock' => $actual_stock,
-            'difference' => $difference,
-            'reason' => $reason,
-            'created_by' => (int) $user_id
-        ));
-        $this->db->insert('stock_transaction_items', array(
-            'transaction_id' => $transaction_id,
-            'product_id' => $product_id,
-            'quantity' => abs($difference),
-            'cost_price' => $product->cost_price
-        ));
-        $this->db->update('products', array('stock' => $actual_stock), array('id' => $product_id));
-        $this->log_activity($user_id, 'stock_adjustment', 'Processed ' . $transaction_no);
-
-        if ($this->db->trans_status() === FALSE) {
-            $this->db->trans_rollback();
-            return array('success' => FALSE, 'message' => 'The stock adjustment could not be completed.');
-        }
-
-        $this->db->trans_commit();
-        return array('success' => TRUE, 'transaction_no' => $transaction_no);
+    // Persistence helper ni para activity log; application/libraries/Stock_service.php ang caller after successful stock action.
+    public function insert_activity_log($data) {
+        return $this->db->insert('activity_logs', $data);
     }
 
     // Data helper ni para get transactions; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
@@ -336,72 +180,6 @@ class Stock_model extends CI_Model {
         $this->db->group_by("DATE_FORMAT(t.created_at, '%Y-%m')", FALSE);
         $this->db->order_by('month', 'ASC');
         return $this->db->get()->result();
-    }
-
-    // Data helper ni para normalize items; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
-    private function normalize_items($items) {
-        $normalized = array();
-
-        foreach ((array) $items as $item) {
-            if (!is_array($item) ||
-                !isset($item['product_id']) ||
-                !isset($item['quantity']) ||
-                !is_scalar($item['product_id']) ||
-                !is_scalar($item['quantity'])) {
-                return FALSE;
-            }
-
-            $product_id = filter_var(
-                $item['product_id'],
-                FILTER_VALIDATE_INT,
-                array('options' => array(
-                    'min_range' => 1,
-                    'max_range' => 2147483647
-                ))
-            );
-            $quantity = filter_var(
-                $item['quantity'],
-                FILTER_VALIDATE_INT,
-                array('options' => array(
-                    'min_range' => 1,
-                    'max_range' => 2147483647
-                ))
-            );
-
-            if ($product_id === FALSE || $quantity === FALSE) {
-                return FALSE;
-            }
-
-            $product_id = (int) $product_id;
-            $quantity = (int) $quantity;
-
-            if (!isset($normalized[$product_id])) {
-                $normalized[$product_id] = 0;
-            }
-
-            if ($normalized[$product_id] > 2147483647 - $quantity) {
-                return FALSE;
-            }
-
-            $normalized[$product_id] += $quantity;
-        }
-
-        return $normalized;
-    }
-
-    // Data helper ni para get product for update; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
-    private function get_product_for_update($product_id) {
-        return $this->db->query('SELECT * FROM products WHERE id = ? FOR UPDATE', array((int) $product_id))->row();
-    }
-
-    // Data helper ni para log activity; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
-    private function log_activity($user_id, $action, $description) {
-        $this->db->insert('activity_logs', array(
-            'user_id' => (int) $user_id,
-            'action' => $action,
-            'description' => $description,
-            'ip_address' => $this->input->ip_address()
-        ));
     }
 
     // Data helper ni para get transactions datatable; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
