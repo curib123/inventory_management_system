@@ -37,14 +37,14 @@ $this->load->view('components/page_header', array(
                         <i class="bi bi-file-earmark-excel me-1"></i>Excel
                     </button>
 
-                    <button
-                        type="button"
+                    <a
                         class="btn btn-sm btn-outline-danger"
-                        data-report-export
-                        data-export-url="<?php echo site_url('reports/export/' . $report_key . '/pdf'); ?>"
+                        href="<?php echo site_url('reports/export/' . $report_key . '/pdf'); ?>"
+                        target="_blank"
+                        rel="noopener"
                     >
-                        <i class="bi bi-file-earmark-pdf me-1"></i>PDF
-                    </button>
+                        <i class="bi bi-printer me-1"></i>Print PDF
+                    </a>
                 </div>
             <?php endif; ?>
         </div>
@@ -52,7 +52,7 @@ $this->load->view('components/page_header', array(
         <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'reports.export')): ?>
             <div class="app-report-export-note mt-3">
                 <i class="bi bi-printer me-1"></i>
-                Excel and PDF are formatted for professional review and printing. CSV includes report metadata and clean labeled columns for portability.
+                CSV and Excel download as report files. Print PDF opens a print-ready A4 landscape report in a new tab.
             </div>
         <?php endif; ?>
     </div>
@@ -60,9 +60,17 @@ $this->load->view('components/page_header', array(
 
 <?php
 $table_columns = array();
+$numeric_fields = array('stock', 'quantity', 'reorder_level', 'shortage', 'cost_price', 'inventory_value');
 
-foreach ($columns as $label) {
-    $table_columns[] = $label;
+foreach ($columns as $field => $label) {
+    $table_columns[] = in_array($field, $numeric_fields, TRUE)
+        ? array('label' => $label, 'class' => 'text-end text-nowrap')
+        : array(
+            'label' => $label,
+            'class' => in_array($field, array('transaction_no', 'type', 'unit', 'created_at'), TRUE)
+                ? 'text-nowrap'
+                : ''
+        );
 }
 
 $this->load->view('components/data_table', array(
