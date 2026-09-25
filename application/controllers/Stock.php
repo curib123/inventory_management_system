@@ -113,7 +113,7 @@ class Stock extends CI_Controller {
         }
 
         $this->load->view('components/stock/product_quantity_list', array(
-            'products' => $this->Product_model->get_active_by_supplier($supplier_id),
+            'products' => $this->Product_model->get_active_by_supplier($supplier_id, $mode),
             'quantities' => array(),
             'mode' => $mode
         ));
@@ -339,7 +339,7 @@ class Stock extends CI_Controller {
 
             if ($supplier && (int) $supplier->status === 1) {
                 $data['suppliers'] = array($supplier);
-                $data['supplier_products'] = $this->Product_model->get_active_by_supplier($supplier_id);
+                $data['supplier_products'] = $this->Product_model->get_active_by_supplier($supplier_id, $type);
             }
         }
 
