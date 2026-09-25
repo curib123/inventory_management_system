@@ -8,7 +8,6 @@ class Role_model extends CI_Model {
     public function __construct() {
         parent::__construct();
         $this->load->database();
-        $this->config->load('permissions');
     }
 
     // Data helper ni para get all; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
