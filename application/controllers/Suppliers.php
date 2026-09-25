@@ -116,7 +116,8 @@ class Suppliers extends CI_Controller {
             $request['length'],
             $request['search'],
             $request['order_column'],
-            $request['order_dir']
+            $request['order_dir'],
+            $request['filters']
         );
 
         $current_user_id = (int) $this->session->userdata('user_id');
@@ -167,7 +168,7 @@ class Suppliers extends CI_Controller {
         $payload = $this->datatable_service->payload(
             $request['draw'],
             $this->Supplier_model->count_all(),
-            $this->Supplier_model->count_datatable_filtered($request['search']),
+            $this->Supplier_model->count_datatable_filtered($request['search'], $request['filters']),
             $rows
         );
 
