@@ -70,6 +70,18 @@ class Auth extends CI_Controller {
         $this->load->view('auth/login');
     }
 
+    public function logout_confirm() {
+        if (!$this->session->userdata('logged_in')) {
+            show_error('Your session is no longer active.', 401, 'Session Expired');
+        }
+
+        if ($this->input->method(TRUE) !== 'GET') {
+            show_error('Invalid request method.', 405, 'Method Not Allowed');
+        }
+
+        $this->load->view('modal/auth/logout');
+    }
+
     public function logout() {
         if ($this->input->method(TRUE) !== 'POST') {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
