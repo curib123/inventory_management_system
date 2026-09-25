@@ -244,3 +244,4 @@ new issuess
 add filtration in each table 
 recommended setup for stock adjustment
 enhance csv,excel format 
+searchable dropdown selection which dropdown have searching on it in in filtrations  and dropdowns
