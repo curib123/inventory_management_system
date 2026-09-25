@@ -17,12 +17,12 @@ $this->load->view('components/data_table', array(
     'table_id' => 'stock-adjustments-table',
     'columns' => array(
         'Product',
-        'System Stock',
-        'Actual Stock',
-        'Difference',
+        array('label' => 'System Stock', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Actual Stock', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Difference', 'class' => 'text-end text-nowrap'),
         'Reason',
         'Processed By',
-        'Date'
+        array('label' => 'Date', 'class' => 'text-nowrap')
     )
 ));
 
