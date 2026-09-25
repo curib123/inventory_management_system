@@ -1,7 +1,7 @@
 <?php
 $page_actions = array();
 
-if ($this->User_model->has_permission($this->session->userdata('user_id'), 'roles.create')) {
+if ($this->authorization_service->has_permission($this->session->userdata('user_id'), 'roles.create')) {
     $page_actions[] = array(
         'label' => 'Add Role',
         'icon' => 'bi-shield-plus',
