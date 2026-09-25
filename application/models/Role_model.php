@@ -250,7 +250,7 @@ class Role_model extends CI_Model {
         return $this->db->count_all('roles');
     }
 
-    public function get_datatable($start, $length, $search, $order_column, $order_dir) {
+    public function get_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
         $this->db->select(
             'r.id, r.role_name, r.description, r.status, ' .
             'COUNT(DISTINCT u.id) AS user_count, ' .
@@ -259,7 +259,7 @@ class Role_model extends CI_Model {
         $this->db->from('roles r');
         $this->db->join('users u', 'u.role_id = r.id', 'left');
         $this->db->join('role_permissions rp', 'rp.role_id = r.id', 'left');
-        $this->apply_datatable_search($search);
+        $this->apply_datatable_search($search, $filters);
         $this->db->group_by(array('r.id', 'r.role_name', 'r.description', 'r.status'));
 
         if ($order_column) {
@@ -270,13 +270,20 @@ class Role_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function count_datatable_filtered($search) {
+    public function count_datatable_filtered($search, $filters = array()) {
         $this->db->from('roles r');
-        $this->apply_datatable_search($search);
+        $this->apply_datatable_search($search, $filters);
         return $this->db->count_all_results();
     }
 
-    private function apply_datatable_search($search) {
+    private function apply_datatable_search($search, $filters = array()) {
+        $status = isset($filters['status']) ? strtolower((string) $filters['status']) : '';
+        if ($status === 'active') {
+            $this->db->where('r.status', 1);
+        } elseif ($status === 'inactive') {
+            $this->db->where('r.status', 0);
+        }
+
         if ($search === '') {
             return;
         }
