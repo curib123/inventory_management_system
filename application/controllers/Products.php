@@ -18,7 +18,6 @@ class Products extends CI_Controller {
         $this->load->model('Product_model');
         $this->load->model('Supplier_model');
         $this->load->model('Category_model');
-        $this->load->model('User_model');
         $this->config->load('inventory');
     }
 
