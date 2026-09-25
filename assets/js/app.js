@@ -6,12 +6,14 @@ document.addEventListener('DOMContentLoaded', function () {
     var modalContent = document.getElementById('action-modal-content');
     var modalInstance = modalElement ? bootstrap.Modal.getOrCreateInstance(modalElement) : null;
 
+    // Frontend helper ni para escape html; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function escapeHtml(value) {
         var node = document.createElement('div');
         node.textContent = value === null || value === undefined ? '' : String(value);
         return node.innerHTML;
     }
 
+    // Frontend helper ni para clean text; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function cleanText(value, fallback) {
         var text = String(value || '').replace(/\s+/g, ' ').trim();
 
@@ -22,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return text.length > 420 ? text.substring(0, 417) + '...' : text;
     }
 
+    // Frontend helper ni para status problem; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function statusProblem(status, context) {
         var action = context || 'complete this request';
         var problems = {
@@ -145,6 +148,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
     }
 
+    // Frontend helper ni para parse server message; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function parseServerMessage(html) {
         if (!html) {
             return {};
@@ -168,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Frontend helper ni para response problem; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function responseProblem(response, html, context) {
         var problem = statusProblem(response ? response.status : 0, context);
         var server = parseServerMessage(html);
@@ -193,6 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return problem;
     }
 
+    // Frontend helper ni para problem body html; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function problemBodyHtml(problem) {
         var causes = Array.isArray(problem.causes) ? problem.causes : [];
         var steps = Array.isArray(problem.steps) ? problem.steps : [];
@@ -236,6 +242,7 @@ document.addEventListener('DOMContentLoaded', function () {
             '</div>';
     }
 
+    // Frontend helper ni para show problem; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function showProblem(problem) {
         if (!modalElement || !modalContent || !modalInstance) {
             window.alert((problem.title || 'Request failed') + '\n\n' + (problem.message || ''));
@@ -271,6 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
         modalInstance.show();
     }
 
+    // Frontend helper ni para show inline problem; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function showInlineProblem(container, problem) {
         if (!container) {
             showProblem(problem);
@@ -300,6 +308,7 @@ document.addEventListener('DOMContentLoaded', function () {
         wrapper.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
 
+    // Frontend helper ni para refresh searchable select; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function refreshSearchableSelect(select) {
         if (!select || !select._searchableInput) {
             return;
@@ -322,6 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Frontend helper ni para initialize searchable select; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function initializeSearchableSelect(select) {
         if (!select || select.getAttribute('data-searchable-ready') === '1') {
             return;
@@ -372,6 +382,7 @@ document.addEventListener('DOMContentLoaded', function () {
             remoteMinLength = 2;
         }
 
+        // Frontend helper ni para selected snapshot; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
         function selectedSnapshot() {
             if (!select.value || select.selectedIndex < 0) {
                 return null;
@@ -394,6 +405,7 @@ document.addEventListener('DOMContentLoaded', function () {
             };
         }
 
+        // Frontend helper ni para rebuild remote options; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
         function rebuildRemoteOptions(items, selected) {
             var placeholderText = select.getAttribute('data-placeholder') ||
                 (select.options.length ? select.options[0].textContent : 'Select an option');
@@ -575,6 +587,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Frontend helper ni para initialize searchable selects; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function initializeSearchableSelects(container) {
         if (!container) {
             return;
@@ -585,6 +598,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Frontend helper ni para filter adjustment products; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function filterAdjustmentProducts(supplierSelect, preserveSelection) {
         if (!supplierSelect) {
             return;
@@ -671,6 +685,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updateAdjustmentPreview(productSelect);
     }
 
+    // Frontend helper ni para update adjustment preview; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function updateAdjustmentPreview(productSelect) {
         if (!productSelect) {
             return;
@@ -722,6 +737,7 @@ document.addEventListener('DOMContentLoaded', function () {
         updateAdjustmentVariance(actualInput);
     }
 
+    // Frontend helper ni para update adjustment variance; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function updateAdjustmentVariance(actualInput) {
         if (!actualInput) {
             return;
@@ -788,6 +804,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Frontend helper ni para filter stock products; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function filterStockProducts(input) {
         var list = input ? input.closest('.modal-body') : null;
 
@@ -822,6 +839,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Frontend helper ni para enhance feedback; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function enhanceFeedback(container) {
         if (!container) {
             return;
@@ -859,6 +877,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Frontend helper ni para set sidebar open; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function setSidebarOpen(open) {
         if (!sidebar) {
             return;
@@ -893,6 +912,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    // Frontend helper ni para render table cell; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function renderTableCell(renderType, value) {
         var raw = value === null || value === undefined ? '' : String(value);
         var normalized = raw.trim().toLowerCase();
@@ -1079,6 +1099,7 @@ document.addEventListener('DOMContentLoaded', function () {
         var filterCount = card.querySelector('[data-table-filter-count]');
         var searchTimer = null;
 
+        // Frontend helper ni para update toolbar state; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
         function updateToolbarState() {
             var activeFilters = 0;
 
@@ -1264,6 +1285,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Frontend helper ni para update stock preview; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function updateStockPreview(input) {
         var product = input.closest('.app-stock-product');
 
@@ -1291,12 +1313,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var confirmationStates = new WeakMap();
 
+    // Frontend helper ni para confirmation variant class; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function confirmationVariantClass(variant) {
         return ['primary', 'success', 'warning', 'danger'].indexOf(variant) !== -1
             ? variant
             : 'primary';
     }
 
+    // Frontend helper ni para show form confirmation; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function showFormConfirmation(form, submitButton) {
         if (!form || confirmationStates.has(form)) {
             return;
@@ -1387,6 +1411,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Frontend helper ni para restore form confirmation; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function restoreFormConfirmation(form) {
         if (!form) {
             return null;
@@ -1485,6 +1510,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    // Frontend helper ni para filename from disposition; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function filenameFromDisposition(disposition, fallback) {
         if (!disposition) {
             return fallback;
@@ -1504,6 +1530,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return match && match[1] ? match[1].trim() : fallback;
     }
 
+    // Frontend helper ni para build report export url; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function buildReportExportUrl(baseUrl) {
         if (!baseUrl) {
             return '';
