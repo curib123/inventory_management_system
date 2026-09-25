@@ -16,9 +16,7 @@ class Reports extends CI_Controller {
         }
 
         $this->load->model('User_model');
-        $this->load->library('Report_rules');
         $this->require_permission('reports.view');
-        $this->load->model('Report_model');
     }
 
     // Mao ni ang index flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
@@ -82,7 +80,7 @@ class Reports extends CI_Controller {
 
         $format = strtolower((string) $format);
 
-        if (!$this->report_rules->export_format_is_supported($format)) {
+        if (!$this->report_service->export_format_is_supported($format)) {
             show_error(
                 'That export format is not supported. Use CSV, Excel, or PDF.',
                 400,
