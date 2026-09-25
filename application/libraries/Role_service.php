@@ -85,7 +85,7 @@ class Role_service {
     }
 
     // Business flow ni para delete role; application/controllers/Roles.php ang caller, while assigned-user rule diri gi-enforce.
-    public function delete($id) {
+    public function delete($id, $execute = TRUE) {
         $id = (int) $id;
         $role = $this->CI->Role_model->get_by_id($id);
 
@@ -95,6 +95,10 @@ class Role_service {
 
         if ($this->CI->Role_model->has_users($id)) {
             return array('success' => FALSE, 'message' => 'This role cannot be deleted while users are assigned to it.');
+        }
+
+        if (!$execute) {
+            return array('success' => TRUE, 'role' => $role);
         }
 
         if (!$this->CI->Role_model->delete($id)) {
