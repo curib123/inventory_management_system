@@ -51,10 +51,18 @@ $this->load->view('components/modal/header', array(
         <div class="col-12 col-md-6">
             <label for="category_id" class="form-label">Category</label>
             <?php $selected_category = set_value('category_id', $product_is_edit ? $product->category_id : ''); ?>
-            <select id="category_id" name="category_id" class="form-select" required >
-                <option value="">Select Category</option>
+            <select
+                id="category_id"
+                name="category_id"
+                class="form-select"
+                required
+                data-searchable-select
+                data-search-placeholder="Search category name..."
+                data-search-url="<?php echo site_url('products/categories/search'); ?>"
+            >
+                <option value="">Search then select a category</option>
                 <?php foreach ($categories as $category): ?>
-                    <option value="<?php echo (int) $category->id; ?>" <?php echo ((string) $selected_category === (string) $category->id) ? 'selected' : ''; ?> autocomplete="off">
+                    <option value="<?php echo (int) $category->id; ?>" <?php echo ((string) $selected_category === (string) $category->id) ? 'selected' : ''; ?>>
                         <?php echo html_escape($category->category_name . ((int) $category->status === 1 ? '' : ' (Inactive)')); ?>
                     </option>
                 <?php endforeach; ?>
@@ -69,16 +77,17 @@ $this->load->view('components/modal/header', array(
                 name="supplier_id"
                 class="form-select"
                 data-searchable-select
-                data-search-placeholder="Search supplier by name..."
+                data-search-placeholder="Search supplier name, contact, or phone..."
+                data-search-url="<?php echo site_url('products/suppliers/search'); ?>"
             >
                 <option value="">No Supplier</option>
                 <?php foreach ($suppliers as $supplier): ?>
-                    <option value="<?php echo (int) $supplier->id; ?>" <?php echo ((string) $selected_supplier === (string) $supplier->id) ? 'selected' : ''; ?> autocomplete="off">
+                    <option value="<?php echo (int) $supplier->id; ?>" <?php echo ((string) $selected_supplier === (string) $supplier->id) ? 'selected' : ''; ?>>
                         <?php echo html_escape($supplier->supplier_name . ((int) $supplier->status === 1 ? '' : ' (Inactive)')); ?>
                     </option>
                 <?php endforeach; ?>
             </select>
-            <div class="form-text">Stock In and Stock Out use this relationship to show the correct supplier products.</div>
+            <div class="form-text">Search runs on the server for large supplier lists. Stock In and Stock Out use this relationship to show the correct supplier products.</div>
         </div>
 
         <div class="col-12 col-md-4">
@@ -87,7 +96,7 @@ $this->load->view('components/modal/header', array(
             <select id="unit" name="unit" class="form-select" required>
                 <option value="">Select Unit</option>
                 <?php foreach ($product_units as $unit_value => $unit_label): ?>
-                    <option value="<?php echo html_escape($unit_value); ?>" <?php echo ((string) $selected_unit === (string) $unit_value) ? 'selected' : ''; ?> autocomplete="off">
+                    <option value="<?php echo html_escape($unit_value); ?>" <?php echo ((string) $selected_unit === (string) $unit_value) ? 'selected' : ''; ?>>
                         <?php echo html_escape($unit_label); ?>
                     </option>
                 <?php endforeach; ?>
