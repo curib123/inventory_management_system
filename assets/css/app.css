@@ -1029,3 +1029,147 @@ body {
     }
 }
 
+
+
+/* --------------------------------------------------------------------------
+   Stock adjustment reconciliation workflow
+   -------------------------------------------------------------------------- */
+.app-adjustment-flow {
+    display: grid;
+    gap: 1rem;
+}
+
+.app-adjustment-section {
+    padding: 1rem;
+    border: 1px solid rgba(var(--bs-secondary-rgb), 0.13);
+    border-radius: 0.85rem;
+    background: var(--bs-body-bg);
+}
+
+.app-adjustment-section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 0.9rem;
+}
+
+.app-adjustment-section-heading h3 {
+    margin: 0;
+    color: var(--bs-emphasis-color);
+    font-size: 0.9rem;
+    font-weight: 750;
+}
+
+.app-adjustment-section-heading p {
+    margin: 0.18rem 0 0;
+    color: var(--bs-secondary-color);
+    font-size: 0.76rem;
+    line-height: 1.45;
+}
+
+.app-adjustment-step {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.85rem;
+    height: 1.85rem;
+    flex: 0 0 auto;
+    border: 1px solid rgba(var(--bs-warning-rgb), 0.2);
+    border-radius: 999px;
+    background: var(--bs-warning-bg-subtle);
+    color: var(--bs-warning-text-emphasis);
+    font-size: 0.74rem;
+    font-weight: 800;
+}
+
+.app-adjustment-snapshot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1.2fr) auto minmax(0, 1fr);
+    align-items: stretch;
+    gap: 0.65rem;
+}
+
+.app-adjustment-snapshot.is-empty {
+    opacity: 0.72;
+}
+
+.app-adjustment-metric {
+    min-width: 0;
+    padding: 0.8rem 0.85rem;
+    border: 1px solid rgba(var(--bs-secondary-rgb), 0.13);
+    border-radius: 0.75rem;
+    background: var(--bs-tertiary-bg);
+}
+
+.app-adjustment-metric-label {
+    display: block;
+    margin-bottom: 0.3rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.055em;
+    text-transform: uppercase;
+}
+
+.app-adjustment-metric > strong {
+    display: inline-block;
+    margin-right: 0.25rem;
+    color: var(--bs-emphasis-color);
+    font-size: 1.2rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.app-adjustment-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--bs-secondary-color);
+    opacity: 0.6;
+}
+
+.app-adjustment-actual-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.app-adjustment-actual-wrap .form-control {
+    min-width: 0;
+    font-weight: 750;
+}
+
+.app-adjustment-actual-wrap > span {
+    color: var(--bs-secondary-color);
+    font-size: 0.76rem;
+    white-space: nowrap;
+}
+
+.app-adjustment-variance {
+    border-color: rgba(var(--bs-warning-rgb), 0.17);
+    background: var(--bs-warning-bg-subtle);
+}
+
+.app-adjustment-variance > strong {
+    display: block;
+    margin: 0;
+}
+
+.app-adjustment-variance > span:last-child {
+    display: block;
+    margin-top: 0.12rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.7rem;
+    line-height: 1.35;
+}
+
+@media (max-width: 767.98px) {
+    .app-adjustment-snapshot {
+        grid-template-columns: 1fr;
+    }
+
+    .app-adjustment-arrow {
+        height: 1rem;
+        transform: rotate(90deg);
+    }
+}
