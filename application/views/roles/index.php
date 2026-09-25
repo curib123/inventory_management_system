@@ -19,10 +19,23 @@ $this->load->view('components/page_header', array(
 $this->load->view('components/data_table', array(
     'source' => site_url('roles/datatable'),
     'table_id' => 'roles-table',
+    'search_placeholder' => 'Search role or description...',
+    'filters' => array(
+        array(
+            'name' => 'status',
+            'label' => 'Status',
+            'icon' => 'bi-shield-check',
+            'options' => array(
+                '' => 'All statuses',
+                'active' => 'Active',
+                'inactive' => 'Inactive'
+            )
+        )
+    ),
     'columns' => array(
         'Role',
         'Description',
-        array('label' => 'Status', 'class' => 'text-center text-nowrap'),
+        array('label' => 'Status', 'class' => 'text-center text-nowrap', 'render' => 'status'),
         array('label' => 'Users', 'class' => 'text-end text-nowrap'),
         array('label' => 'Permissions', 'class' => 'text-end text-nowrap'),
         array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')
