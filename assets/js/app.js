@@ -1462,8 +1462,47 @@ document.addEventListener('DOMContentLoaded', function () {
         return match && match[1] ? match[1].trim() : fallback;
     }
 
+    function buildReportExportUrl(baseUrl) {
+        if (!baseUrl) {
+            return '';
+        }
+
+        var url;
+
+        try {
+            url = new URL(baseUrl, window.location.href);
+        } catch (error) {
+            return baseUrl;
+        }
+
+        var table = document.getElementById('report-table');
+        var card = table ? table.closest('.app-table-card') : null;
+
+        if (!card) {
+            return url.toString();
+        }
+
+        var searchInput = card.querySelector('[data-table-search]');
+        var search = searchInput ? searchInput.value.trim() : '';
+
+        if (search !== '') {
+            url.searchParams.set('search', search);
+        }
+
+        card.querySelectorAll('[data-table-filter]').forEach(function (select) {
+            var name = select.getAttribute('data-table-filter');
+            var value = select.value;
+
+            if (name && value !== '') {
+                url.searchParams.set('table_filters[' + name + ']', value);
+            }
+        });
+
+        return url.toString();
+    }
+
     async function downloadReport(button) {
-        var url = button.getAttribute('data-export-url');
+        var url = buildReportExportUrl(button.getAttribute('data-export-url'));
 
         if (!url) {
             return;
@@ -1619,6 +1658,20 @@ document.addEventListener('DOMContentLoaded', function () {
         if (exportButton) {
             event.preventDefault();
             downloadReport(exportButton);
+            return;
+        }
+
+        var printReport = event.target.closest('[data-report-print]');
+
+        if (printReport) {
+            event.preventDefault();
+
+            var printUrl = buildReportExportUrl(printReport.getAttribute('href'));
+
+            if (printUrl) {
+                window.open(printUrl, '_blank', 'noopener');
+            }
+
             return;
         }
 
