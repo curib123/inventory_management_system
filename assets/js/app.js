@@ -659,6 +659,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 infoEmpty: 'No records to show',
                 infoFiltered: '',
                 lengthMenu: 'Rows per page _MENU_',
+                paginate: {
+                    previous: 'Previous',
+                    next: 'Next'
+                },
                 processing: 'Loading records...',
                 zeroRecords: 'No matching records found.'
             }
