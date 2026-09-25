@@ -176,6 +176,16 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
             </div>
 
             <div class="d-flex align-items-center gap-2">
+                <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    data-modal-url="<?php echo site_url('account/change-password'); ?>"
+                    title="Change password"
+                    aria-label="Change password"
+                >
+                    <i class="bi bi-key" aria-hidden="true"></i>
+                </button>
+
                 <span class="badge text-bg-primary">
                     <?php echo html_escape($this->session->userdata('role_name')); ?>
                 </span>
