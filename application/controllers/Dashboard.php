@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Dashboard extends CI_Controller {
 
-    // Dashboard controller ni bai; diri gi-handle ang overview data para one place ra.
+    // Setup ni sa Dashboard controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
         $this->load->library('session');
@@ -18,7 +18,7 @@ class Dashboard extends CI_Controller {
         $this->load->model('Stock_model');
         $this->load->model('User_model');
     }
-    // Mao ni ang main dashboard load: check access first, then kuhaon ang summary data.
+    // Mao ni ang index flow sa Dashboard; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() {
         $this->require_permission('dashboard.view');
 
@@ -39,6 +39,7 @@ class Dashboard extends CI_Controller {
         $this->load->view('dashboard/index', $data);
         $this->load->view('templates/footer');
     }
+    // Internal helper ni para normalize monthly movement; tawagon ra sulod application/controllers/Dashboard.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function normalize_monthly_movement($rows) {
         $by_month = array();
 
@@ -75,7 +76,7 @@ class Dashboard extends CI_Controller {
         return $series;
     }
 
-    // Simple permission guard ni para dili maka-sulod ang user if walay required access.
+    // Internal helper ni para require permission; tawagon ra sulod application/controllers/Dashboard.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
         if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
