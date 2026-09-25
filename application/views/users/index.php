@@ -19,13 +19,26 @@ $this->load->view('components/page_header', array(
 $this->load->view('components/data_table', array(
     'source' => site_url('users/datatable'),
     'table_id' => 'users-table',
+    'search_placeholder' => 'Search name, username, or role...',
+    'filters' => array(
+        array(
+            'name' => 'status',
+            'label' => 'Account status',
+            'icon' => 'bi-person-check',
+            'options' => array(
+                '' => 'All accounts',
+                'active' => 'Active',
+                'inactive' => 'Inactive'
+            )
+        )
+    ),
     'columns' => array(
         'First Name',
         'Middle Name',
         'Last Name',
         'Username',
         'Role',
-        array('label' => 'Status', 'class' => 'text-center text-nowrap'),
+        array('label' => 'Status', 'class' => 'text-center text-nowrap', 'render' => 'status'),
         array('label' => 'Created', 'class' => 'text-nowrap'),
         array('label' => 'Updated', 'class' => 'text-nowrap'),
         array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')
