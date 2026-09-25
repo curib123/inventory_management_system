@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Users extends CI_Controller {
 
+    // Setup ni sa Users controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
@@ -17,6 +18,7 @@ class Users extends CI_Controller {
         $this->load->model('User_model');
     }
 
+    // Mao ni ang index flow sa Users; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() {
         $this->require_permission('users.view');
 
@@ -26,11 +28,13 @@ class Users extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
+    // Mao ni ang add flow sa Users; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function add() {
         $this->require_permission('users.create');
         $this->user_form();
     }
 
+    // Mao ni ang view flow sa Users; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function view($id) {
         $this->require_permission('users.view');
 
@@ -42,6 +46,7 @@ class Users extends CI_Controller {
         $this->load->view('modal/users/details', $data);
     }
 
+    // Mao ni ang edit flow sa Users; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function edit($id) {
         $this->require_permission('users.edit');
 
@@ -53,6 +58,7 @@ class Users extends CI_Controller {
         $this->user_form((int) $id, $user);
     }
 
+    // Mao ni ang delete flow sa Users; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function delete($id) {
         $this->require_permission('users.delete');
 
@@ -97,6 +103,7 @@ class Users extends CI_Controller {
         redirect('users');
     }
 
+    // Mao ni ang role search flow sa Users; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function role_search() {
         $this->require_user_form_permission();
 
@@ -121,6 +128,7 @@ class Users extends CI_Controller {
             ->set_output(json_encode(array('items' => $items)));
     }
 
+    // Mao ni ang datatable flow sa Users; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function datatable() {
         $this->require_permission('users.view');
 
@@ -192,6 +200,7 @@ class Users extends CI_Controller {
         $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
+    // Internal helper ni para user form; tawagon ra sulod application/controllers/Users.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function user_form($id = NULL, $user = NULL) {
         $this->form_validation->set_rules('first_name', 'First Name', 'trim|required|max_length[100]');
         $this->form_validation->set_rules('middle_name', 'Middle Name', 'trim|max_length[100]');
@@ -294,6 +303,7 @@ class Users extends CI_Controller {
         redirect('users');
     }
 
+    // Internal helper ni para generate temporary password; tawagon ra sulod application/controllers/Users.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function generate_temporary_password($length = 14) {
         $length = max(12, min(32, (int) $length));
 
@@ -324,6 +334,7 @@ class Users extends CI_Controller {
         return implode('', $characters);
     }
 
+    // Internal helper ni para render user form; tawagon ra sulod application/controllers/Users.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function render_user_form($id, $user, $form_error = '') {
         $data['user'] = $user;
         $data['roles'] = array();
@@ -347,6 +358,7 @@ class Users extends CI_Controller {
         $this->load->view('modal/users/form', $data);
     }
 
+    // Internal helper ni para require user form permission; tawagon ra sulod application/controllers/Users.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_user_form_permission() {
         $user_id = (int) $this->session->userdata('user_id');
 
@@ -361,6 +373,7 @@ class Users extends CI_Controller {
         }
     }
 
+    // Internal helper ni para require permission; tawagon ra sulod application/controllers/Users.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
         if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
