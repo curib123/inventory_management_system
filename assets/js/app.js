@@ -231,26 +231,29 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         modalContent.innerHTML =
-            '<div class="modal-header">' +
-                '<div class="d-flex align-items-center gap-3">' +
+            '<div class="modal-header app-modal-header app-modal-header-danger">' +
+                '<div class="app-modal-heading">' +
                     '<span class="app-modal-icon app-modal-icon-danger">' +
                         '<i class="bi bi-exclamation-triangle"></i>' +
                     '</span>' +
-                    '<div>' +
-                        '<div class="text-body-secondary small fw-semibold text-uppercase">System message</div>' +
-                        '<h2 class="modal-title fs-5 mb-0">' + escapeHtml(problem.title || 'Request failed') + '</h2>' +
+                    '<div class="app-modal-heading-copy">' +
+                        '<div class="app-modal-eyebrow">System message</div>' +
+                        '<h2 class="modal-title app-modal-title">' + escapeHtml(problem.title || 'Request failed') + '</h2>' +
+                        '<p class="app-modal-subtitle">The system could not complete the requested operation.</p>' +
                     '</div>' +
                 '</div>' +
-                '<button type="button" class="btn-close" data-modal-close aria-label="Close"></button>' +
+                '<button type="button" class="btn-close app-modal-close" data-modal-close aria-label="Close"></button>' +
             '</div>' +
             '<div class="modal-body">' +
                 problemBodyHtml(problem) +
             '</div>' +
-            '<div class="modal-footer">' +
-                '<button type="button" class="btn btn-outline-secondary" data-modal-close>Close</button>' +
-                '<button type="button" class="btn btn-primary" data-retry-page>' +
-                    '<i class="bi bi-arrow-clockwise me-1"></i>Refresh Page' +
-                '</button>' +
+            '<div class="modal-footer app-modal-footer">' +
+                '<div class="app-modal-footer-actions">' +
+                    '<button type="button" class="btn btn-outline-secondary" data-modal-close>Close</button>' +
+                    '<button type="button" class="btn btn-primary" data-retry-page>' +
+                        '<i class="bi bi-arrow-clockwise me-1"></i>Refresh Page' +
+                    '</button>' +
+                '</div>' +
             '</div>';
 
         modalInstance.show();
@@ -914,17 +917,18 @@ document.addEventListener('DOMContentLoaded', function () {
         var stage = document.createElement('div');
         stage.className = 'app-confirmation-stage';
         stage.innerHTML =
-            '<div class="modal-header">' +
-                '<div class="d-flex align-items-center gap-3">' +
+            '<div class="modal-header app-modal-header app-modal-header-' + escapeHtml(variant) + '">' +
+                '<div class="app-modal-heading">' +
                     '<span class="app-modal-icon app-modal-icon-' + escapeHtml(variant) + '">' +
                         '<i class="bi ' + escapeHtml(icon) + '"></i>' +
                     '</span>' +
-                    '<div>' +
-                        '<div class="text-body-secondary small fw-semibold text-uppercase">Confirmation</div>' +
-                        '<h2 class="modal-title fs-5 mb-0">' + escapeHtml(title) + '</h2>' +
+                    '<div class="app-modal-heading-copy">' +
+                        '<div class="app-modal-eyebrow">Confirmation</div>' +
+                        '<h2 class="modal-title app-modal-title">' + escapeHtml(title) + '</h2>' +
+                        '<p class="app-modal-subtitle">Review the impact before committing this change.</p>' +
                     '</div>' +
                 '</div>' +
-                '<button type="button" class="btn-close" data-confirm-cancel aria-label="Go back"></button>' +
+                '<button type="button" class="btn-close app-modal-close" data-confirm-cancel aria-label="Go back"></button>' +
             '</div>' +
             '<div class="modal-body">' +
                 '<div class="app-confirmation-review">' +
@@ -952,13 +956,15 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Nothing has been submitted yet. Choose Go Back if you want to review or change any information.' +
                 '</div>' +
             '</div>' +
-            '<div class="modal-footer">' +
-                '<button type="button" class="btn btn-outline-secondary" data-confirm-cancel>' +
-                    '<i class="bi bi-arrow-left me-1"></i>Go Back' +
-                '</button>' +
-                '<button type="button" class="btn btn-' + escapeHtml(variant) + '" data-confirm-proceed>' +
-                    '<i class="bi ' + escapeHtml(icon) + ' me-1"></i>' + escapeHtml(label) +
-                '</button>' +
+            '<div class="modal-footer app-modal-footer">' +
+                '<div class="app-modal-footer-actions">' +
+                    '<button type="button" class="btn btn-outline-secondary" data-confirm-cancel>' +
+                        '<i class="bi bi-arrow-left me-1"></i>Go Back' +
+                    '</button>' +
+                    '<button type="button" class="btn btn-' + escapeHtml(variant) + '" data-confirm-proceed>' +
+                        '<i class="bi ' + escapeHtml(icon) + ' me-1"></i>' + escapeHtml(label) +
+                    '</button>' +
+                '</div>' +
             '</div>';
 
         form.appendChild(stage);
