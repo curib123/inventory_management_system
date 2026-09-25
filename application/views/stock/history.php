@@ -46,12 +46,12 @@ $this->load->view('components/data_table', array(
     'source' => site_url('stock/history/datatable'),
     'table_id' => 'stock-history-table',
     'columns' => array(
-        'Transaction No.',
-        'Type',
+        array('label' => 'Transaction No.', 'class' => 'text-nowrap'),
+        array('label' => 'Type', 'class' => 'text-nowrap'),
         'Supplier',
         'Processed By',
-        'Date',
-        array('label' => 'Action', 'orderable' => false)
+        array('label' => 'Date', 'class' => 'text-nowrap'),
+        array('label' => 'Action', 'orderable' => false, 'class' => 'text-end text-nowrap')
     )
 ));
 
