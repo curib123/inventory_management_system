@@ -328,35 +328,32 @@ private function export_csv($title, $columns, $rows, $meta)
 
 private function write_csv_metadata($handle, $title, $meta)
 {
-    $this->write_csv_row($handle, array(
-        $meta['system_name'] ?? '',
-    ));
-
-    $this->write_csv_row($handle, array(
-        $title,
-    ));
-
-    $this->write_csv_row($handle, array(
-        'Generated',
-        $meta['generated_at'] ?? '',
-    ));
-
+    // CSV cannot store visual styling, so keep a clean business-report structure.
+    $this->write_csv_row($handle, array('REPORT INFORMATION'));
+    $this->write_csv_row($handle, array('System', $meta['system_name'] ?? ''));
+    $this->write_csv_row($handle, array('Report', $title));
+    $this->write_csv_row($handle, array('Generated', $meta['generated_at'] ?? ''));
     $this->write_csv_row($handle, array(
         'Prepared By',
-        !empty($meta['prepared_by'])
-            ? $meta['prepared_by']
-            : 'System User',
+        !empty($meta['prepared_by']) ? $meta['prepared_by'] : 'System User'
     ));
+    $this->write_csv_row($handle, array(
+        'Record Count',
+        isset($meta['record_count']) ? (int) $meta['record_count'] : 0
+    ));
+
+    $this->write_csv_row($handle, array());
+    $this->write_csv_row($handle, array('SUMMARY'));
 
     foreach (($meta['summary'] ?? array()) as $label => $value) {
         $this->write_csv_row($handle, array(
             $label,
-            $this->csv_safe_value($value),
+            $this->csv_safe_value($value)
         ));
     }
 
-    // Visual separation between report information and data.
     $this->write_csv_row($handle, array());
+    $this->write_csv_row($handle, array('DATA'));
 }
 
 private function write_csv_header($handle, $columns)
@@ -373,9 +370,19 @@ private function write_csv_data($handle, $columns, $rows)
         $values = array();
 
         foreach ($columns as $field => $label) {
-            $value = array_key_exists($field, $row)
-                ? $row[$field]
-                : '';
+            $value = array_key_exists($field, $row) ? $row[$field] : '';
+
+            if ($field === 'type' && $value !== '') {
+                $value = ucwords(str_replace('_', ' ', (string) $value));
+            }
+
+            if ($field === 'created_at' && trim((string) $value) !== '') {
+                $timestamp = strtotime((string) $value);
+
+                if ($timestamp !== FALSE) {
+                    $value = date('Y-m-d H:i', $timestamp);
+                }
+            }
 
             $values[] = $this->csv_safe_value($value);
         }
