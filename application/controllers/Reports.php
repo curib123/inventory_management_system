@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Reports extends CI_Controller {
 
+    // Setup ni sa Reports controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
         $this->load->library('session');
@@ -20,14 +21,22 @@ class Reports extends CI_Controller {
         $this->load->model('Report_model');
     }
 
+    // Mao ni ang index flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() { $this->show_report('inventory'); }
+    // Mao ni ang inventory flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function inventory() { $this->show_report('inventory'); }
+    // Mao ni ang stock in flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function stock_in() { $this->show_report('stock-in'); }
+    // Mao ni ang stock out flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function stock_out() { $this->show_report('stock-out'); }
+    // Mao ni ang movement flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function movement() { $this->show_report('movement'); }
+    // Mao ni ang low stock flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function low_stock() { $this->show_report('low-stock'); }
+    // Mao ni ang valuation flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function valuation() { $this->show_report('valuation'); }
 
+    // Mao ni ang datatable flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function datatable($report) {
         $this->get_definition($report);
 
@@ -75,6 +84,7 @@ class Reports extends CI_Controller {
             ->set_output(json_encode($payload));
     }
 
+    // Mao ni ang export flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function export($report, $format = 'csv') {
         $this->require_permission('reports.export');
 
@@ -115,6 +125,7 @@ class Reports extends CI_Controller {
         }
     }
 
+    // Internal helper ni para show report; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function show_report($report) {
         $definition = $this->get_definition($report);
         $data['report_title'] = $definition['title'];
@@ -127,6 +138,7 @@ class Reports extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
+    // Internal helper ni para get report columns; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function get_report_columns($report) {
         if ($report === 'inventory' || $report === 'valuation') {
             return array(
@@ -167,6 +179,7 @@ class Reports extends CI_Controller {
         );
     }
 
+    // Internal helper ni para get report order columns; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function get_report_order_columns($report) {
         if ($report === 'inventory' || $report === 'valuation') {
             return array(
@@ -207,6 +220,7 @@ class Reports extends CI_Controller {
         );
     }
 
+    // Internal helper ni para get report default order; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function get_report_default_order($report) {
         if ($report === 'inventory' || $report === 'valuation') {
             return array('column' => 'p.product_name', 'dir' => 'asc');
@@ -219,6 +233,7 @@ class Reports extends CI_Controller {
         return array('column' => 't.created_at', 'dir' => 'desc');
     }
 
+    // Internal helper ni para get definition; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function get_definition($report) {
         try {
             return $this->report_rules->get($report);
@@ -228,6 +243,7 @@ class Reports extends CI_Controller {
         }
     }
 
+    // Internal helper ni para get rows; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function get_rows($definition) {
         $method = $definition['method'];
 
@@ -242,6 +258,7 @@ class Reports extends CI_Controller {
         return $this->Report_model->{$method}();
     }
 
+    // Internal helper ni para build report meta; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function build_report_meta($report, $title, $rows) {
         return array(
             'system_name' => 'Inventory Management System',
@@ -254,6 +271,7 @@ class Reports extends CI_Controller {
         );
     }
 
+    // Internal helper ni para build report summary; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function build_report_summary($report, $rows) {
         $summary = array('Records' => number_format(count($rows)));
 
@@ -298,6 +316,7 @@ class Reports extends CI_Controller {
         return $summary;
     }
 
+// Internal helper ni para export csv; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
 private function export_csv($title, $columns, $rows, $meta)
 {
     $filename = $this->report_filename($title, 'csv');
@@ -330,6 +349,7 @@ private function export_csv($title, $columns, $rows, $meta)
     exit;
 }
 
+// Internal helper ni para write csv metadata; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
 private function write_csv_metadata($handle, $title, $meta)
 {
     // CSV cannot store visual styling, so keep a clean business-report structure.
@@ -360,6 +380,7 @@ private function write_csv_metadata($handle, $title, $meta)
     $this->write_csv_row($handle, array('DATA'));
 }
 
+// Internal helper ni para write csv header; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
 private function write_csv_header($handle, $columns)
 {
     $this->write_csv_row(
@@ -368,6 +389,7 @@ private function write_csv_header($handle, $columns)
     );
 }
 
+// Internal helper ni para write csv data; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
 private function write_csv_data($handle, $columns, $rows)
 {
     foreach ($rows as $row) {
@@ -395,6 +417,7 @@ private function write_csv_data($handle, $columns, $rows)
     }
 }
 
+// Internal helper ni para write csv row; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
 private function write_csv_row($handle, $values)
 {
     if (fputcsv($handle, $values, ',', '"', '') === false) {
@@ -402,6 +425,7 @@ private function write_csv_row($handle, $values)
     }
 }
 
+// Internal helper ni para csv safe value; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
 private function csv_safe_value($value)
 {
     if ($value === null) {
@@ -415,12 +439,6 @@ private function csv_safe_value($value)
     $value = (string) $value;
     $trimmed = ltrim($value);
 
-    /*
-     * Prevent CSV/Excel formula injection.
-     *
-     * Values beginning with =, +, -, or @ can be interpreted
-     * as formulas by spreadsheet applications.
-     */
     if ($trimmed !== '') {
         $firstCharacter = $trimmed[0];
 
@@ -433,6 +451,7 @@ private function csv_safe_value($value)
 }
 
 
+    // Internal helper ni para export xlsx; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function export_xlsx($title, $columns, $rows, $meta) {
         $this->load_composer();
 
@@ -778,6 +797,7 @@ private function csv_safe_value($value)
         exit;
     }
 
+    // Internal helper ni para set excel cell value; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function set_excel_cell_value($sheet, $coordinate, $field, $value) {
         $integer_fields = array('stock', 'reorder_level', 'shortage', 'quantity');
         $decimal_fields = array('cost_price', 'inventory_value');
@@ -832,6 +852,7 @@ private function csv_safe_value($value)
         }
     }
 
+    // Internal helper ni para excel column width; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function excel_column_width($field) {
         $widths = array(
             'transaction_no' => 19,
@@ -855,6 +876,7 @@ private function csv_safe_value($value)
         return isset($widths[$field]) ? $widths[$field] : 18;
     }
 
+    // Internal helper ni para export pdf; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function export_pdf($title, $columns, $rows, $meta) {
         $this->load_composer();
 
@@ -899,6 +921,7 @@ private function csv_safe_value($value)
         exit;
     }
 
+    // Internal helper ni para prepare display rows; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function prepare_display_rows($columns, $rows) {
         $prepared = array();
 
@@ -916,6 +939,7 @@ private function csv_safe_value($value)
         return $prepared;
     }
 
+    // Internal helper ni para format display value; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function format_display_value($field, $value) {
         if ($value === NULL || $value === '') {
             return '—';
@@ -944,6 +968,7 @@ private function csv_safe_value($value)
         return (string) $value;
     }
 
+    // Internal helper ni para report filename; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function report_filename($title, $extension) {
         $base = url_title($title, '-', TRUE);
 
@@ -954,6 +979,7 @@ private function csv_safe_value($value)
         return $base . '-' . date('Y-m-d-His') . '.' . $extension;
     }
 
+    // Internal helper ni para prepare download output; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function prepare_download_output() {
         if (function_exists('ini_set')) {
             @ini_set('zlib.output_compression', 'Off');
@@ -964,6 +990,7 @@ private function csv_safe_value($value)
         }
     }
 
+    // Internal helper ni para load composer; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function load_composer() {
         $autoload = FCPATH . 'vendor/autoload.php';
 
@@ -976,6 +1003,7 @@ private function csv_safe_value($value)
         require_once $autoload;
     }
 
+    // Internal helper ni para handle export failure; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function handle_export_failure($exception, $title) {
         $reference = strtoupper(substr(hash(
             'sha256',
@@ -999,6 +1027,7 @@ private function csv_safe_value($value)
         );
     }
 
+    // Internal helper ni para require permission; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
 
