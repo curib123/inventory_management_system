@@ -3,7 +3,9 @@
 $this->load->view('components/modal/header', array(
     'modal_title' => 'Delete Category',
     'modal_subtitle' => 'Confirm this permanent action before continuing.',
-    'modal_icon' => 'bi-trash3'
+    'modal_icon' => 'bi-trash3',
+    'modal_variant' => 'danger',
+    'modal_eyebrow' => 'Destructive action'
 ));
 ?>
 
