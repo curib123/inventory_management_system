@@ -97,6 +97,30 @@ class Users extends CI_Controller {
         redirect('users');
     }
 
+    public function role_search() {
+        $this->require_user_form_permission();
+
+        if ($this->input->method(TRUE) !== 'GET') {
+            show_error('Invalid request method.', 405, 'Method Not Allowed');
+        }
+
+        $query = trim((string) $this->input->get('q', TRUE));
+        $roles = $this->User_model->search_active_roles($query, 20);
+        $items = array();
+
+        foreach ($roles as $role) {
+            $items[] = array(
+                'id' => (int) $role->id,
+                'text' => (string) $role->role_name,
+                'secondary' => (string) ($role->description ?: '')
+            );
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array('items' => $items)));
+    }
+
     public function datatable() {
         $this->require_permission('users.view');
 
@@ -188,13 +212,22 @@ class Users extends CI_Controller {
 
         $username = trim($this->input->post('username', TRUE));
         $role_id = (int) $this->input->post('role_id', TRUE);
-        $roles = $this->User_model->get_active_roles();
-        $role_ids = array_map(function ($role) {
-            return (int) $role->id;
-        }, $roles);
+        $requested_status = $this->input->post('status', TRUE) === '0' ? 0 : 1;
+        $role = $this->User_model->get_role_by_id($role_id);
+        $preserves_existing_role =
+            $id !== NULL &&
+            $user &&
+            (int) $user->role_id === $role_id;
 
-        if (!in_array($role_id, $role_ids, TRUE)) {
-            $this->render_user_form($id, $user, 'The selected role is invalid or inactive.');
+        if (
+            !$role ||
+            (!(int) $role->status && (!$preserves_existing_role || $requested_status === 1))
+        ) {
+            $this->render_user_form(
+                $id,
+                $user,
+                'The selected role is invalid or inactive. Active user accounts require an active role.'
+            );
             return;
         }
 
@@ -211,7 +244,7 @@ class Users extends CI_Controller {
             'last_name' => trim((string) $this->input->post('last_name', TRUE)),
             'username' => $username,
             'role_id' => $role_id,
-            'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
+            'status' => $requested_status
         );
 
         $password = (string) $this->input->post('password', FALSE);
@@ -240,11 +273,39 @@ class Users extends CI_Controller {
 
     private function render_user_form($id, $user, $form_error = '') {
         $data['user'] = $user;
-        $data['roles'] = $this->User_model->get_active_roles();
+        $data['roles'] = array();
+
+        $is_post = $this->input->method(TRUE) === 'POST';
+        $selected_role_id = $is_post
+            ? (int) $this->input->post('role_id', TRUE)
+            : ($user ? (int) $user->role_id : 0);
+
+        if ($selected_role_id > 0) {
+            $selected_role = $this->User_model->get_role_by_id($selected_role_id);
+
+            if ($selected_role) {
+                $data['roles'][] = $selected_role;
+            }
+        }
+
         $data['page_title'] = $id === NULL ? 'Add User' : 'Edit User';
         $data['form_error'] = $form_error;
 
         $this->load->view('modal/users/form', $data);
+    }
+
+    private function require_user_form_permission() {
+        $user_id = (int) $this->session->userdata('user_id');
+
+        if (
+            $user_id <= 0 ||
+            !$this->User_model->has_any_permission(
+                $user_id,
+                array('users.create', 'users.edit')
+            )
+        ) {
+            show_error('You do not have permission to manage user roles.', 403, 'Access Denied');
+        }
     }
 
     private function require_permission($permission_key) {
