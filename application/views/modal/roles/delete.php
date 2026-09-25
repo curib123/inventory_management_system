@@ -3,12 +3,24 @@
 $this->load->view('components/modal/header', array(
     'modal_title' => 'Delete Role',
     'modal_subtitle' => 'Confirm this permanent action before continuing.',
-    'modal_icon' => 'bi-trash3'
+    'modal_icon' => 'bi-trash3',
+    'modal_variant' => 'danger',
+    'modal_eyebrow' => 'Destructive action'
 ));
 ?>
+
+<div class="modal-body">
+    <div class="app-confirm-entity mb-3">
+        <div class="app-confirm-entity-label">Role</div>
+        <div class="app-confirm-entity-value"><?php echo html_escape($role->role_name); ?></div>
+    </div>
+
     <?php if (!empty($delete_error)): ?>
         <div class="alert alert-warning mb-0" role="alert">
-            <div class="fw-semibold mb-1">Deletion is not available</div>
+            <div class="fw-semibold mb-1">
+                <i class="bi bi-shield-exclamation me-1"></i>
+                Deletion is not available
+            </div>
             <div><?php echo html_escape($delete_error); ?></div>
         </div>
     <?php else: ?>
@@ -16,11 +28,12 @@ $this->load->view('components/modal/header', array(
         $this->load->view('components/modal/confirmation', array(
             'confirmation_variant' => 'danger',
             'confirmation_icon' => 'bi-trash3',
-            'confirmation_title' => 'Delete Role? ' . html_escape($role->role_name),
-            'confirmation_message' => 'Deleting permanently removes this role and its permission assignment.',
+            'confirmation_title' => 'Delete this role?',
+            'confirmation_message' => 'Deleting permanently removes the role and its permission assignments.',
             'confirmation_items' => array(
                 'This action cannot be undone.',
-                'Roles assigned to users are protected and must be unassigned before deletion.'
+                'Roles assigned to users must be unassigned before deletion.',
+                'Review the role name carefully before confirming.'
             )
         ));
         ?>
