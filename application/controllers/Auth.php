@@ -178,23 +178,11 @@ class Auth extends CI_Controller {
     private function redirect_to_authorized_page() {
         $user_id = (int) $this->session->userdata('user_id');
 
-        $destinations = array(
-            'dashboard.view' => 'dashboard',
-            'products.view' => 'products',
-            'categories.view' => 'categories',
-            'suppliers.view' => 'suppliers',
-            'stock.history' => 'stock',
-            'stock.view' => 'stock/low-stock',
-            'reports.view' => 'reports',
-            'users.view' => 'users',
-            'roles.view' => 'roles'
-        );
+        $route = $this->authorization_service->first_authorized_route($user_id);
 
-        foreach ($destinations as $permission_key => $route) {
-            if ($this->User_model->has_permission($user_id, $permission_key)) {
-                redirect($route);
-                return;
-            }
+        if ($route !== NULL) {
+            redirect($route);
+            return;
         }
 
         show_error(
