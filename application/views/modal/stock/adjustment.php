@@ -40,8 +40,7 @@ $this->load->view('components/modal/header', array(
                 id="adjustment_supplier_filter"
                 name="supplier_filter"
                 class="form-select"
-                data-searchable-select
-                data-search-placeholder="Search suppliers..."
+        
                 data-adjustment-supplier
                 data-product-target="#adjustment_product_id"
             >
@@ -67,8 +66,6 @@ $this->load->view('components/modal/header', array(
                 name="product_id"
                 class="form-select"
                 required
-                data-searchable-select
-                data-search-placeholder="Search product code or name..."
                 data-adjustment-product
             >
                 <option value="">Select Product</option>

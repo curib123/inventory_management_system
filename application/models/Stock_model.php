@@ -41,11 +41,7 @@ class Stock_model extends CI_Model {
             if (!$active_supplier) {
                 return array('success' => FALSE, 'message' => 'The selected supplier is invalid or inactive.');
             }
-        } else {
-            // Stock Out never belongs to a supplier. Keep the database invariant
-            // even when another service calls this model directly.
-            $supplier_id = NULL;
-        }
+        } 
 
         // Normalize first para duplicate product rows ma-combine before stock update.
         $normalized = $this->normalize_items($items);

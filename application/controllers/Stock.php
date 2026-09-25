@@ -142,7 +142,7 @@ class Stock extends CI_Controller {
             $rows[] = array(
                 html_escape($transaction->transaction_no),
                 html_escape($transaction->type),
-                html_escape($transaction->supplier_name ?: 'N/A'),
+                html_escape($transaction->supplier_name),
                 html_escape($transaction->username),
                 html_escape($transaction->created_at),
                 ui_modal_action_group(array(

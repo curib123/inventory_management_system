@@ -236,3 +236,11 @@ To reduce merge conflicts, page branches should modify only that page's view-spe
 ## QA note
 
 The current branch passed a JavaScript parse check and structural checks on the changed PHP files. A full local PHPUnit/browser/MySQL execution could not be run from the assistant environment because outbound GitHub DNS resolution is unavailable there. Run `composer test` plus the normal Stock In/Out and export smoke tests on the deployment machine before production release.
+
+
+
+new issuess
+
+add filtration in each table 
+recommended setup for stock adjustment
+enhance csv,excel format 

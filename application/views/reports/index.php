@@ -19,14 +19,14 @@ $this->load->view('components/page_header', array(
 
             <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'reports.export')): ?>
                 <div class="d-flex flex-wrap gap-2" aria-label="Export report">
-                    <button
+                    <!-- <button
                         type="button"
                         class="btn btn-sm btn-outline-secondary"
                         data-report-export
                         data-export-url="<?php echo site_url('reports/export/' . $report_key . '/csv'); ?>"
                     >
                         <i class="bi bi-filetype-csv me-1"></i>CSV
-                    </button>
+                    </button> -->
 
                     <button
                         type="button"

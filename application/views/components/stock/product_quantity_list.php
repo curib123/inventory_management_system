@@ -68,9 +68,6 @@ $is_stock_out = $mode === 'stock_out';
                 <div class="app-stock-product-quantity">
                     <input type="hidden" name="product_id[]" value="<?php echo $product_id; ?>">
 
-                    <label for="<?php echo $mode; ?>_quantity_<?php echo $product_id; ?>" class="form-label small mb-1">
-                        <?php echo $is_stock_out ? 'Stock Out Qty' : 'Stock In Qty'; ?>
-                    </label>
 
                     <input
                         type="number"

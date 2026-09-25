@@ -293,79 +293,133 @@ class Reports extends CI_Controller {
         return $summary;
     }
 
-    private function export_csv($title, $columns, $rows, $meta) {
-        $filename = $this->report_filename($title, 'csv');
+private function export_csv($title, $columns, $rows, $meta)
+{
+    $filename = $this->report_filename($title, 'csv');
 
-        $this->prepare_download_output();
-        header('Content-Type: text/csv; charset=UTF-8');
-        header('Content-Disposition: attachment; filename="' . $filename . '"');
-        header('Cache-Control: no-store, no-cache, must-revalidate');
-        header('X-Content-Type-Options: nosniff');
+    $this->prepare_download_output();
 
-        $handle = fopen('php://output', 'w');
+    header('Content-Type: text/csv; charset=UTF-8');
+    header('Content-Disposition: attachment; filename="' . $filename . '"');
+    header('Cache-Control: no-store, no-cache, must-revalidate');
+    header('Pragma: no-cache');
+    header('X-Content-Type-Options: nosniff');
 
-        if ($handle === FALSE) {
-            throw new RuntimeException('Unable to open the CSV output stream.');
-        }
+    $handle = fopen('php://output', 'w');
 
-        // Excel-compatible UTF-8 BOM.
+    if ($handle === false) {
+        throw new RuntimeException('Unable to open the CSV output stream.');
+    }
+
+    try {
+        // UTF-8 BOM for Microsoft Excel compatibility.
         fwrite($handle, "\xEF\xBB\xBF");
 
-        $this->write_csv_row($handle, array($meta['system_name']));
-        $this->write_csv_row($handle, array($title));
-        $this->write_csv_row($handle, array('Generated', $meta['generated_at']));
-        $this->write_csv_row($handle, array('Prepared By', $meta['prepared_by'] ?: 'System User'));
-
-        foreach ($meta['summary'] as $label => $value) {
-            $this->write_csv_row($handle, array($label, $value));
-        }
-
-        $this->write_csv_row($handle, array());
-        $this->write_csv_row($handle, array_values($columns));
-
-        foreach ($rows as $row) {
-            $values = array();
-
-            foreach ($columns as $field => $label) {
-                $value = array_key_exists($field, $row) ? $row[$field] : '';
-                $values[] = $this->csv_safe_value($value);
-            }
-
-            $this->write_csv_row($handle, $values);
-        }
-
+        $this->write_csv_metadata($handle, $title, $meta);
+        $this->write_csv_header($handle, $columns);
+        $this->write_csv_data($handle, $columns, $rows);
+    } finally {
         fclose($handle);
-        exit;
     }
 
-    private function write_csv_row($handle, $values) {
-        if (fputcsv($handle, $values, ',', '"', '') === FALSE) {
-            throw new RuntimeException('Unable to write the CSV report.');
-        }
+    exit;
+}
+
+private function write_csv_metadata($handle, $title, $meta)
+{
+    $this->write_csv_row($handle, array(
+        $meta['system_name'] ?? '',
+    ));
+
+    $this->write_csv_row($handle, array(
+        $title,
+    ));
+
+    $this->write_csv_row($handle, array(
+        'Generated',
+        $meta['generated_at'] ?? '',
+    ));
+
+    $this->write_csv_row($handle, array(
+        'Prepared By',
+        !empty($meta['prepared_by'])
+            ? $meta['prepared_by']
+            : 'System User',
+    ));
+
+    foreach (($meta['summary'] ?? array()) as $label => $value) {
+        $this->write_csv_row($handle, array(
+            $label,
+            $this->csv_safe_value($value),
+        ));
     }
 
-    private function csv_safe_value($value) {
-        if ($value === NULL) {
-            return '';
+    // Visual separation between report information and data.
+    $this->write_csv_row($handle, array());
+}
+
+private function write_csv_header($handle, $columns)
+{
+    $this->write_csv_row(
+        $handle,
+        array_values($columns)
+    );
+}
+
+private function write_csv_data($handle, $columns, $rows)
+{
+    foreach ($rows as $row) {
+        $values = array();
+
+        foreach ($columns as $field => $label) {
+            $value = array_key_exists($field, $row)
+                ? $row[$field]
+                : '';
+
+            $values[] = $this->csv_safe_value($value);
         }
 
-        if (is_int($value) || is_float($value)) {
-            return $value;
-        }
+        $this->write_csv_row($handle, $values);
+    }
+}
 
-        $value = (string) $value;
-        $trimmed = ltrim($value);
+private function write_csv_row($handle, $values)
+{
+    if (fputcsv($handle, $values, ',', '"', '') === false) {
+        throw new RuntimeException('Unable to write the CSV report.');
+    }
+}
 
-        if ($trimmed !== '' && !is_numeric($trimmed)) {
-            $first = substr($trimmed, 0, 1);
+private function csv_safe_value($value)
+{
+    if ($value === null) {
+        return '';
+    }
 
-            if (in_array($first, array('=', '+', '-', '@'), TRUE)) {
-                return "'" . $value;
-            }
-        }
-
+    if (is_int($value) || is_float($value)) {
         return $value;
     }
+
+    $value = (string) $value;
+    $trimmed = ltrim($value);
+
+    /*
+     * Prevent CSV/Excel formula injection.
+     *
+     * Values beginning with =, +, -, or @ can be interpreted
+     * as formulas by spreadsheet applications.
+     */
+    if ($trimmed !== '') {
+        $firstCharacter = $trimmed[0];
+
+        if (in_array($firstCharacter, array('=', '+', '-', '@'), true)) {
+            return "'" . $value;
+        }
+    }
+
+    return $value;
+}
+
 
     private function export_xlsx($title, $columns, $rows, $meta) {
         $this->load_composer();
@@ -383,7 +437,6 @@ class Reports extends CI_Controller {
 
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle(substr($title, 0, 31));
-        $sheet->getSheetView()->setShowGridLines(FALSE);
         $sheet->getSheetView()->setZoomScale(90);
 
         $column_count = max(1, count($columns));
