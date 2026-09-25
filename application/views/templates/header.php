@@ -143,12 +143,14 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
         </nav>
 
         <div class="logout-section">
-            <?php echo form_open('logout'); ?>
-                <button type="submit" class="btn btn-outline-danger w-100">
-                    <i class="bi bi-box-arrow-right me-2"></i>
-                    Logout
-                </button>
-            <?php echo form_close(); ?>
+            <button
+                type="button"
+                class="btn btn-outline-danger w-100"
+                data-modal-url="<?php echo site_url('logout/confirm'); ?>"
+            >
+                <i class="bi bi-box-arrow-right me-2"></i>
+                Logout
+            </button>
         </div>
     </aside>
 
