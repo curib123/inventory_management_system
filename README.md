@@ -235,7 +235,13 @@ To reduce merge conflicts, page branches should modify only that page's view-spe
 
 ## QA note
 
-The current branch passed a JavaScript parse check and structural checks on the changed PHP files. A full local PHPUnit/browser/MySQL execution could not be run from the assistant environment because outbound GitHub DNS resolution is unavailable there. Run `composer test` plus the normal Stock In/Out and export smoke tests on the deployment machine before production release.
+The current `development` branch has been rechecked from a fresh clone with:
+- JavaScript syntax parsing for `assets/js/app.js`.
+- PHP syntax linting across every PHP file under `application/`.
+- PHPUnit TestDox regression testing on PHP 8.2.
+- Code-path review of Stock In, Stock Out, Stock Adjustment, DataTables, permissions, searchable relationship selectors, and report exports.
+
+A real browser + MySQL transaction smoke test is still recommended on the deployment machine before production release because it verifies environment-specific database configuration, sessions, generated files, and browser interactions.
 
 
 
@@ -246,4 +252,6 @@ The current branch passed a JavaScript parse check and structural checks on the 
 - [x] CSV export uses a structured business-report layout and is available from the Reports UI.
 - [x] Excel export uses a professional manager-ready workbook layout with metadata, KPI summary, filters, frozen headers, print setup, number formats, and semantic movement styling.
 - [x] PDF export uses a professional A4 landscape report layout with metadata, summary cards, styled table, movement badges, and page numbering.
-- [x] Large relationship dropdowns are searchable. Stock supplier/product lookups use server-side search for scalability; small fixed table filters remain normal dropdowns because search would add unnecessary interaction.
+- [x] Large relationship dropdowns are searchable. Stock supplier/product, Product category/supplier, and User role lookups use server-side search for scalability; small fixed table filters remain normal dropdowns because search would add unnecessary interaction.
+- [x] Report CSV, Excel, and Print PDF exports inherit the current report search and active table filters, so downloaded/printed data matches the user's filtered report scope.
+- [x] Stock In, Stock Out, and Movement reports include a server-side Period filter for Today, Last 7 days, Last 30 days, or all dates.
