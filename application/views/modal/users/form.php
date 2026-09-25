@@ -10,7 +10,7 @@ $user_confirmation = array(
         : 'A secure temporary password will be generated automatically and shown once after the account is created.',
     'assist' => $user_is_edit
         ? 'Confirm the person, username, assigned role, account status, and whether a password reset is intended.'
-        : 'Copy the generated temporary password after creation and share it securely with the user.'
+        : 'Copy the generated temporary password after creation and share it securely with the user.',
     'label' => $user_is_edit ? 'Save User Changes' : 'Create User',
     'variant' => 'primary',
     'icon' => 'bi-person-check'
