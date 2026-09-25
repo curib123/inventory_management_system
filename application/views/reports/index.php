@@ -17,7 +17,7 @@ $this->load->view('components/page_header', array(
                 <a class="btn btn-sm <?php echo $report_key === 'valuation' ? 'btn-primary' : 'btn-outline-secondary'; ?>" href="<?php echo site_url('reports/valuation'); ?>">Valuation</a>
             </div>
 
-            <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'reports.export')): ?>
+            <?php if ($this->authorization_service->has_permission($this->session->userdata('user_id'), 'reports.export')): ?>
                 <div class="d-flex flex-wrap gap-2" aria-label="Export report">
                     <button
                         type="button"
@@ -50,7 +50,7 @@ $this->load->view('components/page_header', array(
             <?php endif; ?>
         </div>
 
-        <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'reports.export')): ?>
+        <?php if ($this->authorization_service->has_permission($this->session->userdata('user_id'), 'reports.export')): ?>
             <div class="app-report-export-note mt-3">
                 <i class="bi bi-printer me-1"></i>
                 CSV, Excel, and Print PDF use the current report search and filters. Print PDF opens a print-ready A4 landscape report in a new tab.
