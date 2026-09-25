@@ -32,17 +32,19 @@ class AuthServiceTest extends TestCase {
         $this->assertTrue($session_data['logged_in']);
     }
 
-    public function testSessionDataDoesNotContainLegacyPasswordChangeFlag() {
+    public function testSessionDataIncludesPasswordChangeState() {
         $user = (object) array(
             'id' => 9,
             'username' => 'inventory-user',
             'role_id' => 2,
-            'role_name' => 'staff'
+            'role_name' => 'staff',
+            'must_change_password' => 1
         );
 
         $session_data = (new Auth_service())->session_data($user);
 
-        $this->assertArrayNotHasKey('must_change_password', $session_data);
+        $this->assertTrue($session_data['must_change_password']);
+        $this->assertFalse($session_data['password_change_deferred']);
         $this->assertTrue($session_data['logged_in']);
     }
 
@@ -73,6 +75,8 @@ class AuthServiceTest extends TestCase {
             'username' => 'staff-user',
             'role_id' => 2,
             'role_name' => 'staff',
+            'must_change_password' => FALSE,
+            'password_change_deferred' => FALSE,
             'logged_in' => TRUE
         ), $session_data);
     }
