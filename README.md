@@ -247,6 +247,29 @@ A final browser transaction smoke test is still recommended on the deployment ma
 
 
 
+## User account temporary-password onboarding
+
+User Management now uses a secure first-login password flow:
+
+- New user accounts no longer require an administrator to type an initial password.
+- A cryptographically random temporary password is generated automatically.
+- Only the password hash is stored in the database.
+- The temporary password is shown once after account creation so the administrator can copy and share it securely.
+- Newly created users are marked with `must_change_password = 1`.
+- After login, the Change Password modal opens automatically and asks for Current Password, New Password, and Confirm New Password.
+- Users can choose **Ask later**. This postpones the reminder only for the current login session; the database requirement remains active and returns on the next login.
+- A successful password change clears `must_change_password`.
+- The top navigation includes a key button so users can open Change Password manually at any time.
+- If an administrator manually resets a password while editing a user, the account is marked to request another password change after the next login.
+
+For an existing database created before this feature, run:
+
+```sql
+SOURCE database/migrations/20260926_add_must_change_password.sql;
+```
+
+Fresh installations already include the column in `database/inventory_management_db.sql`.
+
 ## Latest QA checklist
 
 - [x] Add relevant filtration to each DataTable. Filters remain contextual rather than adding unnecessary controls to every page.
@@ -257,3 +280,4 @@ A final browser transaction smoke test is still recommended on the deployment ma
 - [x] Large relationship dropdowns are searchable. Stock supplier/product, Product category/supplier, and User role lookups use server-side search for scalability; small fixed table filters remain normal dropdowns because search would add unnecessary interaction.
 - [x] Report CSV, Excel, and Print PDF exports inherit the current report search and active table filters, so downloaded/printed data matches the user's filtered report scope.
 - [x] Stock In, Stock Out, and Movement reports include a server-side Period filter for Today, Last 7 days, Last 30 days, or all dates.
+- [x] New user accounts receive a secure generated temporary password and are prompted to change it after login, with a session-only Ask later option.
