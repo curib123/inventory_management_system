@@ -13,6 +13,7 @@ class Report_rules {
         'valuation' => array('title' => 'Inventory Valuation', 'type' => NULL, 'method' => 'get_inventory_report')
     );
 
+    // Shared service ni para get; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa if mangita ka asa ni gigamit.
     public function get($report) {
         if (!isset($this->definitions[$report])) {
             throw new InvalidArgumentException('Unknown report.');
@@ -21,6 +22,7 @@ class Report_rules {
         return $this->definitions[$report];
     }
 
+    // Shared service ni para export format is supported; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa if mangita ka asa ni gigamit.
     public function export_format_is_supported($format) {
         return in_array(strtolower($format), array('csv', 'xlsx', 'pdf'), TRUE);
     }
