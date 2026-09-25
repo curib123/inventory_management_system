@@ -1,4 +1,3 @@
-```sql
 USE inventory_management_db;
 
 -- ============================================================
@@ -931,4 +930,3 @@ GROUP BY
     u.username,
     st.created_at
 ORDER BY st.id;
-```
