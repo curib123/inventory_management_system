@@ -8,7 +8,7 @@ class Auth extends CI_Controller {
     public function __construct() {
         parent::__construct();
         $this->load->model('User_model');
-        $this->load->library(array('Auth_service', 'session', 'form_validation'));
+        $this->load->library(array('Auth_service', 'User_service', 'session', 'form_validation'));
         $this->load->helper(array('url', 'form'));
     }
 
@@ -125,29 +125,16 @@ class Auth extends CI_Controller {
             return;
         }
 
-        $current_password = (string) $this->input->post('current_password', FALSE);
-        $new_password = (string) $this->input->post('new_password', FALSE);
+        $result = $this->user_service->change_password(
+            $user_id,
+            (string) $this->input->post('current_password', FALSE),
+            (string) $this->input->post('new_password', FALSE)
+        );
 
-        if (!$this->User_model->verify_password($user_id, $current_password)) {
+        if (!$result['success']) {
             $this->load->view('modal/auth/change_password', array(
                 'password_change_required' => (bool) $this->session->userdata('must_change_password'),
-                'password_error' => 'The current password is incorrect.'
-            ));
-            return;
-        }
-
-        if (hash_equals($current_password, $new_password)) {
-            $this->load->view('modal/auth/change_password', array(
-                'password_change_required' => (bool) $this->session->userdata('must_change_password'),
-                'password_error' => 'Choose a new password that is different from the current password.'
-            ));
-            return;
-        }
-
-        if (!$this->User_model->update_password($user_id, $new_password, FALSE)) {
-            $this->load->view('modal/auth/change_password', array(
-                'password_change_required' => (bool) $this->session->userdata('must_change_password'),
-                'password_error' => 'The password could not be updated. Please try again.'
+                'password_error' => $result['message']
             ));
             return;
         }
