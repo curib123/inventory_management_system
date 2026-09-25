@@ -60,22 +60,67 @@ $this->load->view('components/page_header', array(
 
 <?php
 $table_columns = array();
+$table_filters = array();
 $numeric_fields = array('stock', 'quantity', 'reorder_level', 'shortage', 'cost_price', 'inventory_value');
+
+if ($report_key === 'inventory' || $report_key === 'valuation') {
+    $table_filters[] = array(
+        'name' => 'stock',
+        'label' => 'Stock level',
+        'icon' => 'bi-box-seam',
+        'options' => array(
+            '' => 'All stock levels',
+            'healthy' => 'Healthy stock',
+            'low' => 'Low stock',
+            'out' => 'Out of stock'
+        )
+    );
+} elseif ($report_key === 'low-stock') {
+    $table_filters[] = array(
+        'name' => 'severity',
+        'label' => 'Stock alert',
+        'icon' => 'bi-exclamation-triangle',
+        'options' => array(
+            '' => 'All low stock',
+            'out' => 'Out of stock',
+            'low' => 'Low but available'
+        )
+    );
+} elseif ($report_key === 'movement') {
+    $table_filters[] = array(
+        'name' => 'type',
+        'label' => 'Movement type',
+        'icon' => 'bi-arrow-left-right',
+        'options' => array(
+            '' => 'All movements',
+            'stock_in' => 'Stock In',
+            'stock_out' => 'Stock Out',
+            'adjustment' => 'Adjustment'
+        )
+    );
+}
 
 foreach ($columns as $field => $label) {
     $table_columns[] = in_array($field, $numeric_fields, TRUE)
-        ? array('label' => $label, 'class' => 'text-end text-nowrap')
+        ? array(
+            'label' => $label,
+            'class' => 'text-end text-nowrap',
+            'render' => $field === 'stock' && $report_key === 'low-stock' ? 'stock_alert' : ''
+        )
         : array(
             'label' => $label,
             'class' => in_array($field, array('transaction_no', 'type', 'unit', 'created_at'), TRUE)
                 ? 'text-nowrap'
-                : ''
+                : '',
+            'render' => $field === 'type' ? 'movement' : ''
         );
 }
 
 $this->load->view('components/data_table', array(
     'source' => site_url('reports/datatable/' . $report_key),
     'table_id' => 'report-table',
+    'search_placeholder' => 'Search this report...',
+    'filters' => $table_filters,
     'columns' => $table_columns
 ));
 ?>
