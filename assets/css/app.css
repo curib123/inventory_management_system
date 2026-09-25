@@ -189,9 +189,39 @@ body {
 /* --------------------------------------------------------------------------
    Centralized stock-product selector
    -------------------------------------------------------------------------- */
+.app-stock-product-list-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    border: 1px solid rgba(var(--bs-secondary-rgb), 0.12);
+    border-radius: 0.65rem;
+    background: var(--bs-tertiary-bg);
+    color: var(--bs-secondary-color);
+    font-size: 0.74rem;
+}
+
 .app-stock-product-list {
     display: grid;
     gap: 0.75rem;
+    max-height: 29rem;
+    padding-right: 0.25rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+}
+
+.app-stock-product-list::-webkit-scrollbar {
+    width: 0.55rem;
+}
+
+.app-stock-product-list::-webkit-scrollbar-thumb {
+    border: 0.15rem solid transparent;
+    border-radius: 999px;
+    background: rgba(var(--bs-secondary-rgb), 0.24);
+    background-clip: padding-box;
 }
 
 .app-stock-product {
@@ -244,6 +274,12 @@ body {
 
     .app-stock-product {
         grid-template-columns: 1fr;
+    }
+
+    .app-stock-product-list-summary {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 0.2rem;
     }
 }
 
