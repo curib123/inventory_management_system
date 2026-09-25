@@ -15,11 +15,24 @@ $this->load->view('components/page_header', array(
 $this->load->view('components/data_table', array(
     'source' => site_url('stock/adjustments/datatable'),
     'table_id' => 'stock-adjustments-table',
+    'search_placeholder' => 'Search product, reason, user, or date...',
+    'filters' => array(
+        array(
+            'name' => 'difference',
+            'label' => 'Adjustment',
+            'icon' => 'bi-sliders',
+            'options' => array(
+                '' => 'All adjustments',
+                'increase' => 'Stock increased',
+                'decrease' => 'Stock decreased'
+            )
+        )
+    ),
     'columns' => array(
         'Product',
         array('label' => 'System Stock', 'class' => 'text-end text-nowrap'),
         array('label' => 'Actual Stock', 'class' => 'text-end text-nowrap'),
-        array('label' => 'Difference', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Difference', 'class' => 'text-end text-nowrap', 'render' => 'difference'),
         'Reason',
         'Processed By',
         array('label' => 'Date', 'class' => 'text-nowrap')
