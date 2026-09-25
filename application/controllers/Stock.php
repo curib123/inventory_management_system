@@ -307,6 +307,7 @@ class Stock extends CI_Controller {
 
     private function render_adjustment_form($form_error = '') {
         $data['products'] = $this->Product_model->get_active();
+        $data['suppliers'] = $this->Supplier_model->get_active();
         $data['page_title'] = 'Stock Adjustment';
         $data['form_error'] = $form_error;
 
