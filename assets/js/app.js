@@ -1171,6 +1171,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            if (response.headers.get('X-Modal-Close') === '1') {
+                if (modalInstance) {
+                    modalInstance.hide();
+                }
+
+                if (response.headers.get('X-Page-Reload') === '1') {
+                    window.location.reload();
+                }
+
+                return;
+            }
+
             modalContent.innerHTML = html;
             enhanceFeedback(modalContent);
         } catch (error) {
@@ -1403,9 +1415,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         try {
+            var formData = new FormData(form);
+
+            if (submitButton && submitButton.name) {
+                formData.set(submitButton.name, submitButton.value || '');
+            }
+
             var response = await fetch(form.action, {
                 method: form.method || 'POST',
-                body: new FormData(form),
+                body: formData,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'
                 }
@@ -1675,6 +1693,30 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        var copyTemporaryPassword = event.target.closest('[data-copy-temporary-password]');
+
+        if (copyTemporaryPassword) {
+            event.preventDefault();
+
+            var passwordNode = document.querySelector('[data-temporary-password]');
+            var passwordText = passwordNode ? passwordNode.textContent.trim() : '';
+
+            if (passwordText !== '') {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(passwordText).then(function () {
+                        copyTemporaryPassword.innerHTML =
+                            '<i class="bi bi-check-lg me-1" aria-hidden="true"></i>Copied';
+                    }).catch(function () {
+                        window.prompt('Copy temporary password:', passwordText);
+                    });
+                } else {
+                    window.prompt('Copy temporary password:', passwordText);
+                }
+            }
+
+            return;
+        }
+
         var trigger = event.target.closest('[data-modal-url]');
 
         if (trigger) {
@@ -1704,7 +1746,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         event.preventDefault();
 
-        var submitButton = form.querySelector('button[type="submit"]');
+        var submitButton = event.submitter || form.querySelector('button[type="submit"]');
 
         if (form.getAttribute('data-confirm-required') === '1') {
             showFormConfirmation(form, submitButton);
@@ -1726,4 +1768,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     enhanceFeedback(document);
+
+    var passwordPrompt = document.querySelector('[data-password-change-prompt-url]');
+
+    if (passwordPrompt) {
+        window.requestAnimationFrame(function () {
+            loadModal(passwordPrompt.getAttribute('data-password-change-prompt-url'));
+        });
+    }
 });
