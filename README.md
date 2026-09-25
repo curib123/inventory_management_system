@@ -217,6 +217,22 @@ Current unit-test areas include authentication/session behavior, DataTables requ
 - [x] Stock In continues to follow Phase 3: supplier selection fetches only that supplier's active products, supports multiple products in one transaction, shows old/new stock, updates inventory atomically, creates a transaction number, and records movement history.
 - [x] Bootstrap/custom styling remains centralized through shared page, table, modal, form, stock, sidebar, and report components to reduce page-specific merge conflicts.
 
+### UI styling branches
+
+The following UI branches are prepared from the current `development` baseline:
+
+- `ui/shared` — shared components/CSS/JS only
+- `ui/dashboard`
+- `ui/products`
+- `ui/categories`
+- `ui/suppliers`
+- `ui/stock`
+- `ui/reports`
+- `ui/users`
+- `ui/roles`
+
+To reduce merge conflicts, page branches should modify only that page's view-specific files. Changes to shared components such as `components/data_table.php`, `app.css`, `table.css`, `modal.css`, or `app.js` should go through `ui/shared` first, then be merged into `development` before page branches are refreshed.
+
 ## QA note
 
 The current branch passed a JavaScript parse check and structural checks on the changed PHP files. A full local PHPUnit/browser/MySQL execution could not be run from the assistant environment because outbound GitHub DNS resolution is unavailable there. Run `composer test` plus the normal Stock In/Out and export smoke tests on the deployment machine before production release.
