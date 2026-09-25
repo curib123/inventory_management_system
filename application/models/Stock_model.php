@@ -442,6 +442,8 @@ class Stock_model extends CI_Model {
             $this->db->where('t.type', $type);
         }
 
+        $this->apply_period_filter('t.created_at', $filters);
+
         if ($search !== '') {
             $this->db->group_start();
             $this->db->like('t.transaction_no', $search);
@@ -466,6 +468,8 @@ class Stock_model extends CI_Model {
             $this->db->where('a.difference <', 0);
         }
 
+        $this->apply_period_filter('a.created_at', $filters);
+
         if ($search !== '') {
             $this->db->group_start();
             $this->db->like('p.product_code', $search);
@@ -474,6 +478,19 @@ class Stock_model extends CI_Model {
             $this->db->or_like('u.username', $search);
             $this->db->or_like('a.created_at', $search);
             $this->db->group_end();
+        }
+    }
+
+    private function apply_period_filter($column, $filters) {
+        $period = isset($filters['period']) ? strtolower((string) $filters['period']) : '';
+
+        if ($period === 'today') {
+            $this->db->where($column . ' >=', date('Y-m-d 00:00:00'));
+            $this->db->where($column . ' <=', date('Y-m-d 23:59:59'));
+        } elseif ($period === '7_days') {
+            $this->db->where($column . ' >=', date('Y-m-d 00:00:00', strtotime('-6 days')));
+        } elseif ($period === '30_days') {
+            $this->db->where($column . ' >=', date('Y-m-d 00:00:00', strtotime('-29 days')));
         }
     }
 
