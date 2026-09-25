@@ -99,6 +99,7 @@ $config['ui_page_styles'] = array(
     'roles/index' => TRUE,
     'stock/history' => TRUE,
     'stock/low_stock' => TRUE,
+    'stock/adjustments' => TRUE,
     'reports/index' => TRUE
 );
 
