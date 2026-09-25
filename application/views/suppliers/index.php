@@ -22,10 +22,10 @@ $this->load->view('components/data_table', array(
     'columns' => array(
         'Name',
         'Contact Person',
-        'Phone',
+        array('label' => 'Phone', 'class' => 'text-nowrap'),
         'Address',
-        'Status',
-        array('label' => 'Actions', 'orderable' => false)
+        array('label' => 'Status', 'class' => 'text-center text-nowrap'),
+        array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')
     )
 ));
 
