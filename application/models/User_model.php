@@ -176,15 +176,6 @@ class User_model extends CI_Model {
         return $this->permission_key_cache[$user_id];
     }
 
-    // Data helper ni para has permission; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
-    public function has_permission($user_id, $permission_key) {
-        return in_array(
-            (string) $permission_key,
-            $this->get_user_permission_keys($user_id),
-            TRUE
-        );
-    }
-
     // Query helper ni para password hash; application/libraries/User_service.php ang caller, while verification logic didto sa service.
     public function get_password_hash($user_id) {
         $row = $this->db
@@ -221,19 +212,6 @@ class User_model extends CI_Model {
             ->row();
 
         return $row && (int) $row->must_change_password === 1;
-    }
-
-    // Data helper ni para has any permission; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
-    public function has_any_permission($user_id, $permission_keys) {
-        $user_permissions = $this->get_user_permission_keys($user_id);
-
-        foreach ((array) $permission_keys as $permission_key) {
-            if (in_array((string) $permission_key, $user_permissions, TRUE)) {
-                return TRUE;
-            }
-        }
-
-        return FALSE;
     }
 
     // Data helper ni para count all; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
