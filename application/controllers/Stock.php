@@ -56,7 +56,12 @@ class Stock extends CI_Controller {
     }
 
     public function supplier_products($supplier_id) {
-        $this->require_permission('stock.stock_in');
+        $mode = strtolower(trim((string) $this->input->get('mode', TRUE)));
+        $mode = $mode === 'stock_out' ? 'stock_out' : 'stock_in';
+
+        $this->require_permission(
+            $mode === 'stock_out' ? 'stock.stock_out' : 'stock.stock_in'
+        );
 
         if ($this->input->method(TRUE) !== 'GET') {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
@@ -70,7 +75,8 @@ class Stock extends CI_Controller {
 
         $this->load->view('components/stock/product_quantity_list', array(
             'products' => $this->Product_model->get_active_by_supplier($supplier_id),
-            'quantities' => array()
+            'quantities' => array(),
+            'mode' => $mode
         ));
     }
 
@@ -240,9 +246,11 @@ class Stock extends CI_Controller {
     }
 
     private function transaction_form($type) {
-        if ($type === 'stock_in') {
-            $this->form_validation->set_rules('supplier_id', 'Supplier', 'required|integer|greater_than[0]');
-        }
+        $this->form_validation->set_rules(
+            'supplier_id',
+            'Supplier',
+            'required|integer|greater_than[0]'
+        );
 
         $this->form_validation->set_rules('remarks', 'Remarks', 'trim|max_length[255]');
 
@@ -262,7 +270,7 @@ class Stock extends CI_Controller {
 
         $result = $this->Stock_model->create_transaction(
             $type,
-            $type === 'stock_in' ? $this->input->post('supplier_id', TRUE) : NULL,
+            $this->input->post('supplier_id', TRUE),
             $this->input->post('remarks', TRUE),
             $this->session->userdata('user_id'),
             $items
@@ -278,30 +286,20 @@ class Stock extends CI_Controller {
     }
 
     private function render_transaction_form($type, $item_error = '') {
-        $data['products'] = $type === 'stock_out'
-            ? $this->Product_model->get_active()
-            : array();
-
         $data['suppliers'] = $this->Supplier_model->get_active();
         $data['transaction_type'] = $type;
         $data['page_title'] = $type === 'stock_in' ? 'Stock In' : 'Stock Out';
         $data['item_error'] = $item_error;
-        $data['stock_in_products'] = array();
-        $data['stock_in_quantities'] = array();
-        $data['stock_out_quantities'] = $type === 'stock_out'
-            ? $this->posted_quantity_map()
-            : array();
+        $data['supplier_products'] = array();
+        $data['transaction_quantities'] = $this->posted_quantity_map();
 
-        if ($type === 'stock_in') {
-            $supplier_id = (int) $this->input->post('supplier_id', TRUE);
+        $supplier_id = (int) $this->input->post('supplier_id', TRUE);
 
-            if ($supplier_id > 0) {
-                $supplier = $this->Supplier_model->get_by_id($supplier_id);
+        if ($supplier_id > 0) {
+            $supplier = $this->Supplier_model->get_by_id($supplier_id);
 
-                if ($supplier && (int) $supplier->status === 1) {
-                    $data['stock_in_products'] = $this->Product_model->get_active_by_supplier($supplier_id);
-                    $data['stock_in_quantities'] = $this->posted_quantity_map();
-                }
+            if ($supplier && (int) $supplier->status === 1) {
+                $data['supplier_products'] = $this->Product_model->get_active_by_supplier($supplier_id);
             }
         }
 
