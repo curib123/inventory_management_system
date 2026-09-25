@@ -191,16 +191,28 @@ class User_model extends CI_Model {
         return $row && password_verify((string) $password, $row->password);
     }
 
-    public function update_password($user_id, $password) {
+    public function update_password($user_id, $password, $require_change = FALSE) {
         unset($this->permission_key_cache[(int) $user_id]);
 
         return $this->db->update(
             'users',
             array(
-                'password' => password_hash((string) $password, PASSWORD_DEFAULT)
+                'password' => password_hash((string) $password, PASSWORD_DEFAULT),
+                'must_change_password' => $require_change ? 1 : 0
             ),
             array('id' => (int) $user_id)
         );
+    }
+
+    public function password_change_required($user_id) {
+        $row = $this->db
+            ->select('must_change_password')
+            ->where('id', (int) $user_id)
+            ->where('status', 1)
+            ->get('users')
+            ->row();
+
+        return $row && (int) $row->must_change_password === 1;
     }
 
     public function has_any_permission($user_id, $permission_keys) {
