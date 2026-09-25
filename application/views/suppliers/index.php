@@ -19,12 +19,25 @@ $this->load->view('components/page_header', array(
 $this->load->view('components/data_table', array(
     'source' => site_url('suppliers/datatable'),
     'table_id' => 'suppliers-table',
+    'search_placeholder' => 'Search supplier, contact person, phone, or address...',
+    'filters' => array(
+        array(
+            'name' => 'status',
+            'label' => 'Status',
+            'icon' => 'bi-toggle-on',
+            'options' => array(
+                '' => 'All statuses',
+                'active' => 'Active',
+                'inactive' => 'Inactive'
+            )
+        )
+    ),
     'columns' => array(
         'Name',
         'Contact Person',
         array('label' => 'Phone', 'class' => 'text-nowrap'),
         'Address',
-        array('label' => 'Status', 'class' => 'text-center text-nowrap'),
+        array('label' => 'Status', 'class' => 'text-center text-nowrap', 'render' => 'status'),
         array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')
     )
 ));
