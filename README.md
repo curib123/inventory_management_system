@@ -241,7 +241,9 @@ The current `development` branch has been rechecked from a fresh clone with:
 - PHPUnit TestDox regression testing on PHP 8.2.
 - Code-path review of Stock In, Stock Out, Stock Adjustment, DataTables, permissions, searchable relationship selectors, and report exports.
 
-A real browser + MySQL transaction smoke test is still recommended on the deployment machine before production release because it verifies environment-specific database configuration, sessions, generated files, and browser interactions.
+Fresh-install smoke testing also confirmed that the schema and seed SQL import successfully into MariaDB and that the real login page renders through PHP 8.2 with the configured database. The seed SQL is executable directly and the documented admin/staff development password hashes were corrected.
+
+A final browser transaction smoke test is still recommended on the deployment machine before production release because it verifies environment-specific sessions, Stock In/Out/Adjustment submissions, generated files, and browser interactions.
 
 
 
