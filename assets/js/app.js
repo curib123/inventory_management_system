@@ -341,8 +341,24 @@ document.addEventListener('DOMContentLoaded', function () {
         var remoteMode = select.getAttribute('data-search-mode') || '';
         var dependentSelector = select.getAttribute('data-search-dependent') || '';
         var dependentParam = select.getAttribute('data-search-dependent-param') || '';
+        var remoteMinLength = parseInt(select.getAttribute('data-search-min-length'), 10);
+        var staticOptions = Array.from(select.options)
+            .filter(function (option) {
+                return option.getAttribute('data-static-option') === '1';
+            })
+            .map(function (option) {
+                return {
+                    value: option.value,
+                    text: option.textContent,
+                    searchText: option.getAttribute('data-search-text') || option.textContent
+                };
+            });
         var searchTimer = null;
         var searchSequence = 0;
+
+        if (Number.isNaN(remoteMinLength)) {
+            remoteMinLength = 2;
+        }
 
         function selectedSnapshot() {
             if (!select.value || select.selectedIndex < 0) {
@@ -378,6 +394,21 @@ document.addEventListener('DOMContentLoaded', function () {
             select.appendChild(placeholder);
 
             var selectedIncluded = false;
+
+            staticOptions.forEach(function (item) {
+                var option = document.createElement('option');
+                option.value = String(item.value);
+                option.textContent = item.text;
+                option.setAttribute('data-search-text', item.searchText || item.text);
+                option.setAttribute('data-static-option', '1');
+
+                if (selected && String(selected.value) === option.value) {
+                    option.selected = true;
+                    selectedIncluded = true;
+                }
+
+                select.appendChild(option);
+            });
 
             (items || []).forEach(function (item) {
                 if (!item || !item.id) {
@@ -449,7 +480,15 @@ document.addEventListener('DOMContentLoaded', function () {
             var selected = selectedSnapshot();
             var sequence = ++searchSequence;
 
-            if (query.length < 2) {
+            var dependent = dependentSelector ? document.querySelector(dependentSelector) : null;
+            var dependentValue = dependent ? dependent.value : '';
+
+            if (dependentSelector && !dependentValue) {
+                rebuildRemoteOptions([], selected);
+                return;
+            }
+
+            if (query.length < remoteMinLength) {
                 rebuildRemoteOptions([], selected);
                 return;
             }
@@ -457,9 +496,6 @@ document.addEventListener('DOMContentLoaded', function () {
             search.setAttribute('aria-busy', 'true');
 
             try {
-                var dependent = dependentSelector ? document.querySelector(dependentSelector) : null;
-                var dependentValue = dependent ? dependent.value : '';
-
                 var url = remoteUrl +
                     (remoteUrl.indexOf('?') === -1 ? '?' : '&') +
                     'q=' + encodeURIComponent(query) +
@@ -498,6 +534,8 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
+        select._remoteSearch = searchRemoteOptions;
+
         search.addEventListener('input', function () {
             window.clearTimeout(searchTimer);
 
@@ -535,7 +573,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    function filterAdjustmentProducts(supplierSelect) {
+    function filterAdjustmentProducts(supplierSelect, preserveSelection) {
         if (!supplierSelect) {
             return;
         }
@@ -547,9 +585,23 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Remote product search is supplier-aware. Reset the product when
-        // the optional supplier filter changes so stale selections cannot survive.
+        var hasSupplierScope = supplierSelect.value !== '';
+
         if (productSelect.getAttribute('data-search-url')) {
+            productSelect.disabled = !hasSupplierScope;
+
+            if (productSelect._searchableInput) {
+                productSelect._searchableInput.disabled = !hasSupplierScope;
+                productSelect._searchableInput.placeholder = hasSupplierScope
+                    ? (productSelect.getAttribute('data-search-placeholder') || 'Search products...')
+                    : 'Select supplier first';
+            }
+
+            if (preserveSelection && productSelect.value) {
+                updateAdjustmentPreview(productSelect);
+                return;
+            }
+
             productSelect.value = '';
 
             if (productSelect._searchableInput) {
@@ -563,6 +615,14 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             updateAdjustmentPreview(productSelect);
+
+            if (
+                hasSupplierScope &&
+                typeof productSelect._remoteSearch === 'function'
+            ) {
+                productSelect._remoteSearch('');
+            }
+
             return;
         }
 
@@ -758,16 +818,7 @@ document.addEventListener('DOMContentLoaded', function () {
         initializeSearchableSelects(container);
 
         container.querySelectorAll('[data-adjustment-supplier]').forEach(function (supplierSelect) {
-            if (!supplierSelect.value) {
-                return;
-            }
-
-            var targetSelector = supplierSelect.getAttribute('data-product-target');
-            var productSelect = targetSelector ? container.querySelector(targetSelector) : null;
-
-            if (productSelect && productSelect.value) {
-                updateAdjustmentPreview(productSelect);
-            }
+            filterAdjustmentProducts(supplierSelect, true);
         });
 
         container.querySelectorAll('[data-adjustment-product]').forEach(function (productSelect) {
