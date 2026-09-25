@@ -10,7 +10,6 @@ class Setup extends CI_Controller {
 
         $this->load->library(array('session', 'form_validation', 'Setup_service'));
         $this->load->helper(array('url', 'form'));
-        $this->load->model(array('User_model', 'Role_model'));
     }
 
     // Mao ni ang index flow sa Setup; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
