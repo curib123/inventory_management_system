@@ -1179,7 +1179,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function loadSupplierProducts(select) {
-        var container = document.querySelector('[data-stock-in-products]');
+        var container = document.querySelector('[data-stock-products]');
 
         if (!container) {
             return;
