@@ -16,7 +16,6 @@ class Categories extends CI_Controller {
         }
 
         $this->load->model('Category_model');
-        $this->load->model('User_model');
     }
 
     // Mao ni ang index flow sa Categories; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
