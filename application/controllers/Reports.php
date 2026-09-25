@@ -91,7 +91,11 @@ class Reports extends CI_Controller {
         $definition = $this->get_definition($report);
 
         try {
-            $rows = $this->get_rows($definition);
+            $search = trim((string) $this->input->get('search', TRUE));
+            $filters = $this->input->get('table_filters', TRUE);
+            $filters = is_array($filters) ? $filters : array();
+
+            $rows = $this->Report_model->get_export_rows($report, $search, $filters);
             $columns = $this->get_report_columns($report);
             $meta = $this->build_report_meta($report, $definition['title'], $rows);
 
