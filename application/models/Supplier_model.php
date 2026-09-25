@@ -24,6 +24,28 @@ class Supplier_model extends CI_Model {
         return $this->db->get('suppliers')->result();
     }
 
+    public function search_active($query = '', $limit = 20) {
+        $query = trim((string) $query);
+        $limit = max(1, min(50, (int) $limit));
+
+        $this->db->select('id, supplier_name, contact_person, phone');
+        $this->db->from('suppliers');
+        $this->db->where('status', 1);
+
+        if ($query !== '') {
+            $this->db->group_start();
+            $this->db->like('supplier_name', $query);
+            $this->db->or_like('contact_person', $query);
+            $this->db->or_like('phone', $query);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by('supplier_name', 'ASC');
+        $this->db->limit($limit);
+
+        return $this->db->get()->result();
+    }
+
     public function save($data, $id = NULL) {
         if ($id !== NULL) {
             $this->db->where('id', (int) $id);
