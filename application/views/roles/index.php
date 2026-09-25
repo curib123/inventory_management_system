@@ -22,10 +22,10 @@ $this->load->view('components/data_table', array(
     'columns' => array(
         'Role',
         'Description',
-        'Status',
-        'Users',
-        'Permissions',
-        array('label' => 'Actions', 'orderable' => false)
+        array('label' => 'Status', 'class' => 'text-center text-nowrap'),
+        array('label' => 'Users', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Permissions', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')
     )
 ));
 
