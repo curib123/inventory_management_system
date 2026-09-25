@@ -238,7 +238,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     '</span>' +
                     '<div class="app-modal-heading-copy">' +
                         '<div class="app-modal-eyebrow">System message</div>' +
-                        '<h2 class="modal-title app-modal-title">' + escapeHtml(problem.title || 'Request failed') + '</h2>' +
+                        '<h2 class="modal-title app-modal-title" id="action-modal-title">' + escapeHtml(problem.title || 'Request failed') + '</h2>' +
                         '<p class="app-modal-subtitle">The system could not complete the requested operation.</p>' +
                     '</div>' +
                 '</div>' +
@@ -924,7 +924,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     '</span>' +
                     '<div class="app-modal-heading-copy">' +
                         '<div class="app-modal-eyebrow">Confirmation</div>' +
-                        '<h2 class="modal-title app-modal-title">' + escapeHtml(title) + '</h2>' +
+                        '<h2 class="modal-title app-modal-title" id="action-modal-title">' + escapeHtml(title) + '</h2>' +
                         '<p class="app-modal-subtitle">Review the impact before committing this change.</p>' +
                     '</div>' +
                 '</div>' +
