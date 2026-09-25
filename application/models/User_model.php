@@ -12,25 +12,16 @@ class User_model extends CI_Model {
         $this->load->database();
     }
 
-    // Data helper ni para login; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
-    public function login($username, $password) {
+    // Query helper ni para active login user; application/libraries/Auth_service.php ang caller, while password verification didto sa service.
+    public function find_active_by_username($username) {
         $this->db->select('u.*, r.role_name');
         $this->db->from('users u');
         $this->db->join('roles r', 'r.id = u.role_id', 'left');
-        $this->db->where('u.username', trim($username));
+        $this->db->where('u.username', trim((string) $username));
         $this->db->where('u.status', 1);
         $this->db->where('r.status', 1);
-        $query = $this->db->get();
 
-        if ($query->num_rows() === 1) {
-            $user = $query->row();
-
-            if (password_verify($password, $user->password)) {
-                return $user;
-            }
-        }
-
-        return FALSE;
+        return $this->db->get()->row();
     }
 
     // Data helper ni para get all; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
@@ -194,8 +185,8 @@ class User_model extends CI_Model {
         );
     }
 
-    // Data helper ni para verify password; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
-    public function verify_password($user_id, $password) {
+    // Query helper ni para password hash; application/libraries/User_service.php ang caller, while verification logic didto sa service.
+    public function get_password_hash($user_id) {
         $row = $this->db
             ->select('password')
             ->where('id', (int) $user_id)
@@ -203,17 +194,17 @@ class User_model extends CI_Model {
             ->get('users')
             ->row();
 
-        return $row && password_verify((string) $password, $row->password);
+        return $row ? (string) $row->password : NULL;
     }
 
-    // Data helper ni para update password; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
-    public function update_password($user_id, $password, $require_change = FALSE) {
+    // Persistence helper ni para update password hash; application/libraries/User_service.php ang caller, while hashing ug password rules didto sa service.
+    public function update_password_hash($user_id, $password_hash, $require_change = FALSE) {
         unset($this->permission_key_cache[(int) $user_id]);
 
         return $this->db->update(
             'users',
             array(
-                'password' => password_hash((string) $password, PASSWORD_DEFAULT),
+                'password' => (string) $password_hash,
                 'must_change_password' => $require_change ? 1 : 0
             ),
             array('id' => (int) $user_id)
