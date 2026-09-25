@@ -46,7 +46,8 @@ class Reports extends CI_Controller {
             $request['length'],
             $request['search'],
             $request['order_column'],
-            $request['order_dir']
+            $request['order_dir'],
+            $request['filters']
         );
 
         $fields = array_keys($this->get_report_columns($report));
@@ -65,7 +66,7 @@ class Reports extends CI_Controller {
         $payload = $this->datatable_service->payload(
             $request['draw'],
             $this->Report_model->count_datatable_total($report),
-            $this->Report_model->count_datatable_filtered($report, $request['search']),
+            $this->Report_model->count_datatable_filtered($report, $request['search'], $request['filters']),
             $data_rows
         );
 
