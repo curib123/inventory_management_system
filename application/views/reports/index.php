@@ -42,6 +42,7 @@ $this->load->view('components/page_header', array(
                         href="<?php echo site_url('reports/export/' . $report_key . '/pdf'); ?>"
                         target="_blank"
                         rel="noopener"
+                        data-report-print
                     >
                         <i class="bi bi-printer me-1"></i>Print PDF
                     </a>
@@ -52,7 +53,7 @@ $this->load->view('components/page_header', array(
         <?php if ($this->User_model->has_permission($this->session->userdata('user_id'), 'reports.export')): ?>
             <div class="app-report-export-note mt-3">
                 <i class="bi bi-printer me-1"></i>
-                CSV and Excel download as report files. Print PDF opens a print-ready A4 landscape report in a new tab.
+                CSV, Excel, and Print PDF use the current report search and filters. Print PDF opens a print-ready A4 landscape report in a new tab.
             </div>
         <?php endif; ?>
     </div>
