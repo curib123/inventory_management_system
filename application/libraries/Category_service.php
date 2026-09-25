@@ -36,7 +36,7 @@ class Category_service {
     }
 
     // Business flow ni para delete category; application/controllers/Categories.php ang caller, then dependency count gikan Category_model.
-    public function delete($id) {
+    public function delete($id, $execute = TRUE) {
         $id = (int) $id;
         $category = $this->CI->Category_model->get_by_id($id);
 
@@ -49,6 +49,10 @@ class Category_service {
                 'success' => FALSE,
                 'message' => 'This category is assigned to products. Reassign those products before deleting the category.'
             );
+        }
+
+        if (!$execute) {
+            return array('success' => TRUE, 'category' => $category);
         }
 
         if (!$this->CI->Category_model->delete($id)) {
