@@ -75,10 +75,10 @@ class Supplier_model extends CI_Model {
         return $this->db->count_all('suppliers');
     }
 
-    public function get_datatable($start, $length, $search, $order_column, $order_dir) {
+    public function get_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
         $this->db->select('s.id, s.supplier_name, s.contact_person, s.phone, s.address, s.status,s.created_at,s.updated_at');
         $this->db->from('suppliers s');
-        $this->apply_datatable_search($search);
+        $this->apply_datatable_search($search, $filters);
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
         }
@@ -86,13 +86,20 @@ class Supplier_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function count_datatable_filtered($search) {
+    public function count_datatable_filtered($search, $filters = array()) {
         $this->db->from('suppliers s');
-        $this->apply_datatable_search($search);
+        $this->apply_datatable_search($search, $filters);
         return $this->db->count_all_results();
     }
 
-    private function apply_datatable_search($search) {
+    private function apply_datatable_search($search, $filters = array()) {
+        $status = isset($filters['status']) ? strtolower((string) $filters['status']) : '';
+        if ($status === 'active') {
+            $this->db->where('s.status', 1);
+        } elseif ($status === 'inactive') {
+            $this->db->where('s.status', 0);
+        }
+
         if ($search === '') {
             return;
         }
