@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Products extends CI_Controller {
 
+    // Setup ni sa Products controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
@@ -21,6 +22,7 @@ class Products extends CI_Controller {
         $this->config->load('inventory');
     }
 
+    // Mao ni ang index flow sa Products; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() {
         $this->require_permission('products.view');
 
@@ -30,11 +32,13 @@ class Products extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
+    // Mao ni ang add flow sa Products; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function add() {
         $this->require_permission('products.create');
         $this->product_form();
     }
 
+    // Mao ni ang view flow sa Products; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function view($id) {
         $this->require_permission('products.view');
 
@@ -46,6 +50,7 @@ class Products extends CI_Controller {
         $this->load->view('modal/products/details', $data);
     }
 
+    // Mao ni ang edit flow sa Products; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function edit($id) {
         $this->require_permission('products.edit');
 
@@ -57,6 +62,7 @@ class Products extends CI_Controller {
         $this->product_form((int) $id, $product);
     }
 
+    // Mao ni ang delete flow sa Products; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function delete($id) {
         $this->require_permission('products.delete');
 
@@ -98,6 +104,7 @@ class Products extends CI_Controller {
         redirect('products');
     }
 
+    // Mao ni ang category search flow sa Products; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function category_search() {
         $this->require_product_form_permission();
 
@@ -121,6 +128,7 @@ class Products extends CI_Controller {
             ->set_output(json_encode(array('items' => $items)));
     }
 
+    // Mao ni ang supplier search flow sa Products; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function supplier_search() {
         $this->require_product_form_permission();
 
@@ -155,6 +163,7 @@ class Products extends CI_Controller {
             ->set_output(json_encode(array('items' => $items)));
     }
 
+    // Mao ni ang datatable flow sa Products; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function datatable() {
         $this->require_permission('products.view');
 
@@ -238,6 +247,7 @@ class Products extends CI_Controller {
         $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
+    // Internal helper ni para product form; tawagon ra sulod application/controllers/Products.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function product_form($id = NULL, $product = NULL) {
         $this->form_validation->set_rules('product_name', 'Product Name', 'trim|required|max_length[150]');
         $this->form_validation->set_rules('product_code', 'Product Code', 'trim|required|max_length[50]');
@@ -347,6 +357,7 @@ class Products extends CI_Controller {
         redirect('products');
     }
 
+    // Internal helper ni para render product form; tawagon ra sulod application/controllers/Products.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function render_product_form($id, $product, $form_error = '') {
         $data['product'] = $product;
         $data['suppliers'] = array();
@@ -394,6 +405,7 @@ class Products extends CI_Controller {
         $this->load->view('modal/products/form', $data);
     }
 
+    // Internal helper ni para require product form permission; tawagon ra sulod application/controllers/Products.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_product_form_permission() {
         $user_id = (int) $this->session->userdata('user_id');
 
@@ -408,6 +420,7 @@ class Products extends CI_Controller {
         }
     }
 
+    // Internal helper ni para require permission; tawagon ra sulod application/controllers/Products.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
         if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
