@@ -194,8 +194,8 @@ class User_model extends CI_Model {
         return $this->db->count_all('users');
     }
 
-    public function get_datatable($start, $length, $search, $order_column, $order_dir) {
-        $this->build_datatable_query($search);
+    public function get_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
+        $this->build_datatable_query($search, $filters);
         $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.status, u.created_at, u.updated_at, r.role_name');
 
         if ($order_column) {
@@ -207,14 +207,21 @@ class User_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function count_datatable_filtered($search) {
-        $this->build_datatable_query($search);
+    public function count_datatable_filtered($search, $filters = array()) {
+        $this->build_datatable_query($search, $filters);
         return $this->db->count_all_results();
     }
 
-    private function build_datatable_query($search) {
+    private function build_datatable_query($search, $filters = array()) {
         $this->db->from('users u');
         $this->db->join('roles r', 'r.id = u.role_id', 'left');
+
+        $status = isset($filters['status']) ? strtolower((string) $filters['status']) : '';
+        if ($status === 'active') {
+            $this->db->where('u.status', 1);
+        } elseif ($status === 'inactive') {
+            $this->db->where('u.status', 0);
+        }
 
         if ($search !== '') {
             $this->db->group_start();
