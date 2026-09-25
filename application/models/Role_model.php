@@ -115,131 +115,18 @@ class Role_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    // Data helper ni para sync permissions; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
-    public function sync_permissions($role_id, $permission_ids) {
+    // Persistence helper ni para replace permissions; application/libraries/Role_service.php ang caller, while validation/dependency rules didto tanan.
+    public function replace_permissions($role_id, $permission_ids) {
         $role_id = (int) $role_id;
-
-        if ($role_id <= 0 || !$this->get_by_id($role_id)) {
-            return FALSE;
-        }
-
-        $this->db->trans_begin();
-
-        if (!$this->replace_permissions($role_id, $permission_ids)) {
-            $this->db->trans_rollback();
-            return FALSE;
-        }
-
-        if ($this->db->trans_status() === FALSE) {
-            $this->db->trans_rollback();
-            return FALSE;
-        }
-
-        $this->db->trans_commit();
-        return TRUE;
-    }
-
-    // Data helper ni para save with permissions; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
-    public function save_with_permissions($data, $permission_ids, $id = NULL) {
-        $this->db->trans_begin();
-
-        $role_id = $this->save($data, $id);
-
-        if ($role_id === FALSE) {
-            $this->db->trans_rollback();
-            return FALSE;
-        }
-
-        if (!$this->replace_permissions($role_id, $permission_ids)) {
-            $this->db->trans_rollback();
-            return FALSE;
-        }
-
-        if ($this->db->trans_status() === FALSE) {
-            $this->db->trans_rollback();
-            return FALSE;
-        }
-
-        $this->db->trans_commit();
-        return (int) $role_id;
-    }
-
-    // Data helper ni para replace permissions; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
-    private function replace_permissions($role_id, $permission_ids) {
-        $role_id = (int) $role_id;
-        $normalized = array();
-
-        foreach ((array) $permission_ids as $permission_id) {
-            if (!is_scalar($permission_id)) {
-                return FALSE;
-            }
-
-            $permission_id = filter_var(
-                $permission_id,
-                FILTER_VALIDATE_INT,
-                array('options' => array('min_range' => 1))
-            );
-
-            if ($permission_id === FALSE) {
-                return FALSE;
-            }
-
-            $normalized[] = (int) $permission_id;
-        }
-
-        $normalized = array_values(array_unique($normalized));
-
-        $permission_rows = $this->get_permissions();
-        $valid_permissions = array();
-        $permission_id_by_key = array();
-        $permission_key_by_id = array();
-
-        foreach ($permission_rows as $permission) {
-            $permission_id = (int) $permission->id;
-            $permission_key = (string) $permission->permission_key;
-
-            $valid_permissions[] = $permission_id;
-            $permission_id_by_key[$permission_key] = $permission_id;
-            $permission_key_by_id[$permission_id] = $permission_key;
-        }
-
-        if (!empty(array_diff($normalized, $valid_permissions))) {
-            return FALSE;
-        }
-
-        $dependencies = (array) $this->config->item('permission_dependencies');
-        $selected_keys = array();
-
-        foreach ($normalized as $permission_id) {
-            if (isset($permission_key_by_id[$permission_id])) {
-                $selected_keys[] = $permission_key_by_id[$permission_id];
-            }
-        }
-
-        foreach ($selected_keys as $permission_key) {
-            if (empty($dependencies[$permission_key])) {
-                continue;
-            }
-
-            foreach ((array) $dependencies[$permission_key] as $required_key) {
-                if (!isset($permission_id_by_key[$required_key])) {
-                    return FALSE;
-                }
-
-                $normalized[] = $permission_id_by_key[$required_key];
-            }
-        }
-
-        $normalized = array_values(array_unique($normalized));
 
         if (!$this->db->delete('role_permissions', array('role_id' => $role_id))) {
             return FALSE;
         }
 
-        foreach ($normalized as $permission_id) {
+        foreach ((array) $permission_ids as $permission_id) {
             if (!$this->db->insert('role_permissions', array(
                 'role_id' => $role_id,
-                'permission_id' => $permission_id
+                'permission_id' => (int) $permission_id
             ))) {
                 return FALSE;
             }
