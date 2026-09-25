@@ -141,13 +141,13 @@ class Users extends CI_Controller {
                 array('label' => 'View', 'url' => site_url('users/view/' . $id), 'variant' => 'secondary', 'icon' => 'bi-eye')
             );
 
-            if ($this->User_model->has_permission($current_user_id, 'users.edit')) {
+            if ($this->authorization_service->has_permission($current_user_id, 'users.edit')) {
                 $action_items[] = array('label' => 'Edit', 'url' => site_url('users/edit/' . $id), 'variant' => 'primary', 'icon' => 'bi-pencil');
             }
 
             if (
                 $id !== $current_user_id &&
-                $this->User_model->has_permission($current_user_id, 'users.delete')
+                $this->authorization_service->has_permission($current_user_id, 'users.delete')
             ) {
                 $action_items[] = array('label' => 'Delete', 'url' => site_url('users/delete/' . $id), 'variant' => 'danger', 'icon' => 'bi-trash');
             }
@@ -272,7 +272,7 @@ class Users extends CI_Controller {
 
         if (
             $user_id <= 0 ||
-            !$this->User_model->has_any_permission(
+            !$this->authorization_service->has_any_permission(
                 $user_id,
                 array('users.create', 'users.edit')
             )
@@ -284,7 +284,7 @@ class Users extends CI_Controller {
     // Internal helper ni para require permission; tawagon ra sulod application/controllers/Users.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
-        if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
+        if (!$user_id || !$this->authorization_service->has_permission($user_id, $permission_key)) {
             show_error('You do not have permission to access this page.', 403, 'Access Denied');
         }
     }
