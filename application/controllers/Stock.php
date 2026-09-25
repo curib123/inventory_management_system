@@ -18,7 +18,6 @@ class Stock extends CI_Controller {
         $this->load->model('Stock_model');
         $this->load->model('Product_model');
         $this->load->model('Supplier_model');
-        $this->load->model('User_model');
     }
 
     // Mao ni ang index flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
