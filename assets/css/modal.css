@@ -573,3 +573,186 @@
         gap: 0.7rem;
     }
 }
+
+
+/* Detail-grid compatibility with Bootstrap col-* widths. */
+#action-modal .app-detail-list > dt,
+#action-modal .app-detail-list > dd {
+    width: auto !important;
+    max-width: none !important;
+}
+
+/* Role details: compact enterprise access summary. */
+#action-modal .app-role-summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: stretch;
+    margin-bottom: 1.25rem;
+    padding: 1rem;
+    border: 1px solid var(--app-modal-soft-border);
+    border-radius: 0.85rem;
+    background:
+        linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.045), transparent 55%),
+        var(--bs-body-bg);
+}
+
+#action-modal .app-role-summary-main {
+    min-width: 0;
+}
+
+#action-modal .app-role-summary-label,
+#action-modal .app-role-stat-label {
+    color: var(--bs-secondary-color);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.065em;
+    text-transform: uppercase;
+}
+
+#action-modal .app-role-summary-name {
+    margin-top: 0.18rem;
+    color: var(--bs-emphasis-color);
+    font-size: 1.1rem;
+    font-weight: 780;
+    letter-spacing: -0.018em;
+}
+
+#action-modal .app-role-summary-description {
+    max-width: 36rem;
+    margin-top: 0.35rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.82rem;
+    line-height: 1.5;
+}
+
+#action-modal .app-role-summary-meta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(7rem, auto));
+    gap: 0.65rem;
+}
+
+#action-modal .app-role-stat {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.28rem;
+    min-width: 7.5rem;
+    padding: 0.75rem 0.85rem;
+    border: 1px solid var(--app-modal-soft-border);
+    border-radius: 0.72rem;
+    background: var(--bs-tertiary-bg);
+}
+
+#action-modal .app-role-stat strong {
+    font-size: 1.02rem;
+}
+
+#action-modal .app-modal-section-header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0 0 0.8rem;
+}
+
+#action-modal .app-modal-section-header h3 {
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 750;
+}
+
+#action-modal .app-modal-section-header p {
+    margin: 0.18rem 0 0;
+    color: var(--bs-secondary-color);
+    font-size: 0.76rem;
+}
+
+#action-modal .app-role-permission-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+#action-modal .app-role-permission-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.48rem 0.62rem;
+    border: 1px solid rgba(var(--bs-primary-rgb), 0.14);
+    border-radius: 0.58rem;
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary-text-emphasis);
+    font-size: 0.76rem;
+    font-weight: 700;
+}
+
+#action-modal .app-modal-empty-state {
+    border: 1px dashed var(--app-modal-border);
+    border-radius: 0.82rem;
+    background: var(--bs-tertiary-bg);
+}
+
+#action-modal .app-modal-empty-state > .bi {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1.45rem;
+}
+
+/* Alert/message card semantic variants. */
+#action-modal .app-modal-message-card-info .app-modal-message-card-icon,
+#action-modal .app-modal-message-card-icon-info {
+    background: var(--bs-info-bg-subtle);
+    color: var(--bs-info-text-emphasis);
+}
+
+#action-modal .app-modal-message-card-warning .app-modal-message-card-icon,
+#action-modal .app-modal-message-card-icon-warning {
+    background: var(--bs-warning-bg-subtle);
+    color: var(--bs-warning-text-emphasis);
+}
+
+#action-modal .app-modal-message-card-danger .app-modal-message-card-icon,
+#action-modal .app-modal-message-card-icon-danger {
+    background: var(--bs-danger-bg-subtle);
+    color: var(--bs-danger);
+}
+
+#action-modal .app-modal-message-card-success .app-modal-message-card-icon,
+#action-modal .app-modal-message-card-icon-success {
+    background: var(--bs-success-bg-subtle);
+    color: var(--bs-success);
+}
+
+#action-modal .app-modal-message-card-warning {
+    border-color: rgba(var(--bs-warning-rgb), 0.2);
+}
+
+#action-modal .app-modal-message-card-danger {
+    border-color: rgba(var(--bs-danger-rgb), 0.2);
+}
+
+#action-modal .app-modal-message-card-success {
+    border-color: rgba(var(--bs-success-rgb), 0.2);
+}
+
+@media (max-width: 767.98px) {
+    #action-modal .app-role-summary {
+        grid-template-columns: 1fr;
+    }
+
+    #action-modal .app-role-summary-meta {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 479.98px) {
+    #action-modal .app-role-summary-meta {
+        grid-template-columns: 1fr;
+    }
+
+    #action-modal .app-modal-section-header {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+}
