@@ -23,6 +23,24 @@ class Category_model extends CI_Model {
         return $this->db->get('categories')->result();
     }
 
+    public function search_active($query = '', $limit = 20) {
+        $query = trim((string) $query);
+        $limit = max(1, min(50, (int) $limit));
+
+        $this->db->select('id, category_name');
+        $this->db->from('categories');
+        $this->db->where('status', 1);
+
+        if ($query !== '') {
+            $this->db->like('category_name', $query);
+        }
+
+        $this->db->order_by('category_name', 'ASC');
+        $this->db->limit($limit);
+
+        return $this->db->get()->result();
+    }
+
     public function count_all() {
         return $this->db->count_all('categories');
     }
