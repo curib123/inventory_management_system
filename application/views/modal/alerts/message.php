@@ -16,8 +16,8 @@ $this->load->view('components/modal/header', array(
 ?>
 
 <div class="modal-body">
-    <div class="app-modal-message-card">
-        <span class="app-modal-message-card-icon" aria-hidden="true">
+    <div class="app-modal-message-card app-modal-message-card-<?php echo html_escape($alert_variant); ?>">
+        <span class="app-modal-message-card-icon app-modal-message-card-icon-<?php echo html_escape($alert_variant); ?>" aria-hidden="true">
             <i class="bi <?php echo html_escape($alert_icon); ?>"></i>
         </span>
         <div class="min-w-0">
