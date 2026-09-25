@@ -34,7 +34,7 @@ class Supplier_service {
     }
 
     // Business flow ni para delete supplier; application/controllers/Suppliers.php ang caller, then dependency rules diri gi-check before delete.
-    public function delete($id) {
+    public function delete($id, $execute = TRUE) {
         $id = (int) $id;
         $supplier = $this->CI->Supplier_model->get_by_id($id);
 
@@ -47,6 +47,10 @@ class Supplier_service {
                 'success' => FALSE,
                 'message' => 'This supplier is used by products or stock transaction history. Set the supplier to inactive instead of deleting it.'
             );
+        }
+
+        if (!$execute) {
+            return array('success' => TRUE, 'supplier' => $supplier);
         }
 
         if (!$this->CI->Supplier_model->delete($id)) {
