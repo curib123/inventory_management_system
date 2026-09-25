@@ -115,7 +115,7 @@ $this->load->view('components/modal/header', array(
     </div>
 
 
-    <div data-stock-in-products>
+    <div data-stock-products>
 
         <?php if ($selected_supplier !== ''): ?>
 
