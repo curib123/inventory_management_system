@@ -84,7 +84,7 @@ $is_stock_out = $mode === 'stock_out';
                         inputmode="numeric"
                         placeholder="0"
                         value="<?php echo $quantity === '' ? '' : (int) $quantity; ?>"
-                        <?php echo ($is_stock_out && $current_stock <= 0) ? 'disabled' : ''; ?>
+                        <?php echo ($is_stock_out && $current_stock <= 0) ? 'readonly' : ''; ?>
                     >
                 </div>
             </div>
