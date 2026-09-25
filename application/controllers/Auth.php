@@ -70,6 +70,96 @@ class Auth extends CI_Controller {
         $this->load->view('auth/login');
     }
 
+    public function change_password() {
+        if (!$this->session->userdata('logged_in')) {
+            show_error('Your session is no longer active.', 401, 'Session Expired');
+        }
+
+        $user_id = (int) $this->session->userdata('user_id');
+
+        if ($this->input->method(TRUE) === 'GET') {
+            $this->load->view('modal/auth/change_password', array(
+                'password_change_required' => (bool) $this->session->userdata('must_change_password')
+            ));
+            return;
+        }
+
+        if ($this->input->method(TRUE) !== 'POST') {
+            show_error('Invalid request method.', 405, 'Method Not Allowed');
+        }
+
+        $action = trim((string) $this->input->post('password_action', TRUE));
+
+        if ($action === 'later') {
+            $this->session->set_userdata('password_change_deferred', TRUE);
+            $this->output
+                ->set_header('X-Modal-Close: 1')
+                ->set_output('');
+            return;
+        }
+
+        $this->form_validation->set_rules(
+            'current_password',
+            'Current Password',
+            'required|min_length[8]|max_length[255]'
+        );
+        $this->form_validation->set_rules(
+            'new_password',
+            'New Password',
+            'required|min_length[8]|max_length[255]'
+        );
+        $this->form_validation->set_rules(
+            'confirm_password',
+            'Confirm Password',
+            'required|matches[new_password]'
+        );
+
+        if ($this->form_validation->run() === FALSE) {
+            $this->load->view('modal/auth/change_password', array(
+                'password_change_required' => (bool) $this->session->userdata('must_change_password')
+            ));
+            return;
+        }
+
+        $current_password = (string) $this->input->post('current_password', FALSE);
+        $new_password = (string) $this->input->post('new_password', FALSE);
+
+        if (!$this->User_model->verify_password($user_id, $current_password)) {
+            $this->load->view('modal/auth/change_password', array(
+                'password_change_required' => (bool) $this->session->userdata('must_change_password'),
+                'password_error' => 'The current password is incorrect.'
+            ));
+            return;
+        }
+
+        if (hash_equals($current_password, $new_password)) {
+            $this->load->view('modal/auth/change_password', array(
+                'password_change_required' => (bool) $this->session->userdata('must_change_password'),
+                'password_error' => 'Choose a new password that is different from the current password.'
+            ));
+            return;
+        }
+
+        if (!$this->User_model->update_password($user_id, $new_password, FALSE)) {
+            $this->load->view('modal/auth/change_password', array(
+                'password_change_required' => (bool) $this->session->userdata('must_change_password'),
+                'password_error' => 'The password could not be updated. Please try again.'
+            ));
+            return;
+        }
+
+        $this->session->set_userdata(array(
+            'must_change_password' => FALSE,
+            'password_change_deferred' => FALSE
+        ));
+        $this->session->set_flashdata('success', 'Password changed successfully.');
+
+        $this->output
+            ->set_header('X-Modal-Close: 1')
+            ->set_header('X-Page-Reload: 1')
+            ->set_output('');
+    }
+
     public function logout_confirm() {
         if (!$this->session->userdata('logged_in')) {
             show_error('Your session is no longer active.', 401, 'Session Expired');
