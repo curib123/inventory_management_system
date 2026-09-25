@@ -296,6 +296,7 @@ class Reports extends CI_Controller {
     private function export_csv($title, $columns, $rows, $meta) {
         $filename = $this->report_filename($title, 'csv');
 
+        $this->prepare_download_output();
         header('Content-Type: text/csv; charset=UTF-8');
         header('Content-Disposition: attachment; filename="' . $filename . '"');
         header('Cache-Control: no-store, no-cache, must-revalidate');
@@ -368,6 +369,10 @@ class Reports extends CI_Controller {
 
     private function export_xlsx($title, $columns, $rows, $meta) {
         $this->load_composer();
+
+        if (!class_exists('\\PhpOffice\\PhpSpreadsheet\\Spreadsheet')) {
+            throw new RuntimeException('PhpSpreadsheet is unavailable. Run composer install in the project root.');
+        }
 
         $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
         $spreadsheet->getProperties()
@@ -475,6 +480,16 @@ class Reports extends CI_Controller {
         ));
 
         $sheet->getRowDimension($header_row)->setRowHeight(24);
+        $sheet->getStyle('A' . $header_row . ':' . $last_column . $header_row)
+            ->getAlignment()
+            ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+
+        $sheet->getStyle('A' . $header_row . ':' . $last_column . $last_data_row)
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN)
+            ->getColor()
+            ->setARGB('CBD5E1');
 
         if (!empty($rows)) {
             $data_range = 'A' . $data_start_row . ':' . $last_column . $last_data_row;
@@ -482,8 +497,8 @@ class Reports extends CI_Controller {
             $sheet->getStyle($data_range)->applyFromArray(array(
                 'borders' => array(
                     'allBorders' => array(
-                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_HAIR,
-                        'color' => array('argb' => 'E2E8F0')
+                        'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
+                        'color' => array('argb' => 'CBD5E1')
                     )
                 ),
                 'alignment' => array(
@@ -511,6 +526,13 @@ class Reports extends CI_Controller {
         foreach ($columns as $field => $label) {
             $column_letter = \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex($column_index);
             $sheet->getColumnDimension($column_letter)->setWidth($this->excel_column_width($field));
+
+            if (in_array($field, array('stock', 'quantity', 'reorder_level', 'shortage', 'cost_price', 'inventory_value'), TRUE)) {
+                $sheet->getStyle($column_letter . $data_start_row . ':' . $column_letter . $last_data_row)
+                    ->getAlignment()
+                    ->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_RIGHT);
+            }
+
             $column_index++;
         }
 
@@ -544,11 +566,20 @@ class Reports extends CI_Controller {
 
         try {
             $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
+            $writer->setPreCalculateFormulas(FALSE);
             $writer->save($temp_file);
 
+            clearstatcache(TRUE, $temp_file);
+            $file_size = filesize($temp_file);
+
+            if ($file_size === FALSE || $file_size <= 0) {
+                throw new RuntimeException('The Excel report file could not be written correctly.');
+            }
+
+            $this->prepare_download_output();
             header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
             header('Content-Disposition: attachment; filename="' . $filename . '"');
-            header('Content-Length: ' . filesize($temp_file));
+            header('Content-Length: ' . $file_size);
             header('Cache-Control: no-store, no-cache, must-revalidate');
             header('X-Content-Type-Options: nosniff');
 
@@ -652,6 +683,10 @@ class Reports extends CI_Controller {
             'report_meta' => $meta
         ), TRUE);
 
+        if (!class_exists('\\Dompdf\\Dompdf')) {
+            throw new RuntimeException('Dompdf is unavailable. Run composer install in the project root.');
+        }
+
         $options = new \Dompdf\Options();
         $options->set('defaultFont', 'Helvetica');
         $options->set('isRemoteEnabled', FALSE);
@@ -672,9 +707,10 @@ class Reports extends CI_Controller {
             array(0.39, 0.45, 0.55)
         );
 
+        $this->prepare_download_output();
         $dompdf->stream(
             $this->report_filename($title, 'pdf'),
-            array('Attachment' => TRUE)
+            array('Attachment' => FALSE)
         );
 
         exit;
@@ -733,6 +769,16 @@ class Reports extends CI_Controller {
         }
 
         return $base . '-' . date('Y-m-d-His') . '.' . $extension;
+    }
+
+    private function prepare_download_output() {
+        if (function_exists('ini_set')) {
+            @ini_set('zlib.output_compression', 'Off');
+        }
+
+        while (ob_get_level() > 0) {
+            @ob_end_clean();
+        }
     }
 
     private function load_composer() {
