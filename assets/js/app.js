@@ -804,6 +804,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var supplierId = select.value;
         var baseUrl = select.getAttribute('data-products-url');
+        var mode = select.getAttribute('data-stock-mode') === 'stock_out'
+            ? 'stock_out'
+            : 'stock_in';
 
         if (!supplierId) {
             container.innerHTML =
@@ -824,7 +827,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         try {
             var response = await fetch(
-                baseUrl.replace(/\/$/, '') + '/' + encodeURIComponent(supplierId),
+                baseUrl.replace(/\/$/, '') + '/' + encodeURIComponent(supplierId) +
+                    '?mode=' + encodeURIComponent(mode),
                 {
                     method: 'GET',
                     headers: {
@@ -1178,7 +1182,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     document.addEventListener('change', function (event) {
-        var supplierSelect = event.target.closest('[data-stock-in-supplier]');
+        var supplierSelect = event.target.closest('[data-stock-supplier]');
 
         if (supplierSelect) {
             loadSupplierProducts(supplierSelect);
