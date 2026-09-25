@@ -134,7 +134,8 @@ class Stock extends CI_Controller {
             $request['length'],
             $request['search'],
             $request['order_column'],
-            $request['order_dir']
+            $request['order_dir'],
+            $request['filters']
         );
 
         $rows = array();
@@ -159,7 +160,7 @@ class Stock extends CI_Controller {
         $payload = $this->datatable_service->payload(
             $request['draw'],
             $this->Stock_model->count_transactions(),
-            $this->Stock_model->count_transactions_filtered($request['search']),
+            $this->Stock_model->count_transactions_filtered($request['search'], $request['filters']),
             $rows
         );
 
@@ -176,7 +177,8 @@ class Stock extends CI_Controller {
             $request['length'],
             $request['search'],
             $request['order_column'],
-            $request['order_dir']
+            $request['order_dir'],
+            $request['filters']
         );
 
         $rows = array();
@@ -195,7 +197,7 @@ class Stock extends CI_Controller {
         $payload = $this->datatable_service->payload(
             $request['draw'],
             $this->Stock_model->count_adjustments(),
-            $this->Stock_model->count_adjustments_filtered($request['search']),
+            $this->Stock_model->count_adjustments_filtered($request['search'], $request['filters']),
             $rows
         );
 
@@ -212,7 +214,8 @@ class Stock extends CI_Controller {
             $request['length'],
             $request['search'],
             $request['order_column'],
-            $request['order_dir']
+            $request['order_dir'],
+            $request['filters']
         );
 
         $rows = array();
@@ -229,7 +232,7 @@ class Stock extends CI_Controller {
         $payload = $this->datatable_service->payload(
             $request['draw'],
             $this->Stock_model->count_low_stock_products(),
-            $this->Stock_model->count_low_stock_filtered($request['search']),
+            $this->Stock_model->count_low_stock_filtered($request['search'], $request['filters']),
             $rows
         );
 
