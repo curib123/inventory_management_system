@@ -9,7 +9,7 @@ class Users extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
-        $this->load->library('Datatable_service');
+        $this->load->library(array('Datatable_service', 'User_service'));
 
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -68,33 +68,17 @@ class Users extends CI_Controller {
             show_404();
         }
 
-        $delete_error = '';
-        if ($id === (int) $this->session->userdata('user_id')) {
-            $delete_error = 'You cannot delete your own signed-in account.';
-        } elseif ($this->User_model->has_history($id)) {
-            $delete_error = 'This user has transaction or activity history. Set the account to inactive instead of deleting it.';
-        }
+        $execute = $this->input->method(TRUE) === 'POST';
+        $result = $this->user_service->delete(
+            $id,
+            (int) $this->session->userdata('user_id'),
+            $execute
+        );
 
-        if ($this->input->method(TRUE) !== 'POST') {
+        if (!$execute || !$result['success']) {
             $this->load->view('modal/users/delete', array(
                 'user' => $user,
-                'delete_error' => $delete_error
-            ));
-            return;
-        }
-
-        if ($delete_error !== '') {
-            $this->load->view('modal/users/delete', array(
-                'user' => $user,
-                'delete_error' => $delete_error
-            ));
-            return;
-        }
-
-        if (!$this->User_model->delete($id)) {
-            $this->load->view('modal/users/delete', array(
-                'user' => $user,
-                'delete_error' => 'The user could not be deleted.'
+                'delete_error' => $result['success'] ? '' : $result['message']
             ));
             return;
         }
@@ -111,17 +95,10 @@ class Users extends CI_Controller {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
         }
 
-        $query = trim((string) $this->input->get('q', TRUE));
-        $roles = $this->User_model->search_active_roles($query, 20);
-        $items = array();
-
-        foreach ($roles as $role) {
-            $items[] = array(
-                'id' => (int) $role->id,
-                'text' => (string) $role->role_name,
-                'secondary' => (string) ($role->description ?: '')
-            );
-        }
+        $items = $this->user_service->role_options(
+            trim((string) $this->input->get('q', TRUE)),
+            20
+        );
 
         $this->output
             ->set_content_type('application/json')
@@ -217,80 +194,42 @@ class Users extends CI_Controller {
             return;
         }
 
-        $username = trim($this->input->post('username', TRUE));
-        $role_id = (int) $this->input->post('role_id', TRUE);
-        $requested_status = $this->input->post('status', TRUE) === '0' ? 0 : 1;
-        $role = $this->User_model->get_role_by_id($role_id);
-        $preserves_existing_role =
-            $id !== NULL &&
-            $user &&
-            (int) $user->role_id === $role_id;
-
-        if (
-            !$role ||
-            (!(int) $role->status && (!$preserves_existing_role || $requested_status === 1))
-        ) {
-            $this->render_user_form(
-                $id,
-                $user,
-                'The selected role is invalid or inactive. Active user accounts require an active role.'
-            );
-            return;
-        }
-
-        if ($this->User_model->username_exists($username, $id)) {
-            $this->render_user_form($id, $user, 'That username is already in use.');
-            return;
-        }
-
-        $middle_name = trim((string) $this->input->post('middle_name', TRUE));
-
-        $data = array(
-            'first_name' => trim((string) $this->input->post('first_name', TRUE)),
-            'middle_name' => $middle_name === '' ? NULL : $middle_name,
-            'last_name' => trim((string) $this->input->post('last_name', TRUE)),
-            'username' => $username,
-            'role_id' => $role_id,
-            'status' => $requested_status
+        $result = $this->user_service->save(
+            $id,
+            array(
+                'first_name' => $this->input->post('first_name', TRUE),
+                'middle_name' => $this->input->post('middle_name', TRUE),
+                'last_name' => $this->input->post('last_name', TRUE),
+                'username' => $this->input->post('username', TRUE),
+                'role_id' => $this->input->post('role_id', TRUE),
+                'status' => $this->input->post('status', TRUE),
+                'password' => $id !== NULL ? $this->input->post('password', FALSE) : ''
+            ),
+            $user,
+            (int) $this->session->userdata('user_id')
         );
 
-        $temporary_password = NULL;
-
-        if ($id === NULL) {
-            $temporary_password = $this->generate_temporary_password();
-            $data['password'] = password_hash($temporary_password, PASSWORD_DEFAULT);
-            $data['must_change_password'] = 1;
-        } else {
-            $password = (string) $this->input->post('password', FALSE);
-
-            if ($password !== '') {
-                $data['password'] = password_hash($password, PASSWORD_DEFAULT);
-                $data['must_change_password'] = 1;
-            }
-        }
-
-        if (!$this->User_model->save($data, $id)) {
-            $this->render_user_form($id, $user, 'The user could not be saved.');
+        if (!$result['success']) {
+            $this->render_user_form($id, $user, $result['message']);
             return;
         }
 
-        if ($id !== NULL &&
-            (int) $id === (int) $this->session->userdata('user_id') &&
-            $data['status'] === 0) {
+        if (!empty($result['self_deactivated'])) {
             $this->session->sess_destroy();
             redirect('login');
+            return;
         }
 
-        if ($temporary_password !== NULL) {
+        if ($result['temporary_password'] !== NULL) {
             if ($this->input->is_ajax_request()) {
                 $this->load->view('modal/users/created', array(
-                    'username' => $username,
-                    'temporary_password' => $temporary_password
+                    'username' => $result['username'],
+                    'temporary_password' => $result['temporary_password']
                 ));
                 return;
             }
 
-            $this->session->set_flashdata('temporary_password', $temporary_password);
+            $this->session->set_flashdata('temporary_password', $result['temporary_password']);
             $this->session->set_flashdata(
                 'success',
                 'User account created successfully. Copy the temporary password below and share it securely with the user.'
@@ -301,37 +240,6 @@ class Users extends CI_Controller {
 
         $this->session->set_flashdata('success', 'User changes saved successfully.');
         redirect('users');
-    }
-
-    // Internal helper ni para generate temporary password; tawagon ra sulod application/controllers/Users.php, so ari ra pud pangitaa ang caller if mag-trace ka.
-    private function generate_temporary_password($length = 14) {
-        $length = max(12, min(32, (int) $length));
-
-        $groups = array(
-            'ABCDEFGHJKLMNPQRSTUVWXYZ',
-            'abcdefghijkmnopqrstuvwxyz',
-            '23456789',
-            '!@#$%*-_'
-        );
-        $all = implode('', $groups);
-        $characters = array();
-
-        foreach ($groups as $group) {
-            $characters[] = $group[random_int(0, strlen($group) - 1)];
-        }
-
-        while (count($characters) < $length) {
-            $characters[] = $all[random_int(0, strlen($all) - 1)];
-        }
-
-        for ($i = count($characters) - 1; $i > 0; $i--) {
-            $j = random_int(0, $i);
-            $temp = $characters[$i];
-            $characters[$i] = $characters[$j];
-            $characters[$j] = $temp;
-        }
-
-        return implode('', $characters);
     }
 
     // Internal helper ni para render user form; tawagon ra sulod application/controllers/Users.php, so ari ra pud pangitaa ang caller if mag-trace ka.
