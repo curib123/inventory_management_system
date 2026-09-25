@@ -25,10 +25,10 @@ $this->load->view('components/data_table', array(
         'Last Name',
         'Username',
         'Role',
-        'Status',
-        'Created',
-        'Updated',
-        array('label' => 'Actions', 'orderable' => false)
+        array('label' => 'Status', 'class' => 'text-center text-nowrap'),
+        array('label' => 'Created', 'class' => 'text-nowrap'),
+        array('label' => 'Updated', 'class' => 'text-nowrap'),
+        array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')
     )
 ));
 
