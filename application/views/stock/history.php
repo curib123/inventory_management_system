@@ -2,7 +2,7 @@
 $current_user_id = (int) $this->session->userdata('user_id');
 $page_actions = array();
 
-if ($this->User_model->has_permission($current_user_id, 'stock.stock_in')) {
+if ($this->authorization_service->has_permission($current_user_id, 'stock.stock_in')) {
     $page_actions[] = array(
         'label' => 'Stock In',
         'icon' => 'bi-box-arrow-in-down',
@@ -11,7 +11,7 @@ if ($this->User_model->has_permission($current_user_id, 'stock.stock_in')) {
     );
 }
 
-if ($this->User_model->has_permission($current_user_id, 'stock.stock_out')) {
+if ($this->authorization_service->has_permission($current_user_id, 'stock.stock_out')) {
     $page_actions[] = array(
         'label' => 'Stock Out',
         'icon' => 'bi-box-arrow-up',
@@ -20,7 +20,7 @@ if ($this->User_model->has_permission($current_user_id, 'stock.stock_out')) {
     );
 }
 
-if ($this->User_model->has_permission($current_user_id, 'stock.adjust')) {
+if ($this->authorization_service->has_permission($current_user_id, 'stock.adjust')) {
     $page_actions[] = array(
         'label' => 'Adjustment',
         'icon' => 'bi-sliders',
