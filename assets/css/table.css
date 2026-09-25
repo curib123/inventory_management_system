@@ -10,29 +10,76 @@
     letter-spacing: 0.02em;
     white-space: nowrap;
     border-bottom-width: 1px;
+    vertical-align: middle;
 }
 
 .app-data-table tbody td {
     vertical-align: middle;
+    line-height: 1.35;
+}
+
+.app-data-table .text-end {
+    text-align: right !important;
+}
+
+.app-data-table .text-center {
+    text-align: center !important;
+}
+
+.app-data-table .text-nowrap {
+    white-space: nowrap !important;
+}
+
+.app-table-card .table-responsive {
+    min-height: 8rem;
 }
 
 .app-table-card .dt-container .dt-layout-row {
-    margin: 0 0 0.9rem;
+    display: flex;
     align-items: center;
     gap: 0.75rem;
+    margin: 0 0 0.9rem;
 }
 
 .app-table-card .dt-container .dt-layout-row:last-child {
     margin: 0.9rem 0 0;
 }
 
+.app-table-card .dt-container .dt-layout-start {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.app-table-card .dt-container .dt-layout-end {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
 .app-table-card .dt-search {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    width: 100%;
+    gap: 0;
 }
 
-.app-table-card .dt-search label,
+.app-table-card .dt-search label {
+    display: none;
+}
+
+.app-table-card .dt-search input {
+    width: 100%;
+    max-width: none;
+    min-width: 12rem;
+    margin: 0 !important;
+}
+
+.app-table-card .dt-length {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    white-space: nowrap;
+}
+
 .app-table-card .dt-length label,
 .app-table-card .dt-info {
     color: var(--bs-secondary-color);
@@ -44,6 +91,10 @@
     border-radius: var(--app-radius-sm);
 }
 
+.app-table-card .dt-length select {
+    min-width: 5rem;
+}
+
 .app-table-card .pagination {
     margin-bottom: 0;
 }
@@ -53,14 +104,34 @@
     margin-inline: 0.12rem;
 }
 
+.app-table-actions {
+    justify-content: flex-end;
+}
+
 @media (max-width: 767.98px) {
     .app-table-card .dt-container .dt-layout-row {
         flex-direction: column;
         align-items: stretch;
     }
 
+    .app-table-card .dt-container .dt-layout-start,
+    .app-table-card .dt-container .dt-layout-end {
+        width: 100%;
+        margin-left: 0;
+    }
+
     .app-table-card .dt-search,
     .app-table-card .dt-search input {
         width: 100%;
+        min-width: 0;
+    }
+
+    .app-table-card .dt-length {
+        justify-content: flex-start;
+    }
+
+    .app-table-card .dt-paging {
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
     }
 }
