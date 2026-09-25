@@ -51,7 +51,7 @@ $this->load->view('components/modal/header', array(
         <div class="col-12 col-md-6">
             <label for="category_id" class="form-label">Category</label>
             <?php $selected_category = set_value('category_id', $product_is_edit ? $product->category_id : ''); ?>
-            <select id="category_id" name="category_id" class="form-select" required>
+            <select id="category_id" name="category_id" class="form-select" required data-searchable-select data-search-placeholder="Search categories...">
                 <option value="">Select Category</option>
                 <?php foreach ($categories as $category): ?>
                     <option value="<?php echo (int) $category->id; ?>" <?php echo ((string) $selected_category === (string) $category->id) ? 'selected' : ''; ?> autocomplete="off">
@@ -64,7 +64,7 @@ $this->load->view('components/modal/header', array(
         <div class="col-12 col-md-6">
             <label for="supplier_id" class="form-label">Supplier</label>
             <?php $selected_supplier = set_value('supplier_id', $product_is_edit ? $product->supplier_id : ''); ?>
-            <select id="supplier_id" name="supplier_id" class="form-select">
+            <select id="supplier_id" name="supplier_id" class="form-select" data-searchable-select data-search-placeholder="Search suppliers...">
                 <option value="">No Supplier</option>
                 <?php foreach ($suppliers as $supplier): ?>
                     <option value="<?php echo (int) $supplier->id; ?>" <?php echo ((string) $selected_supplier === (string) $supplier->id) ? 'selected' : ''; ?> autocomplete="off">
