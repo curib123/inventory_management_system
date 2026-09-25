@@ -17,6 +17,8 @@ $route['dashboard'] = 'dashboard';
 //product route
 $route['products'] = 'products';
 $route['products/datatable'] = 'products/datatable';
+$route['products/categories/search'] = 'products/category_search';
+$route['products/suppliers/search'] = 'products/supplier_search';
 $route['products/add'] = 'products/add';
 $route['products/view/(:num)'] = 'products/view/$1';
 $route['products/edit/(:num)'] = 'products/edit/$1';
