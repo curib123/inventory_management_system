@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class MY_Exceptions extends CI_Exceptions {
 
+    // Central error helper ni para error id; CodeIgniter core mo-call ani, then shared output makita sa application/views/errors/html/_app_error.php.
     private function error_id() {
         try {
             return 'ERR-' . strtoupper(bin2hex(random_bytes(5)));
@@ -12,6 +13,7 @@ class MY_Exceptions extends CI_Exceptions {
         }
     }
 
+    // Central error helper ni para log reference; CodeIgniter core mo-call ani, then shared output makita sa application/views/errors/html/_app_error.php.
     private function log_reference() {
         $extension = config_item('log_file_extension');
         $extension = is_string($extension) && trim($extension) !== ''
@@ -21,6 +23,7 @@ class MY_Exceptions extends CI_Exceptions {
         return 'application/logs/log-' . date('Y-m-d') . '.' . $extension;
     }
 
+    // Central error helper ni para render app error; CodeIgniter core mo-call ani, then shared output makita sa application/views/errors/html/_app_error.php.
     private function render_app_error(
         $heading,
         $message,
@@ -74,6 +77,7 @@ class MY_Exceptions extends CI_Exceptions {
         include $templates_path . 'html' . DIRECTORY_SEPARATOR . '_app_error.php';
     }
 
+    // Central error helper ni para show 404; CodeIgniter core mo-call ani, then shared output makita sa application/views/errors/html/_app_error.php.
     public function show_404($page = '', $log_error = TRUE) {
         $error_id = $this->error_id();
         $message = 'The page, route, or record you requested could not be found.';
@@ -97,6 +101,7 @@ class MY_Exceptions extends CI_Exceptions {
         exit(4);
     }
 
+    // Central error helper ni para show error; CodeIgniter core mo-call ani, then shared output makita sa application/views/errors/html/_app_error.php.
     public function show_error(
         $heading,
         $message,
@@ -153,6 +158,7 @@ class MY_Exceptions extends CI_Exceptions {
         return $buffer;
     }
 
+    // Central error helper ni para show exception; CodeIgniter core mo-call ani, then shared output makita sa application/views/errors/html/_app_error.php.
     public function show_exception($exception) {
         $error_id = $this->error_id();
         $message = $exception->getMessage();
@@ -201,6 +207,7 @@ class MY_Exceptions extends CI_Exceptions {
         );
     }
 
+    // Central error helper ni para show php error; CodeIgniter core mo-call ani, then shared output makita sa application/views/errors/html/_app_error.php.
     public function show_php_error($severity, $message, $filepath, $line) {
         $error_id = $this->error_id();
         $severity_name = isset($this->levels[$severity])
