@@ -506,11 +506,34 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        var nonOrderable = [];
+        var columnDefinitions = [];
 
         table.querySelectorAll('thead th').forEach(function (th, index) {
+            var definition = {
+                targets: index
+            };
+            var configured = false;
+
             if (th.getAttribute('data-orderable') === 'false') {
-                nonOrderable.push(index);
+                definition.orderable = false;
+                configured = true;
+            }
+
+            if (th.getAttribute('data-visible') === 'false') {
+                definition.visible = false;
+                definition.searchable = false;
+                configured = true;
+            }
+
+            var columnClass = th.getAttribute('data-column-class');
+
+            if (columnClass) {
+                definition.className = columnClass;
+                configured = true;
+            }
+
+            if (configured) {
+                columnDefinitions.push(definition);
             }
         });
 
@@ -540,15 +563,22 @@ document.addEventListener('DOMContentLoaded', function () {
             pageLength: 10,
             lengthMenu: [10, 25, 50, 100],
             searchDelay: 300,
-            order: []
+            order: [],
+            layout: {
+                topStart: 'search',
+                topEnd: 'pageLength',
+                bottomStart: 'info',
+                bottomEnd: 'paging'
+            },
+            language: {
+                search: '',
+                searchPlaceholder: 'Search records...',
+                lengthMenu: '_MENU_ per page'
+            }
         };
 
-        if (nonOrderable.length > 0) {
-            options.columnDefs = [{
-                targets: nonOrderable,
-                orderable: false,
-                searchable: false
-            }];
+        if (columnDefinitions.length > 0) {
+            options.columnDefs = columnDefinitions;
         }
 
         table._dataTable = new DataTable(table, options);
