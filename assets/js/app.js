@@ -674,6 +674,9 @@ document.addEventListener('DOMContentLoaded', function () {
         var actualRaw = actualInput.value.trim();
         var actualStock = /^\d+$/.test(actualRaw) ? parseInt(actualRaw, 10) : NaN;
 
+        var form = actualInput.closest('form[data-modal-form]');
+        var submitButton = form ? form.querySelector('button[type="submit"]') : null;
+
         if (!varianceNode || !varianceLabel || Number.isNaN(currentStock) || Number.isNaN(actualStock)) {
             if (varianceNode) {
                 varianceNode.textContent = '—';
@@ -686,10 +689,18 @@ document.addEventListener('DOMContentLoaded', function () {
                     : 'Select a product';
             }
 
+            if (submitButton) {
+                submitButton.disabled = true;
+            }
+
             return;
         }
 
         var variance = actualStock - currentStock;
+
+        if (submitButton) {
+            submitButton.disabled = variance === 0;
+        }
         varianceNode.textContent = variance > 0 ? '+' + variance : String(variance);
         varianceNode.classList.remove('text-success', 'text-danger', 'text-body-secondary');
 
