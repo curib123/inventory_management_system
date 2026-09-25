@@ -53,6 +53,8 @@ $this->load->view('components/modal/header', array(
                 class="form-select"
                 required
                 data-stock-in-supplier
+                data-searchable-select
+                data-search-placeholder="Search suppliers..."
                 data-products-url="<?php echo site_url('stock/supplier-products'); ?>"
             >
                 <option value="">Select Supplier</option>
@@ -84,7 +86,8 @@ $this->load->view('components/modal/header', array(
                 <?php
                 $this->load->view('components/stock/product_quantity_list', array(
                     'products' => $stock_in_products,
-                    'quantities' => $stock_in_quantities
+                    'quantities' => $stock_in_quantities,
+                    'mode' => 'stock_in'
                 ));
                 ?>
             <?php else: ?>
@@ -95,42 +98,34 @@ $this->load->view('components/modal/header', array(
             <?php endif; ?>
         </div>
     <?php else: ?>
-        <h3 class="h6 mb-3">Items</h3>
+        <div class="d-flex flex-wrap align-items-end justify-content-between gap-3 mb-3">
+            <div>
+                <h3 class="h6 mb-1">Products to release</h3>
+                <p class="small text-body-secondary mb-0">
+                    Enter quantities only for products leaving inventory. The new stock preview decreases immediately.
+                </p>
+            </div>
 
-        <div class="vstack gap-3">
-            <?php for ($row = 0; $row < 5; $row++): ?>
-                <div class="border rounded-3 p-3">
-                    <div class="fw-semibold mb-2">Item <?php echo $row + 1; ?></div>
-                    <div class="row g-2">
-                        <div class="col-12 col-md-8">
-                            <label for="product_id_<?php echo $row; ?>" class="form-label">Product</label>
-                            <select id="product_id_<?php echo $row; ?>" name="product_id[]" class="form-select">
-                                <option value="">Select Product</option>
-                                <?php foreach ($products as $product): ?>
-                                    <option value="<?php echo (int) $product->id; ?>">
-                                        <?php echo html_escape($product->product_code . ' - ' . $product->product_name); ?>
-                                        - Stock: <?php echo (int) $product->stock; ?>
-                                        <?php echo html_escape($product->unit ?: ''); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="col-12 col-md-4">
-                            <label for="quantity_<?php echo $row; ?>" class="form-label">Quantity</label>
-                            <input
-                                type="number"
-                                id="quantity_<?php echo $row; ?>"
-                                name="quantity[]"
-                                class="form-control"
-                                min="1"
-                                step="1"
-                            >
-                        </div>
-                    </div>
-                </div>
-            <?php endfor; ?>
+            <div class="app-stock-filter">
+                <label for="stock_out_product_filter" class="form-label small mb-1">Find Product</label>
+                <input
+                    type="search"
+                    id="stock_out_product_filter"
+                    class="form-control form-control-sm"
+                    placeholder="Search code, name, or unit..."
+                    autocomplete="off"
+                    data-stock-product-filter
+                >
+            </div>
         </div>
+
+        <?php
+        $this->load->view('components/stock/product_quantity_list', array(
+            'products' => $products,
+            'quantities' => $stock_out_quantities,
+            'mode' => 'stock_out'
+        ));
+        ?>
     <?php endif; ?>
 
     <div class="mt-3">
