@@ -21,6 +21,7 @@ class Auth_service {
             'role_id' => $user->role_id,
             'role_name' => $user->role_name,
             'must_change_password' => !empty($user->must_change_password),
+            'password_change_deferred' => FALSE,
             'logged_in' => TRUE
         );
     }
