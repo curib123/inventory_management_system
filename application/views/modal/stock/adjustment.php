@@ -27,7 +27,7 @@ $variance = ($system_stock !== NULL && $actual_value !== '' && is_numeric($actua
 <?php
 $this->load->view('components/modal/header', array(
     'modal_title' => $page_title,
-    'modal_subtitle' => 'Find the counted product, compare system stock with the physical count, then record the reason for the difference.',
+    'modal_subtitle' => 'Select the supplier first, choose one of that supplier\'s products, compare system stock with the physical count, then document the variance.',
     'modal_icon' => 'bi-sliders',
     'modal_variant' => 'warning',
     'modal_eyebrow' => 'Inventory reconciliation'
@@ -49,14 +49,14 @@ $this->load->view('components/modal/header', array(
                 <span class="app-adjustment-step">1</span>
                 <div>
                     <h3>Find the product</h3>
-                    <p>Supplier is optional and only narrows the product search. It is not saved as the source of the adjustment.</p>
+                    <p>Select the supplier first. Product search will then be limited to that supplier's active products.</p>
                 </div>
             </div>
 
             <div class="row g-3">
                 <div class="col-12 col-md-5">
                     <label for="adjustment_supplier_filter" class="form-label">
-                        Supplier <span class="text-body-secondary">(Optional)</span>
+                        Supplier
                     </label>
                     <select
                         id="adjustment_supplier_filter"
@@ -68,8 +68,14 @@ $this->load->view('components/modal/header', array(
                         data-search-url="<?php echo site_url('stock/suppliers/search'); ?>"
                         data-search-mode="adjustment"
                         data-product-target="#adjustment_product_id"
+                        required
                     >
-                        <option value="">All suppliers</option>
+                        <option value="">Search then select a supplier</option>
+                        <option
+                            value="unassigned"
+                            data-static-option="1"
+                            <?php echo $selected_supplier === 'unassigned' ? 'selected' : ''; ?>
+                        >Unassigned Products</option>
                         <?php foreach ($suppliers as $supplier): ?>
                             <option
                                 value="<?php echo (int) $supplier->id; ?>"
@@ -79,7 +85,7 @@ $this->load->view('components/modal/header', array(
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <div class="form-text">Use this only when you know which supplier owns the product.</div>
+                    <div class="form-text">Choose the supplier that owns the product. Use Unassigned Products only for products without a supplier.</div>
                 </div>
 
                 <div class="col-12 col-md-7">
@@ -95,6 +101,8 @@ $this->load->view('components/modal/header', array(
                         data-search-url="<?php echo site_url('stock/adjustment/products/search'); ?>"
                         data-search-dependent="#adjustment_supplier_filter"
                         data-search-dependent-param="supplier_id"
+                        data-search-min-length="0"
+                        <?php echo $selected_supplier === '' ? 'disabled' : ''; ?>
                     >
                         <option value="">Search then select a product</option>
                         <?php foreach ($products as $product): ?>
@@ -117,7 +125,7 @@ $this->load->view('components/modal/header', array(
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <div class="form-text">Searches active products on the server, so the selector stays fast even with a large catalog.</div>
+                    <div class="form-text">After selecting a supplier, only that supplier's active products are available. Search runs on the server for large catalogs.</div>
                 </div>
             </div>
         </section>
