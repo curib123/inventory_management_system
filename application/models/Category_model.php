@@ -57,11 +57,11 @@ class Category_model extends CI_Model {
         return $this->db->count_all_results('products');
     }
 
-    public function get_datatable($start, $length, $search, $order_column, $order_dir) {
+    public function get_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
         $this->db->select('c.id, c.category_name, c.status, COUNT(p.id) AS product_count');
         $this->db->from('categories c');
         $this->db->join('products p', 'p.category_id = c.id', 'left');
-        $this->apply_datatable_search($search, 'c');
+        $this->apply_datatable_search($search, 'c', $filters);
         $this->db->group_by(array('c.id', 'c.category_name', 'c.status'));
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
@@ -70,13 +70,20 @@ class Category_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function count_datatable_filtered($search) {
+    public function count_datatable_filtered($search, $filters = array()) {
         $this->db->from('categories c');
-        $this->apply_datatable_search($search, 'c');
+        $this->apply_datatable_search($search, 'c', $filters);
         return $this->db->count_all_results();
     }
 
-    private function apply_datatable_search($search, $alias) {
+    private function apply_datatable_search($search, $alias, $filters = array()) {
+        $status = isset($filters['status']) ? strtolower((string) $filters['status']) : '';
+        if ($status === 'active') {
+            $this->db->where($alias . '.status', 1);
+        } elseif ($status === 'inactive') {
+            $this->db->where($alias . '.status', 0);
+        }
+
         if ($search === '') {
             return;
         }
