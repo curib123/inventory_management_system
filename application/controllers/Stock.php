@@ -57,11 +57,18 @@ class Stock extends CI_Controller {
 
     public function supplier_search() {
         $mode = strtolower(trim((string) $this->input->get('mode', TRUE)));
-        $mode = $mode === 'stock_out' ? 'stock_out' : 'stock_in';
 
-        $this->require_permission(
-            $mode === 'stock_out' ? 'stock.stock_out' : 'stock.stock_in'
-        );
+        if (!in_array($mode, array('stock_in', 'stock_out', 'adjustment'), TRUE)) {
+            $mode = 'stock_in';
+        }
+
+        if ($mode === 'stock_out') {
+            $this->require_permission('stock.stock_out');
+        } elseif ($mode === 'adjustment') {
+            $this->require_permission('stock.adjust');
+        } else {
+            $this->require_permission('stock.stock_in');
+        }
 
         if ($this->input->method(TRUE) !== 'GET') {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
@@ -86,6 +93,47 @@ class Stock extends CI_Controller {
                 'id' => (int) $supplier->id,
                 'text' => (string) $supplier->supplier_name,
                 'secondary' => implode(' • ', $secondary)
+            );
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array('items' => $items)));
+    }
+
+    public function adjustment_products_search() {
+        $this->require_permission('stock.adjust');
+
+        if ($this->input->method(TRUE) !== 'GET') {
+            show_error('Invalid request method.', 405, 'Method Not Allowed');
+        }
+
+        $query = trim((string) $this->input->get('q', TRUE));
+        $supplier_id = (int) $this->input->get('supplier_id', TRUE);
+        $products = $this->Product_model->search_active(
+            $query,
+            $supplier_id > 0 ? $supplier_id : NULL,
+            20
+        );
+        $items = array();
+
+        foreach ($products as $product) {
+            $secondary = array();
+
+            if (!empty($product->supplier_name)) {
+                $secondary[] = $product->supplier_name;
+            }
+
+            $secondary[] = 'System stock: ' . (int) $product->stock . ' ' . ($product->unit ?: 'unit');
+
+            $items[] = array(
+                'id' => (int) $product->id,
+                'text' => (string) ($product->product_code . ' - ' . $product->product_name),
+                'secondary' => implode(' • ', $secondary),
+                'current_stock' => (int) $product->stock,
+                'unit' => (string) ($product->unit ?: 'unit'),
+                'supplier_id' => $product->supplier_id !== NULL ? (int) $product->supplier_id : 0,
+                'supplier_name' => (string) ($product->supplier_name ?: 'No supplier')
             );
         }
 
@@ -347,10 +395,29 @@ class Stock extends CI_Controller {
     }
 
     private function render_adjustment_form($form_error = '') {
-        $data['products'] = $this->Product_model->get_active();
-        $data['suppliers'] = $this->Supplier_model->get_active();
+        $data['products'] = array();
+        $data['suppliers'] = array();
         $data['page_title'] = 'Stock Adjustment';
         $data['form_error'] = $form_error;
+
+        $supplier_id = (int) $this->input->post('supplier_filter', TRUE);
+        $product_id = (int) $this->input->post('product_id', TRUE);
+
+        if ($supplier_id > 0) {
+            $supplier = $this->Supplier_model->get_by_id($supplier_id);
+
+            if ($supplier && (int) $supplier->status === 1) {
+                $data['suppliers'] = array($supplier);
+            }
+        }
+
+        if ($product_id > 0) {
+            $product = $this->Product_model->get_by_id($product_id);
+
+            if ($product && (int) $product->status === 1) {
+                $data['products'] = array($product);
+            }
+        }
 
         $this->load->view('modal/stock/adjustment', $data);
     }
