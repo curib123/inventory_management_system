@@ -478,7 +478,7 @@ class Stock extends CI_Controller {
     // Internal helper ni para require permission; tawagon ra sulod application/controllers/Stock.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
-        if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
+        if (!$user_id || !$this->authorization_service->has_permission($user_id, $permission_key)) {
             show_error('You do not have permission to access this page.', 403, 'Access Denied');
         }
     }
