@@ -59,11 +59,13 @@ $this->load->view('components/modal/header', array(
             required
             data-stock-supplier
             data-searchable-select
-            data-search-placeholder="Search supplier by name..."
+            data-search-placeholder="Search supplier name, contact, or phone..."
+            data-search-url="<?php echo site_url('stock/suppliers/search'); ?>"
+            data-search-mode="<?php echo html_escape($transaction_type); ?>"
             data-stock-mode="<?php echo html_escape($transaction_type); ?>"
             data-products-url="<?php echo site_url('stock/supplier-products'); ?>"
         >
-            <option value="">Select Supplier</option>
+            <option value="">Search then select a supplier</option>
 
             <?php foreach ($suppliers as $supplier): ?>
                 <?php if ((int) $supplier->status === 1): ?>
