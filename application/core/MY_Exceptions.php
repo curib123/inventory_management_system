@@ -13,7 +13,12 @@ class MY_Exceptions extends CI_Exceptions {
     }
 
     private function log_reference() {
-        return 'application/logs/log-' . date('Y-m-d') . '.php';
+        $extension = config_item('log_file_extension');
+        $extension = is_string($extension) && trim($extension) !== ''
+            ? ltrim(trim($extension), '.')
+            : 'php';
+
+        return 'application/logs/log-' . date('Y-m-d') . '.' . $extension;
     }
 
     private function render_app_error(
