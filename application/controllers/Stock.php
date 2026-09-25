@@ -55,6 +55,45 @@ class Stock extends CI_Controller {
         $this->transaction_form('stock_out');
     }
 
+    public function supplier_search() {
+        $mode = strtolower(trim((string) $this->input->get('mode', TRUE)));
+        $mode = $mode === 'stock_out' ? 'stock_out' : 'stock_in';
+
+        $this->require_permission(
+            $mode === 'stock_out' ? 'stock.stock_out' : 'stock.stock_in'
+        );
+
+        if ($this->input->method(TRUE) !== 'GET') {
+            show_error('Invalid request method.', 405, 'Method Not Allowed');
+        }
+
+        $query = trim((string) $this->input->get('q', TRUE));
+        $suppliers = $this->Supplier_model->search_active($query, 20);
+        $items = array();
+
+        foreach ($suppliers as $supplier) {
+            $secondary = array();
+
+            if (!empty($supplier->contact_person)) {
+                $secondary[] = $supplier->contact_person;
+            }
+
+            if (!empty($supplier->phone)) {
+                $secondary[] = $supplier->phone;
+            }
+
+            $items[] = array(
+                'id' => (int) $supplier->id,
+                'text' => (string) $supplier->supplier_name,
+                'secondary' => implode(' • ', $secondary)
+            );
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array('items' => $items)));
+    }
+
     public function supplier_products($supplier_id) {
         $mode = strtolower(trim((string) $this->input->get('mode', TRUE)));
         $mode = $mode === 'stock_out' ? 'stock_out' : 'stock_in';
@@ -286,7 +325,7 @@ class Stock extends CI_Controller {
     }
 
     private function render_transaction_form($type, $item_error = '') {
-        $data['suppliers'] = $this->Supplier_model->get_active();
+        $data['suppliers'] = array();
         $data['transaction_type'] = $type;
         $data['page_title'] = $type === 'stock_in' ? 'Stock In' : 'Stock Out';
         $data['item_error'] = $item_error;
@@ -299,6 +338,7 @@ class Stock extends CI_Controller {
             $supplier = $this->Supplier_model->get_by_id($supplier_id);
 
             if ($supplier && (int) $supplier->status === 1) {
+                $data['suppliers'] = array($supplier);
                 $data['supplier_products'] = $this->Product_model->get_active_by_supplier($supplier_id);
             }
         }
