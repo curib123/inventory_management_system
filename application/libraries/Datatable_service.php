@@ -5,25 +5,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Datatable_service
 {
-    /**
-     * Allowed DataTable page lengths.
-     */
     private $allowed_lengths = array(10, 25, 50, 100);
 
-    /**
-     * Maximum search string length.
-     */
     private $max_search_length = 100;
 
-    /**
-     * Parse and sanitize DataTable request.
-     *
-     * @param CI_Input $input
-     * @param array    $columns
-     * @param string|null $default_order_column
-     * @param string $default_order_dir
-     * @return array
-     */
+    // Shared service ni para request; main caller/integration pangitaa sa application/controllers/ nga nag-render sa server-side tables, so didto tan-awa if mangita ka asa ni gigamit.
     public function request(
         $input,
         $columns,
@@ -37,21 +23,11 @@ class Datatable_service
         }
 
 
-        /*
-         * ---------------------------------------------------------
-         * Draw
-         * ---------------------------------------------------------
-         */
         $draw = isset($request['draw'])
             ? max(0, (int) $request['draw'])
             : 0;
 
 
-        /*
-         * ---------------------------------------------------------
-         * Pagination
-         * ---------------------------------------------------------
-         */
         $start = isset($request['start'])
             ? max(0, (int) $request['start'])
             : 0;
@@ -60,19 +36,11 @@ class Datatable_service
             ? (int) $request['length']
             : 10;
 
-        /*
-         * Only allow predefined page sizes.
-         */
         if (!in_array($length, $this->allowed_lengths, TRUE)) {
             $length = 10;
         }
 
 
-        /*
-         * ---------------------------------------------------------
-         * Search
-         * ---------------------------------------------------------
-         */
         $search = '';
 
         if (
@@ -83,19 +51,11 @@ class Datatable_service
             $search = trim((string) $request['search']['value']);
         }
 
-        /*
-         * Prevent excessively long search requests.
-         */
         if (strlen($search) > $this->max_search_length) {
             $search = substr($search, 0, $this->max_search_length);
         }
 
 
-        /*
-         * ---------------------------------------------------------
-         * Table filters
-         * ---------------------------------------------------------
-         */
         $filters = array();
 
         if (isset($request['table_filters']) && is_array($request['table_filters'])) {
@@ -118,11 +78,6 @@ class Datatable_service
             }
         }
 
-        /*
-         * ---------------------------------------------------------
-         * Ordering
-         * ---------------------------------------------------------
-         */
         $order_column = $default_order_column;
 
         $order_dir = strtolower((string) $default_order_dir) === 'desc'
@@ -130,17 +85,6 @@ class Datatable_service
             : 'asc';
 
 
-        /*
-         * DataTables sends:
-         *
-         * order[0][column]
-         * order[0][dir]
-         *
-         * We NEVER trust the column name from the browser.
-         *
-         * The column index is mapped against the whitelist
-         * supplied by the controller.
-         */
         if (
             isset($request['order'][0]) &&
             is_array($request['order'][0])
@@ -154,9 +98,6 @@ class Datatable_service
                 : $order_dir;
 
 
-            /*
-             * Validate column index.
-             */
             if (
                 $order_index >= 0 &&
                 isset($columns[$order_index]) &&
@@ -164,9 +105,6 @@ class Datatable_service
             ) {
                 $order_column = $columns[$order_index];
 
-                /*
-                 * Only ASC/DESC are allowed.
-                 */
                 $order_dir = ($requested_dir === 'desc')
                     ? 'desc'
                     : 'asc';
@@ -174,11 +112,6 @@ class Datatable_service
         }
 
 
-        /*
-         * ---------------------------------------------------------
-         * Response
-         * ---------------------------------------------------------
-         */
         return array(
             'draw'         => $draw,
             'start'        => $start,
@@ -191,24 +124,12 @@ class Datatable_service
     }
 
 
-    /**
-     * Create DataTable response payload.
-     *
-     * @param int   $draw
-     * @param int   $total
-     * @param int   $filtered
-     * @param array $rows
-     * @return array
-     */
+    // Shared service ni para payload; main caller/integration pangitaa sa application/controllers/ nga nag-render sa server-side tables, so didto tan-awa if mangita ka asa ni gigamit.
     public function payload($draw, $total, $filtered, $rows)
     {
         $total = max(0, (int) $total);
         $filtered = max(0, (int) $filtered);
 
-        /*
-         * Filtered records can never logically exceed
-         * the total number of records.
-         */
         $filtered = min($filtered, $total);
 
         return array(
