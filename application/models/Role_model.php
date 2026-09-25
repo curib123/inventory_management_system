@@ -4,12 +4,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Role_model extends CI_Model {
 
+    // Setup ni sa Role_model; CodeIgniter mo-run ani when gi-load ang model, with main integration sa application/controllers/Roles.php ug application/controllers/Users.php.
     public function __construct() {
         parent::__construct();
         $this->load->database();
         $this->config->load('permissions');
     }
 
+    // Data helper ni para get all; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_all() {
         $this->db->select(
             'r.*, COUNT(DISTINCT u.id) AS user_count, ' .
@@ -23,10 +25,12 @@ class Role_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para get by id; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_by_id($id) {
         return $this->db->get_where('roles', array('id' => (int) $id))->row();
     }
 
+    // Data helper ni para get by name; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_by_name($name) {
         return $this->db->get_where(
             'roles',
@@ -34,6 +38,7 @@ class Role_model extends CI_Model {
         )->row();
     }
 
+    // Data helper ni para name exists; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function name_exists($name, $exclude_id = NULL) {
         $this->db->where('role_name', trim($name));
 
@@ -44,6 +49,7 @@ class Role_model extends CI_Model {
         return $this->db->count_all_results('roles') > 0;
     }
 
+    // Data helper ni para save; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function save($data, $id = NULL) {
         if ($id !== NULL) {
             $saved = $this->db->update('roles', $data, array('id' => (int) $id));
@@ -57,11 +63,12 @@ class Role_model extends CI_Model {
         return (int) $this->db->insert_id();
     }
 
+    // Data helper ni para delete; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function delete($id) {
         return $this->db->delete('roles', array('id' => (int) $id));
     }
 
-    // Permissions now belong to modules. Always read module data through the modules table.
+    // Data helper ni para get permissions; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_permissions() {
         $this->db->select(
             'p.id, p.module_id, p.permission_name, p.permission_key, p.action, ' .
@@ -78,6 +85,7 @@ class Role_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para get role permissions; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_role_permissions($role_id) {
         $this->db->select('permission_id');
         $this->db->where('role_id', (int) $role_id);
@@ -88,6 +96,7 @@ class Role_model extends CI_Model {
         }, $rows);
     }
 
+    // Data helper ni para get role permission details; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_role_permission_details($role_id) {
         $this->db->select(
             'p.id, p.permission_name, p.permission_key, p.action, p.description, ' .
@@ -106,6 +115,7 @@ class Role_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para sync permissions; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function sync_permissions($role_id, $permission_ids) {
         $role_id = (int) $role_id;
 
@@ -129,6 +139,7 @@ class Role_model extends CI_Model {
         return TRUE;
     }
 
+    // Data helper ni para save with permissions; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function save_with_permissions($data, $permission_ids, $id = NULL) {
         $this->db->trans_begin();
 
@@ -153,6 +164,7 @@ class Role_model extends CI_Model {
         return (int) $role_id;
     }
 
+    // Data helper ni para replace permissions; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     private function replace_permissions($role_id, $permission_ids) {
         $role_id = (int) $role_id;
         $normalized = array();
@@ -236,20 +248,24 @@ class Role_model extends CI_Model {
         return TRUE;
     }
 
+    // Data helper ni para has users; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function has_users($role_id) {
         return $this->count_users($role_id) > 0;
     }
 
+    // Data helper ni para count users; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function count_users($role_id) {
         return $this->db
             ->where('role_id', (int) $role_id)
             ->count_all_results('users');
     }
 
+    // Data helper ni para count all; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function count_all() {
         return $this->db->count_all('roles');
     }
 
+    // Data helper ni para get datatable; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
         $this->db->select(
             'r.id, r.role_name, r.description, r.status, ' .
@@ -270,12 +286,14 @@ class Role_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para count datatable filtered; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function count_datatable_filtered($search, $filters = array()) {
         $this->db->from('roles r');
         $this->apply_datatable_search($search, $filters);
         return $this->db->count_all_results();
     }
 
+    // Data helper ni para apply datatable search; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     private function apply_datatable_search($search, $filters = array()) {
         $status = isset($filters['status']) ? strtolower((string) $filters['status']) : '';
         if ($status === 'active') {
