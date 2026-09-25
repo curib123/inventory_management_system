@@ -64,7 +64,13 @@ $this->load->view('components/modal/header', array(
         <div class="col-12 col-md-6">
             <label for="supplier_id" class="form-label">Supplier</label>
             <?php $selected_supplier = set_value('supplier_id', $product_is_edit ? $product->supplier_id : ''); ?>
-            <select id="supplier_id" name="supplier_id" class="form-select" >
+            <select
+                id="supplier_id"
+                name="supplier_id"
+                class="form-select"
+                data-searchable-select
+                data-search-placeholder="Search supplier by name..."
+            >
                 <option value="">No Supplier</option>
                 <?php foreach ($suppliers as $supplier): ?>
                     <option value="<?php echo (int) $supplier->id; ?>" <?php echo ((string) $selected_supplier === (string) $supplier->id) ? 'selected' : ''; ?> autocomplete="off">
@@ -72,7 +78,7 @@ $this->load->view('components/modal/header', array(
                     </option>
                 <?php endforeach; ?>
             </select>
-            <div class="form-text">Stock In uses this supplier relationship to show the correct supplier products.</div>
+            <div class="form-text">Stock In and Stock Out use this relationship to show the correct supplier products.</div>
         </div>
 
         <div class="col-12 col-md-4">
