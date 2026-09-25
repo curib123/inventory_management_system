@@ -98,6 +98,63 @@ class Products extends CI_Controller {
         redirect('products');
     }
 
+    public function category_search() {
+        $this->require_product_form_permission();
+
+        if ($this->input->method(TRUE) !== 'GET') {
+            show_error('Invalid request method.', 405, 'Method Not Allowed');
+        }
+
+        $query = trim((string) $this->input->get('q', TRUE));
+        $categories = $this->Category_model->search_active($query, 20);
+        $items = array();
+
+        foreach ($categories as $category) {
+            $items[] = array(
+                'id' => (int) $category->id,
+                'text' => (string) $category->category_name
+            );
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array('items' => $items)));
+    }
+
+    public function supplier_search() {
+        $this->require_product_form_permission();
+
+        if ($this->input->method(TRUE) !== 'GET') {
+            show_error('Invalid request method.', 405, 'Method Not Allowed');
+        }
+
+        $query = trim((string) $this->input->get('q', TRUE));
+        $suppliers = $this->Supplier_model->search_active($query, 20);
+        $items = array();
+
+        foreach ($suppliers as $supplier) {
+            $secondary = array();
+
+            if (!empty($supplier->contact_person)) {
+                $secondary[] = $supplier->contact_person;
+            }
+
+            if (!empty($supplier->phone)) {
+                $secondary[] = $supplier->phone;
+            }
+
+            $items[] = array(
+                'id' => (int) $supplier->id,
+                'text' => (string) $supplier->supplier_name,
+                'secondary' => implode(' • ', $secondary)
+            );
+        }
+
+        $this->output
+            ->set_content_type('application/json')
+            ->set_output(json_encode(array('items' => $items)));
+    }
+
     public function datatable() {
         $this->require_permission('products.view');
 
@@ -292,34 +349,33 @@ class Products extends CI_Controller {
 
     private function render_product_form($id, $product, $form_error = '') {
         $data['product'] = $product;
-        $data['suppliers'] = $this->Supplier_model->get_active();
-        $data['categories'] = $this->Category_model->get_active();
+        $data['suppliers'] = array();
+        $data['categories'] = array();
 
-        if ($product) {
-            $active_category_ids = array_map(function ($category) {
-                return (int) $category->id;
-            }, $data['categories']);
+        $is_post = $this->input->method(TRUE) === 'POST';
+        $selected_category_id = $is_post
+            ? (int) $this->input->post('category_id', TRUE)
+            : ($product ? (int) $product->category_id : 0);
+        $selected_supplier_raw = $is_post
+            ? $this->input->post('supplier_id', TRUE)
+            : ($product ? $product->supplier_id : NULL);
+        $selected_supplier_id = ($selected_supplier_raw === '' || $selected_supplier_raw === NULL)
+            ? 0
+            : (int) $selected_supplier_raw;
 
-            if (!in_array((int) $product->category_id, $active_category_ids, TRUE)) {
-                $current_category = $this->Category_model->get_by_id($product->category_id);
+        if ($selected_category_id > 0) {
+            $selected_category = $this->Category_model->get_by_id($selected_category_id);
 
-                if ($current_category) {
-                    $data['categories'][] = $current_category;
-                }
+            if ($selected_category) {
+                $data['categories'][] = $selected_category;
             }
+        }
 
-            if ($product->supplier_id !== NULL) {
-                $active_supplier_ids = array_map(function ($supplier) {
-                    return (int) $supplier->id;
-                }, $data['suppliers']);
+        if ($selected_supplier_id > 0) {
+            $selected_supplier = $this->Supplier_model->get_by_id($selected_supplier_id);
 
-                if (!in_array((int) $product->supplier_id, $active_supplier_ids, TRUE)) {
-                    $current_supplier = $this->Supplier_model->get_by_id($product->supplier_id);
-
-                    if ($current_supplier) {
-                        $data['suppliers'][] = $current_supplier;
-                    }
-                }
+            if ($selected_supplier) {
+                $data['suppliers'][] = $selected_supplier;
             }
         }
 
@@ -336,6 +392,20 @@ class Products extends CI_Controller {
         }
 
         $this->load->view('modal/products/form', $data);
+    }
+
+    private function require_product_form_permission() {
+        $user_id = (int) $this->session->userdata('user_id');
+
+        if (
+            $user_id <= 0 ||
+            !$this->User_model->has_any_permission(
+                $user_id,
+                array('products.create', 'products.edit')
+            )
+        ) {
+            show_error('You do not have permission to manage product relationships.', 403, 'Access Denied');
+        }
     }
 
     private function require_permission($permission_key) {
