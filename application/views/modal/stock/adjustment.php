@@ -42,6 +42,8 @@ $this->load->view('components/modal/header', array(
                 class="form-select"
         
                 data-adjustment-supplier
+                data-searchable-select
+                data-search-placeholder="Search supplier by name..."
                 data-product-target="#adjustment_product_id"
             >
                 <option value="">All Suppliers</option>
@@ -67,6 +69,8 @@ $this->load->view('components/modal/header', array(
                 class="form-select"
                 required
                 data-adjustment-product
+                data-searchable-select
+                data-search-placeholder="Search product code or name..."
             >
                 <option value="">Select Product</option>
                 <?php foreach ($products as $product): ?>
