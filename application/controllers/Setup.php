@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Setup extends CI_Controller {
 
+    // Setup ni sa Setup controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
 
@@ -12,6 +13,7 @@ class Setup extends CI_Controller {
         $this->load->model(array('User_model', 'Role_model'));
     }
 
+    // Mao ni ang index flow sa Setup; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() {
         if ($this->User_model->count_all() > 0) {
             redirect('login');
