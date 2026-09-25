@@ -339,6 +339,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var remoteUrl = select.getAttribute('data-search-url') || '';
         var remoteMode = select.getAttribute('data-search-mode') || '';
+        var dependentSelector = select.getAttribute('data-search-dependent') || '';
+        var dependentParam = select.getAttribute('data-search-dependent-param') || '';
         var searchTimer = null;
         var searchSequence = 0;
 
@@ -356,7 +358,11 @@ document.addEventListener('DOMContentLoaded', function () {
             return {
                 value: option.value,
                 text: option.textContent,
-                searchText: option.getAttribute('data-search-text') || option.textContent
+                searchText: option.getAttribute('data-search-text') || option.textContent,
+                currentStock: option.getAttribute('data-current-stock'),
+                unit: option.getAttribute('data-unit'),
+                supplierId: option.getAttribute('data-supplier-id'),
+                supplierName: option.getAttribute('data-supplier-name')
             };
         }
 
@@ -388,6 +394,22 @@ document.addEventListener('DOMContentLoaded', function () {
                     (String(item.text || '') + ' ' + String(item.secondary || '')).trim()
                 );
 
+                if (item.current_stock !== undefined && item.current_stock !== null) {
+                    option.setAttribute('data-current-stock', String(item.current_stock));
+                }
+
+                if (item.unit !== undefined && item.unit !== null) {
+                    option.setAttribute('data-unit', String(item.unit));
+                }
+
+                if (item.supplier_id !== undefined && item.supplier_id !== null) {
+                    option.setAttribute('data-supplier-id', String(item.supplier_id));
+                }
+
+                if (item.supplier_name !== undefined && item.supplier_name !== null) {
+                    option.setAttribute('data-supplier-name', String(item.supplier_name));
+                }
+
                 if (selected && String(selected.value) === option.value) {
                     option.selected = true;
                     selectedIncluded = true;
@@ -401,6 +423,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 selectedOption.value = String(selected.value);
                 selectedOption.textContent = selected.text;
                 selectedOption.setAttribute('data-search-text', selected.searchText || selected.text);
+
+                if (selected.currentStock !== null) {
+                    selectedOption.setAttribute('data-current-stock', selected.currentStock);
+                }
+
+                if (selected.unit !== null) {
+                    selectedOption.setAttribute('data-unit', selected.unit);
+                }
+
+                if (selected.supplierId !== null) {
+                    selectedOption.setAttribute('data-supplier-id', selected.supplierId);
+                }
+
+                if (selected.supplierName !== null) {
+                    selectedOption.setAttribute('data-supplier-name', selected.supplierName);
+                }
+
                 selectedOption.selected = true;
                 select.appendChild(selectedOption);
             }
@@ -418,10 +457,16 @@ document.addEventListener('DOMContentLoaded', function () {
             search.setAttribute('aria-busy', 'true');
 
             try {
+                var dependent = dependentSelector ? document.querySelector(dependentSelector) : null;
+                var dependentValue = dependent ? dependent.value : '';
+
                 var url = remoteUrl +
                     (remoteUrl.indexOf('?') === -1 ? '?' : '&') +
                     'q=' + encodeURIComponent(query) +
-                    (remoteMode ? '&mode=' + encodeURIComponent(remoteMode) : '');
+                    (remoteMode ? '&mode=' + encodeURIComponent(remoteMode) : '') +
+                    (dependentParam && dependentValue
+                        ? '&' + encodeURIComponent(dependentParam) + '=' + encodeURIComponent(dependentValue)
+                        : '');
 
                 var response = await fetch(url, {
                     method: 'GET',
@@ -502,6 +547,25 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+        // Remote product search is supplier-aware. Reset the product when
+        // the optional supplier filter changes so stale selections cannot survive.
+        if (productSelect.getAttribute('data-search-url')) {
+            productSelect.value = '';
+
+            if (productSelect._searchableInput) {
+                productSelect._searchableInput.value = '';
+            }
+
+            Array.from(productSelect.options).forEach(function (option, index) {
+                if (index > 0) {
+                    option.remove();
+                }
+            });
+
+            updateAdjustmentPreview(productSelect);
+            return;
+        }
+
         var supplierId = supplierSelect.value;
 
         Array.from(productSelect.options).forEach(function (option) {
@@ -530,6 +594,114 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (typeof productSelect._refreshSearchable === 'function') {
             productSelect._refreshSearchable();
+        }
+
+        updateAdjustmentPreview(productSelect);
+    }
+
+    function updateAdjustmentPreview(productSelect) {
+        if (!productSelect) {
+            return;
+        }
+
+        var modalBody = productSelect.closest('.modal-body');
+
+        if (!modalBody) {
+            return;
+        }
+
+        var snapshot = modalBody.querySelector('[data-adjustment-snapshot]');
+        var systemStockNode = modalBody.querySelector('[data-adjustment-system-stock]');
+        var actualInput = modalBody.querySelector('[data-adjustment-actual]');
+        var unitNodes = modalBody.querySelectorAll('[data-adjustment-unit], [data-adjustment-unit-copy]');
+        var varianceNode = modalBody.querySelector('[data-adjustment-variance]');
+        var varianceLabel = modalBody.querySelector('[data-adjustment-variance-label]');
+        var selectedOption = productSelect.options[productSelect.selectedIndex];
+        var hasProduct = selectedOption && selectedOption.value !== '';
+        var currentStock = hasProduct
+            ? parseInt(selectedOption.getAttribute('data-current-stock'), 10)
+            : NaN;
+        var unit = hasProduct
+            ? (selectedOption.getAttribute('data-unit') || 'unit')
+            : '';
+
+        if (systemStockNode) {
+            systemStockNode.textContent = hasProduct && !Number.isNaN(currentStock)
+                ? String(currentStock)
+                : '—';
+        }
+
+        unitNodes.forEach(function (node) {
+            node.textContent = unit;
+        });
+
+        if (snapshot) {
+            snapshot.classList.toggle('is-empty', !hasProduct);
+        }
+
+        if (actualInput) {
+            actualInput.disabled = !hasProduct;
+
+            if (!hasProduct) {
+                actualInput.value = '';
+            }
+        }
+
+        updateAdjustmentVariance(actualInput);
+    }
+
+    function updateAdjustmentVariance(actualInput) {
+        if (!actualInput) {
+            return;
+        }
+
+        var modalBody = actualInput.closest('.modal-body');
+
+        if (!modalBody) {
+            return;
+        }
+
+        var productSelect = modalBody.querySelector('[data-adjustment-product]');
+        var varianceNode = modalBody.querySelector('[data-adjustment-variance]');
+        var varianceLabel = modalBody.querySelector('[data-adjustment-variance-label]');
+        var selectedOption = productSelect && productSelect.selectedIndex >= 0
+            ? productSelect.options[productSelect.selectedIndex]
+            : null;
+
+        var currentStock = selectedOption && selectedOption.value !== ''
+            ? parseInt(selectedOption.getAttribute('data-current-stock'), 10)
+            : NaN;
+        var actualRaw = actualInput.value.trim();
+        var actualStock = /^\d+$/.test(actualRaw) ? parseInt(actualRaw, 10) : NaN;
+
+        if (!varianceNode || !varianceLabel || Number.isNaN(currentStock) || Number.isNaN(actualStock)) {
+            if (varianceNode) {
+                varianceNode.textContent = '—';
+                varianceNode.classList.remove('text-success', 'text-danger', 'text-body-secondary');
+            }
+
+            if (varianceLabel) {
+                varianceLabel.textContent = selectedOption && selectedOption.value !== ''
+                    ? 'Enter physical count'
+                    : 'Select a product';
+            }
+
+            return;
+        }
+
+        var variance = actualStock - currentStock;
+        varianceNode.textContent = variance > 0 ? '+' + variance : String(variance);
+        varianceNode.classList.remove('text-success', 'text-danger', 'text-body-secondary');
+
+        if (variance > 0) {
+            varianceNode.classList.add('text-success');
+            varianceLabel.textContent = 'Physical count is higher';
+        } else if (variance < 0) {
+            varianceNode.classList.add('text-danger');
+            varianceLabel.textContent = 'Physical count is lower';
+        } else {
+            varianceNode.classList.add('text-body-secondary');
+            varianceLabel.textContent = 'No difference — adjustment not needed';
         }
     }
 
@@ -575,7 +747,20 @@ document.addEventListener('DOMContentLoaded', function () {
         initializeSearchableSelects(container);
 
         container.querySelectorAll('[data-adjustment-supplier]').forEach(function (supplierSelect) {
-            filterAdjustmentProducts(supplierSelect);
+            if (!supplierSelect.value) {
+                return;
+            }
+
+            var targetSelector = supplierSelect.getAttribute('data-product-target');
+            var productSelect = targetSelector ? container.querySelector(targetSelector) : null;
+
+            if (productSelect && productSelect.value) {
+                updateAdjustmentPreview(productSelect);
+            }
+        });
+
+        container.querySelectorAll('[data-adjustment-product]').forEach(function (productSelect) {
+            updateAdjustmentPreview(productSelect);
         });
 
         container.querySelectorAll('.alert-danger, .alert-warning').forEach(function (alert) {
@@ -1315,6 +1500,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (productFilter) {
             filterStockProducts(productFilter);
         }
+
+        var adjustmentActual = event.target.closest('[data-adjustment-actual]');
+
+        if (adjustmentActual) {
+            updateAdjustmentVariance(adjustmentActual);
+        }
     });
 
     document.addEventListener('change', function (event) {
@@ -1328,6 +1519,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (adjustmentSupplier) {
             filterAdjustmentProducts(adjustmentSupplier);
+        }
+
+        var adjustmentProduct = event.target.closest('[data-adjustment-product]');
+
+        if (adjustmentProduct) {
+            updateAdjustmentPreview(adjustmentProduct);
         }
     });
 
