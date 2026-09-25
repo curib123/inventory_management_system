@@ -68,13 +68,23 @@ $this->load->view('components/modal/header', array(
         <div class="col-12 col-md-6">
             <label for="role_id" class="form-label">Role</label>
             <?php $selected_role = set_value('role_id', $user_is_edit ? $user->role_id : ''); ?>
-            <select id="role_id" name="role_id" class="form-select" required>
-                <option value="">Select Role</option>
+            <select
+                id="role_id"
+                name="role_id"
+                class="form-select"
+                required
+                data-searchable-select
+                data-search-placeholder="Search role name or description..."
+                data-search-url="<?php echo site_url('users/roles/search'); ?>"
+            >
+                <option value="">Search then select a role</option>
                 <?php foreach ($roles as $role): ?>
-                    <option value="<?php echo (int) $role->id; ?>" <?php echo ((string) $selected_role === (string) $role->id) ? 'selected' : ''; ?>><?php echo html_escape($role->role_name); ?></option>
+                    <option value="<?php echo (int) $role->id; ?>" <?php echo ((string) $selected_role === (string) $role->id) ? 'selected' : ''; ?>>
+                        <?php echo html_escape($role->role_name . ((int) $role->status === 1 ? '' : ' (Inactive)')); ?>
+                    </option>
                 <?php endforeach; ?>
             </select>
-            <div class="form-text">The selected role determines the modules and actions this user can access.</div>
+            <div class="form-text">Search runs on the server for large role lists. The selected role determines the modules and actions this user can access.</div>
         </div>
 
         <div class="col-12 col-md-6">
