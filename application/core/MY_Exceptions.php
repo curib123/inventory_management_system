@@ -39,6 +39,14 @@ class MY_Exceptions extends CI_Exceptions {
 
         set_status_header((int) $status_code);
 
+        if (!headers_sent()) {
+            if ($error_id !== '') {
+                header('X-Error-Reference: ' . $error_id);
+            }
+
+            header('X-Error-Log: ' . $this->log_reference());
+        }
+
         $app_error_heading = (string) $heading;
         $app_error_message = is_array($message)
             ? implode(' ', array_map('strip_tags', $message))
