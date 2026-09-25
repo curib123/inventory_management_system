@@ -54,6 +54,31 @@ class User_model extends CI_Model {
         return $this->db->get('roles')->result();
     }
 
+    public function get_role_by_id($id) {
+        return $this->db->get_where('roles', array('id' => (int) $id))->row();
+    }
+
+    public function search_active_roles($query = '', $limit = 20) {
+        $query = trim((string) $query);
+        $limit = max(1, min(50, (int) $limit));
+
+        $this->db->select('id, role_name, description');
+        $this->db->from('roles');
+        $this->db->where('status', 1);
+
+        if ($query !== '') {
+            $this->db->group_start();
+            $this->db->like('role_name', $query);
+            $this->db->or_like('description', $query);
+            $this->db->group_end();
+        }
+
+        $this->db->order_by('role_name', 'ASC');
+        $this->db->limit($limit);
+
+        return $this->db->get()->result();
+    }
+
     public function username_exists($username, $exclude_id = NULL) {
         $this->db->where('username', trim($username));
 
