@@ -9,7 +9,7 @@ class Suppliers extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
-        $this->load->library('Datatable_service');
+        $this->load->library(array('Datatable_service', 'Supplier_service'));
 
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -68,34 +68,13 @@ class Suppliers extends CI_Controller {
             show_404();
         }
 
-        $delete_error = '';
+        $execute = $this->input->method(TRUE) === 'POST';
+        $result = $this->supplier_service->delete($id, $execute);
 
-        if ($this->Supplier_model->has_dependencies($id)) {
-            $delete_error =
-                'This supplier is used by products or stock transaction history. ' .
-                'Set the supplier to inactive instead of deleting it.';
-        }
-
-        if ($this->input->method(TRUE) !== 'POST') {
+        if (!$execute || !$result['success']) {
             $this->load->view('modal/suppliers/delete', array(
                 'supplier' => $supplier,
-                'delete_error' => $delete_error
-            ));
-            return;
-        }
-
-        if ($delete_error !== '') {
-            $this->load->view('modal/suppliers/delete', array(
-                'supplier' => $supplier,
-                'delete_error' => $delete_error
-            ));
-            return;
-        }
-
-        if (!$this->Supplier_model->delete($id)) {
-            $this->load->view('modal/suppliers/delete', array(
-                'supplier' => $supplier,
-                'delete_error' => 'The supplier could not be deleted.'
+                'delete_error' => $result['success'] ? '' : $result['message']
             ));
             return;
         }
@@ -194,16 +173,16 @@ class Suppliers extends CI_Controller {
             return;
         }
 
-        $data = array(
-            'supplier_name' => trim($this->input->post('supplier_name', TRUE)),
-            'contact_person' => trim($this->input->post('contact_person', TRUE)),
-            'phone' => trim($this->input->post('phone', TRUE)),
-            'address' => trim($this->input->post('address', TRUE)),
-            'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
-        );
+        $result = $this->supplier_service->save($id, array(
+            'supplier_name' => $this->input->post('supplier_name', TRUE),
+            'contact_person' => $this->input->post('contact_person', TRUE),
+            'phone' => $this->input->post('phone', TRUE),
+            'address' => $this->input->post('address', TRUE),
+            'status' => $this->input->post('status', TRUE)
+        ));
 
-        if (!$this->Supplier_model->save($data, $id)) {
-            $this->render_supplier_form($id, $supplier, 'The supplier could not be saved.');
+        if (!$result['success']) {
+            $this->render_supplier_form($id, $supplier, $result['message']);
             return;
         }
 
