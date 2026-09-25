@@ -53,6 +53,23 @@ class Report_model extends CI_Model {
         return $this->db->get()->result_array();
     }
 
+    public function get_export_rows($report, $search = '', $filters = array()) {
+        $this->build_datatable_query($report, trim((string) $search), (array) $filters);
+        $this->select_report_columns($report);
+
+        if ($report === 'inventory' || $report === 'valuation') {
+            $this->db->order_by('p.product_name', 'ASC');
+        } elseif ($report === 'low-stock') {
+            $this->db->order_by('p.stock', 'ASC');
+            $this->db->order_by('p.product_name', 'ASC');
+        } else {
+            $this->db->order_by('t.created_at', 'DESC');
+            $this->db->order_by('t.id', 'DESC');
+        }
+
+        return $this->db->get()->result_array();
+    }
+
     public function count_datatable_total($report) {
         $this->build_datatable_query($report, '');
         return $this->db->count_all_results();
