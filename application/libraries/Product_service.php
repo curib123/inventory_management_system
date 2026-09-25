@@ -67,7 +67,7 @@ class Product_service {
     }
 
     // Business flow ni para delete product; application/controllers/Products.php ang caller, then transaction-history rule diri gi-enforce.
-    public function delete($id) {
+    public function delete($id, $execute = TRUE) {
         $id = (int) $id;
         $product = $this->CI->Product_model->get_by_id($id);
 
@@ -80,6 +80,10 @@ class Product_service {
                 'success' => FALSE,
                 'message' => 'Products with stock transaction history cannot be deleted. Set the product to inactive instead.'
             );
+        }
+
+        if (!$execute) {
+            return array('success' => TRUE, 'product' => $product);
         }
 
         if (!$this->CI->Product_model->delete($id)) {
