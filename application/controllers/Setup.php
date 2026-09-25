@@ -8,23 +8,23 @@ class Setup extends CI_Controller {
     public function __construct() {
         parent::__construct();
 
-        $this->load->library(array('session', 'form_validation'));
+        $this->load->library(array('session', 'form_validation', 'Setup_service'));
         $this->load->helper(array('url', 'form'));
         $this->load->model(array('User_model', 'Role_model'));
     }
 
     // Mao ni ang index flow sa Setup; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() {
-        if ($this->User_model->count_all() > 0) {
+        $setup_status = $this->setup_service->status();
+
+        if (!empty($setup_status['configured'])) {
             redirect('login');
             return;
         }
 
-        $admin_role = $this->Role_model->get_by_name('admin');
-
-        if (!$admin_role || !(int) $admin_role->status) {
+        if (empty($setup_status['ready'])) {
             show_error(
-                'The admin role is missing or inactive. Import the current database schema before initial setup.',
+                $setup_status['message'],
                 500,
                 'Setup Error'
             );
@@ -67,29 +67,21 @@ class Setup extends CI_Controller {
                 return;
             }
 
-            $username = trim((string) $this->input->post('username', TRUE));
-
-            if ($this->User_model->username_exists($username)) {
-                $data['error'] = 'That username already exists.';
-                $this->load->view('auth/setup', $data);
-                return;
-            }
-
-            $saved = $this->User_model->save(array(
-                'first_name' => trim((string) $this->input->post('first_name', TRUE)),
-                'middle_name' => trim((string) $this->input->post('middle_name', TRUE)),
-                'last_name' => trim((string) $this->input->post('last_name', TRUE)),
-                'username' => $username,
-                'password' => password_hash(
-                    (string) $this->input->post('password', FALSE),
-                    PASSWORD_DEFAULT
-                ),
-                'role_id' => (int) $admin_role->id,
-                'status' => 1
+            $result = $this->setup_service->create_initial_admin(array(
+                'first_name' => $this->input->post('first_name', TRUE),
+                'middle_name' => $this->input->post('middle_name', TRUE),
+                'last_name' => $this->input->post('last_name', TRUE),
+                'username' => $this->input->post('username', TRUE),
+                'password' => $this->input->post('password', FALSE)
             ));
 
-            if (!$saved) {
-                $data['error'] = 'The administrator account could not be created.';
+            if (!$result['success']) {
+                if (!empty($result['configured'])) {
+                    redirect('login');
+                    return;
+                }
+
+                $data['error'] = $result['message'];
                 $this->load->view('auth/setup', $data);
                 return;
             }
