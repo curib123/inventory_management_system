@@ -211,7 +211,7 @@ Current unit-test areas include authentication/session behavior, DataTables requ
 - [x] Centralized DataTable layout now places a full-width search control on the left and the page-length selector on the right, with responsive stacking on smaller screens.
 - [x] DataTable columns are centrally aligned through column metadata. Internal Product and Category IDs remain available to the server/actions but are hidden from users.
 - [x] Added a centralized searchable-select enhancement for large relationship lists. It is currently used for Stock In suppliers, Product category/supplier selection, and Stock Adjustment supplier/product selection.
-- [x] Stock Adjustment now has an optional searchable Supplier filter first. Selecting a supplier limits the searchable Product dropdown to active products assigned to that supplier; leaving Supplier blank keeps all active products available.
+- [x] Stock Adjustment now uses a required supplier-first reconciliation flow. Selecting a supplier limits Product search to that supplier's active products; an explicit Unassigned Products scope handles products without a supplier. The modal shows system stock, physical count, live variance, requires a reason, blocks no-op adjustments, and records permanent history.
 - [x] CSV and Excel remain downloadable report files. Excel output is hardened against buffered-output corruption and uses the same professional blue-header, bordered, zebra-row table language as PDF.
 - [x] PDF is now a print-focused export: it opens inline in a new tab as an A4 landscape report instead of forcing a file download.
 - [x] Stock In continues to follow Phase 3: supplier selection fetches only that supplier's active products, supports multiple products in one transaction, shows old/new stock, updates inventory atomically, creates a transaction number, and records movement history.
@@ -239,9 +239,11 @@ The current branch passed a JavaScript parse check and structural checks on the 
 
 
 
-new issuess
+## Latest QA checklist
 
-add filtration in each table 
-recommended setup for stock adjustment
-enhance csv,excel format 
-searchable dropdown selection which dropdown have searching on it in in filtrations  and dropdowns
+- [x] Add relevant filtration to each DataTable. Filters remain contextual rather than adding unnecessary controls to every page.
+- [x] Stock Adjustment uses the recommended supplier-first reconciliation flow: Supplier -> Product -> System Stock -> Actual Physical Stock -> Variance -> Reason -> Review -> Confirm.
+- [x] CSV export uses a structured business-report layout and is available from the Reports UI.
+- [x] Excel export uses a professional manager-ready workbook layout with metadata, KPI summary, filters, frozen headers, print setup, number formats, and semantic movement styling.
+- [x] PDF export uses a professional A4 landscape report layout with metadata, summary cards, styled table, movement badges, and page numbering.
+- [x] Large relationship dropdowns are searchable. Stock supplier/product lookups use server-side search for scalability; small fixed table filters remain normal dropdowns because search would add unnecessary interaction.
