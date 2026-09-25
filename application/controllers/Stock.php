@@ -9,7 +9,7 @@ class Stock extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
-        $this->load->library('Datatable_service');
+        $this->load->library(array('Datatable_service', 'Stock_service'));
 
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -81,27 +81,10 @@ class Stock extends CI_Controller {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
         }
 
-        $query = trim((string) $this->input->get('q', TRUE));
-        $suppliers = $this->Supplier_model->search_active($query, 20);
-        $items = array();
-
-        foreach ($suppliers as $supplier) {
-            $secondary = array();
-
-            if (!empty($supplier->contact_person)) {
-                $secondary[] = $supplier->contact_person;
-            }
-
-            if (!empty($supplier->phone)) {
-                $secondary[] = $supplier->phone;
-            }
-
-            $items[] = array(
-                'id' => (int) $supplier->id,
-                'text' => (string) $supplier->supplier_name,
-                'secondary' => implode(' • ', $secondary)
-            );
-        }
+        $items = $this->stock_service->supplier_options(
+            trim((string) $this->input->get('q', TRUE)),
+            20
+        );
 
         $this->output
             ->set_content_type('application/json')
@@ -116,58 +99,23 @@ class Stock extends CI_Controller {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
         }
 
-        $query = trim((string) $this->input->get('q', TRUE));
-        $supplier_scope = trim((string) $this->input->get('supplier_id', TRUE));
-
-        if ($supplier_scope === '') {
-            $this->output
-                ->set_content_type('application/json')
-                ->set_output(json_encode(array('items' => array())));
-            return;
-        }
-
-        if ($supplier_scope !== 'unassigned') {
-            if (!ctype_digit($supplier_scope) || (int) $supplier_scope <= 0) {
-                show_error('Invalid supplier selection.', 400, 'Invalid Supplier');
-            }
-
-            $supplier = $this->Supplier_model->get_by_id((int) $supplier_scope);
-
-            if (!$supplier || !(int) $supplier->status) {
-                show_error('Supplier not found or inactive.', 404, 'Supplier Not Found');
-            }
-        }
-
-        $products = $this->Product_model->search_active(
-            $query,
-            $supplier_scope,
+        $result = $this->stock_service->adjustment_product_options(
+            trim((string) $this->input->get('q', TRUE)),
+            trim((string) $this->input->get('supplier_id', TRUE)),
             20
         );
-        $items = array();
 
-        foreach ($products as $product) {
-            $secondary = array();
-
-            if (!empty($product->supplier_name)) {
-                $secondary[] = $product->supplier_name;
-            }
-
-            $secondary[] = 'System stock: ' . (int) $product->stock . ' ' . ($product->unit ?: 'unit');
-
-            $items[] = array(
-                'id' => (int) $product->id,
-                'text' => (string) ($product->product_code . ' - ' . $product->product_name),
-                'secondary' => implode(' • ', $secondary),
-                'current_stock' => (int) $product->stock,
-                'unit' => (string) ($product->unit ?: 'unit'),
-                'supplier_id' => $product->supplier_id !== NULL ? (int) $product->supplier_id : 0,
-                'supplier_name' => (string) ($product->supplier_name ?: 'No supplier')
+        if (!$result['success']) {
+            show_error(
+                $result['message'],
+                isset($result['status']) ? (int) $result['status'] : 400,
+                'Invalid Adjustment Product Search'
             );
         }
 
         $this->output
             ->set_content_type('application/json')
-            ->set_output(json_encode(array('items' => $items)));
+            ->set_output(json_encode(array('items' => $result['items'])));
     }
 
     // Mao ni ang supplier products flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
@@ -183,16 +131,20 @@ class Stock extends CI_Controller {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
         }
 
-        $supplier = $this->Supplier_model->get_by_id($supplier_id);
+        $result = $this->stock_service->supplier_products($supplier_id, $mode);
 
-        if (!$supplier || !(int) $supplier->status) {
-            show_error('Supplier not found or inactive.', 404, 'Supplier Not Found');
+        if (!$result['success']) {
+            show_error(
+                $result['message'],
+                isset($result['status']) ? (int) $result['status'] : 400,
+                'Supplier Products Error'
+            );
         }
 
         $this->load->view('components/stock/product_quantity_list', array(
-            'products' => $this->Product_model->get_active_by_supplier($supplier_id, $mode),
+            'products' => $result['products'],
             'quantities' => array(),
-            'mode' => $mode
+            'mode' => $result['mode']
         ));
     }
 
@@ -214,43 +166,9 @@ class Stock extends CI_Controller {
             return;
         }
 
-        $supplier_scope = trim((string) $this->input->post('supplier_filter', TRUE));
-        $product_id = (int) $this->input->post('product_id', TRUE);
-        $product = $this->Product_model->get_by_id($product_id);
-
-        if (!$product || !(int) $product->status) {
-            $this->render_adjustment_form('The selected product is invalid or inactive.');
-            return;
-        }
-
-        if ($supplier_scope === 'unassigned') {
-            if ($product->supplier_id !== NULL) {
-                $this->render_adjustment_form('The selected product is not an unassigned product.');
-                return;
-            }
-        } else {
-            if (!ctype_digit($supplier_scope) || (int) $supplier_scope <= 0) {
-                $this->render_adjustment_form('Select a valid supplier before choosing a product.');
-                return;
-            }
-
-            $supplier_id = (int) $supplier_scope;
-            $supplier = $this->Supplier_model->get_by_id($supplier_id);
-
-            if (
-                !$supplier ||
-                !(int) $supplier->status ||
-                (int) $product->supplier_id !== $supplier_id
-            ) {
-                $this->render_adjustment_form(
-                    'The selected product does not belong to the selected supplier.'
-                );
-                return;
-            }
-        }
-
-        $result = $this->Stock_model->create_adjustment(
-            $product_id,
+        $result = $this->stock_service->create_adjustment(
+            $this->input->post('supplier_filter', TRUE),
+            $this->input->post('product_id', TRUE),
             $this->input->post('actual_stock', TRUE),
             $this->input->post('reason', TRUE),
             $this->session->userdata('user_id')
@@ -427,7 +345,7 @@ class Stock extends CI_Controller {
             return;
         }
 
-        $result = $this->Stock_model->create_transaction(
+        $result = $this->stock_service->create_transaction(
             $type,
             $this->input->post('supplier_id', TRUE),
             $this->input->post('remarks', TRUE),
