@@ -10,6 +10,7 @@ $route['login'] = 'auth/login';
 $route['setup'] = 'setup';
 $route['logout'] = 'auth/logout';
 $route['logout/confirm'] = 'auth/logout_confirm';
+$route['account/change-password'] = 'auth/change_password';
 
 //dashboard route
 $route['dashboard'] = 'dashboard';
