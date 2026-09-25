@@ -650,7 +650,7 @@ document.addEventListener('DOMContentLoaded', function () {
             layout: {
                 topStart: null,
                 topEnd: null,
-                bottomStart: 'info',
+                bottomStart: ['pageLength', 'info'],
                 bottomEnd: 'paging'
             },
             language: {
@@ -658,6 +658,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 info: 'Showing _START_ to _END_ of _TOTAL_ records',
                 infoEmpty: 'No records to show',
                 infoFiltered: '',
+                lengthMenu: 'Rows per page _MENU_',
                 processing: 'Loading records...',
                 zeroRecords: 'No matching records found.'
             }
@@ -672,7 +673,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         var searchInput = card.querySelector('[data-table-search]');
         var searchClear = card.querySelector('[data-table-search-clear]');
-        var lengthSelect = card.querySelector('[data-table-length]');
         var resetButton = card.querySelector('[data-table-reset]');
         var filterCount = card.querySelector('[data-table-filter-count]');
         var searchTimer = null;
@@ -728,13 +728,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 dataTable.ajax.reload(null, true);
             });
         });
-
-        if (lengthSelect) {
-            lengthSelect.addEventListener('change', function () {
-                dataTable.page.len(Number(lengthSelect.value) || 10).draw();
-            });
-        }
-
         if (resetButton) {
             resetButton.addEventListener('click', function () {
                 card.querySelectorAll('[data-table-filter]').forEach(function (select) {
@@ -746,7 +739,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 updateToolbarState();
-                dataTable.search('').page.len(lengthSelect ? Number(lengthSelect.value) || 10 : 10).draw();
+                dataTable.search('').draw();
             });
         }
 
