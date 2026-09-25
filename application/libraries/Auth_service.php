@@ -6,9 +6,9 @@ class Auth_service {
 
     // Shared service ni para authenticate; main caller/integration pangitaa sa application/controllers/Auth.php, so didto tan-awa if mangita ka asa ni gigamit.
     public function authenticate($user_model, $username, $password) {
-        $user = $user_model->login($username, $password);
+        $user = $user_model->find_active_by_username($username);
 
-        if (!$user) {
+        if (!$user || !password_verify((string) $password, (string) $user->password)) {
             return FALSE;
         }
 
