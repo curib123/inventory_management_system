@@ -199,10 +199,8 @@ class Users extends CI_Controller {
         $this->form_validation->set_rules('username', 'Username', 'trim|required|min_length[3]|max_length[50]|alpha_dash');
         $this->form_validation->set_rules('role_id', 'Role', 'required|integer|greater_than[0]');
 
-        if ($id === NULL) {
-            $this->form_validation->set_rules('password', 'Password', 'required|min_length[8]|max_length[255]');
-        } else {
-            $this->form_validation->set_rules('password', 'Password', 'min_length[8]|max_length[255]');
+        if ($id !== NULL) {
+            $this->form_validation->set_rules('password', 'Reset Password', 'min_length[8]|max_length[255]');
         }
 
         if ($this->form_validation->run() === FALSE) {
@@ -247,9 +245,19 @@ class Users extends CI_Controller {
             'status' => $requested_status
         );
 
-        $password = (string) $this->input->post('password', FALSE);
-        if ($password !== '') {
-            $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+        $temporary_password = NULL;
+
+        if ($id === NULL) {
+            $temporary_password = $this->generate_temporary_password();
+            $data['password'] = password_hash($temporary_password, PASSWORD_DEFAULT);
+            $data['must_change_password'] = 1;
+        } else {
+            $password = (string) $this->input->post('password', FALSE);
+
+            if ($password !== '') {
+                $data['password'] = password_hash($password, PASSWORD_DEFAULT);
+                $data['must_change_password'] = 1;
+            }
         }
 
         if (!$this->User_model->save($data, $id)) {
@@ -264,11 +272,47 @@ class Users extends CI_Controller {
             redirect('login');
         }
 
-        $this->session->set_flashdata(
-            'success',
-            $id === NULL ? 'User account created successfully.' : 'User changes saved successfully.'
-        );
+        if ($temporary_password !== NULL) {
+            $this->session->set_flashdata('temporary_password', $temporary_password);
+            $this->session->set_flashdata(
+                'success',
+                'User account created successfully. Copy the temporary password below and share it securely with the user.'
+            );
+        } else {
+            $this->session->set_flashdata('success', 'User changes saved successfully.');
+        }
+
         redirect('users');
+    }
+
+    private function generate_temporary_password($length = 14) {
+        $length = max(12, min(32, (int) $length));
+
+        $groups = array(
+            'ABCDEFGHJKLMNPQRSTUVWXYZ',
+            'abcdefghijkmnopqrstuvwxyz',
+            '23456789',
+            '!@#$%*-_'
+        );
+        $all = implode('', $groups);
+        $characters = array();
+
+        foreach ($groups as $group) {
+            $characters[] = $group[random_int(0, strlen($group) - 1)];
+        }
+
+        while (count($characters) < $length) {
+            $characters[] = $all[random_int(0, strlen($all) - 1)];
+        }
+
+        for ($i = count($characters) - 1; $i > 0; $i--) {
+            $j = random_int(0, $i);
+            $temp = $characters[$i];
+            $characters[$i] = $characters[$j];
+            $characters[$j] = $temp;
+        }
+
+        return implode('', $characters);
     }
 
     private function render_user_form($id, $user, $form_error = '') {
