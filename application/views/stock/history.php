@@ -57,6 +57,17 @@ $this->load->view('components/data_table', array(
                 'stock_out' => 'Stock Out',
                 'adjustment' => 'Adjustment'
             )
+        ),
+        array(
+            'name' => 'period',
+            'label' => 'Period',
+            'icon' => 'bi-calendar3',
+            'options' => array(
+                '' => 'All dates',
+                'today' => 'Today',
+                '7_days' => 'Last 7 days',
+                '30_days' => 'Last 30 days'
+            )
         )
     ),
     'columns' => array(
