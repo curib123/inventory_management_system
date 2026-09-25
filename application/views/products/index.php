@@ -56,5 +56,4 @@ $this->load->view('components/data_table', array(
     )
 ));
 
-$this->load->view('modal/container');
 ?>
