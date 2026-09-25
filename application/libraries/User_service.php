@@ -114,7 +114,9 @@ class User_service {
         $current_password = (string) $current_password;
         $new_password = (string) $new_password;
 
-        if (!$this->CI->User_model->verify_password($user_id, $current_password)) {
+        $password_hash = $this->CI->User_model->get_password_hash($user_id);
+
+        if (!$password_hash || !password_verify($current_password, $password_hash)) {
             return array('success' => FALSE, 'message' => 'The current password is incorrect.');
         }
 
@@ -125,7 +127,11 @@ class User_service {
             );
         }
 
-        if (!$this->CI->User_model->update_password($user_id, $new_password, FALSE)) {
+        if (!$this->CI->User_model->update_password_hash(
+            $user_id,
+            password_hash($new_password, PASSWORD_DEFAULT),
+            FALSE
+        )) {
             return array('success' => FALSE, 'message' => 'The password could not be updated. Please try again.');
         }
 
