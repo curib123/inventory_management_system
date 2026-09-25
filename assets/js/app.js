@@ -337,16 +337,149 @@ document.addEventListener('DOMContentLoaded', function () {
             refreshSearchableSelect(select);
         };
 
+        var remoteUrl = select.getAttribute('data-search-url') || '';
+        var remoteMode = select.getAttribute('data-search-mode') || '';
+        var searchTimer = null;
+        var searchSequence = 0;
+
+        function selectedSnapshot() {
+            if (!select.value || select.selectedIndex < 0) {
+                return null;
+            }
+
+            var option = select.options[select.selectedIndex];
+
+            if (!option || option.value === '') {
+                return null;
+            }
+
+            return {
+                value: option.value,
+                text: option.textContent,
+                searchText: option.getAttribute('data-search-text') || option.textContent
+            };
+        }
+
+        function rebuildRemoteOptions(items, selected) {
+            var placeholderText = select.getAttribute('data-placeholder') ||
+                (select.options.length ? select.options[0].textContent : 'Select an option');
+
+            select.innerHTML = '';
+
+            var placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = placeholderText;
+            select.appendChild(placeholder);
+
+            var selectedIncluded = false;
+
+            (items || []).forEach(function (item) {
+                if (!item || !item.id) {
+                    return;
+                }
+
+                var option = document.createElement('option');
+                option.value = String(item.id);
+                option.textContent = item.secondary
+                    ? String(item.text || '') + ' — ' + String(item.secondary)
+                    : String(item.text || '');
+                option.setAttribute(
+                    'data-search-text',
+                    (String(item.text || '') + ' ' + String(item.secondary || '')).trim()
+                );
+
+                if (selected && String(selected.value) === option.value) {
+                    option.selected = true;
+                    selectedIncluded = true;
+                }
+
+                select.appendChild(option);
+            });
+
+            if (selected && !selectedIncluded) {
+                var selectedOption = document.createElement('option');
+                selectedOption.value = String(selected.value);
+                selectedOption.textContent = selected.text;
+                selectedOption.setAttribute('data-search-text', selected.searchText || selected.text);
+                selectedOption.selected = true;
+                select.appendChild(selectedOption);
+            }
+        }
+
+        async function searchRemoteOptions(query) {
+            var selected = selectedSnapshot();
+            var sequence = ++searchSequence;
+
+            if (query.length < 2) {
+                rebuildRemoteOptions([], selected);
+                return;
+            }
+
+            select.disabled = true;
+            search.setAttribute('aria-busy', 'true');
+
+            try {
+                var url = remoteUrl +
+                    (remoteUrl.indexOf('?') === -1 ? '?' : '&') +
+                    'q=' + encodeURIComponent(query) +
+                    (remoteMode ? '&mode=' + encodeURIComponent(remoteMode) : '');
+
+                var response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                if (!response.ok) {
+                    return;
+                }
+
+                var payload = await response.json();
+
+                if (sequence !== searchSequence) {
+                    return;
+                }
+
+                rebuildRemoteOptions(
+                    payload && Array.isArray(payload.items) ? payload.items : [],
+                    selected
+                );
+            } catch (error) {
+                // Keep the current selected value if remote search temporarily fails.
+            } finally {
+                if (sequence === searchSequence) {
+                    select.disabled = false;
+                    search.removeAttribute('aria-busy');
+                }
+            }
+        }
+
         search.addEventListener('input', function () {
-            refreshSearchableSelect(select);
+            window.clearTimeout(searchTimer);
+
+            if (!remoteUrl) {
+                refreshSearchableSelect(select);
+                return;
+            }
+
+            var query = search.value.trim();
+
+            searchTimer = window.setTimeout(function () {
+                searchRemoteOptions(query);
+            }, 250);
         });
 
         select.addEventListener('change', function () {
-            search.value = '';
-            refreshSearchableSelect(select);
+            if (!remoteUrl) {
+                search.value = '';
+                refreshSearchableSelect(select);
+            }
         });
 
-        refreshSearchableSelect(select);
+        if (!remoteUrl) {
+            refreshSearchableSelect(select);
+        }
     }
 
     function initializeSearchableSelects(container) {
