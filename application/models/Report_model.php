@@ -141,9 +141,21 @@ class Report_model extends CI_Model {
             $this->db->where('t.type', 'stock_out');
         } elseif ($report === 'movement') {
             $type = isset($filters['type']) ? strtolower((string) $filters['type']) : '';
+
             if (in_array($type, array('stock_in', 'stock_out', 'adjustment'), TRUE)) {
                 $this->db->where('t.type', $type);
             }
+        }
+
+        $period = isset($filters['period']) ? strtolower((string) $filters['period']) : '';
+
+        if ($period === 'today') {
+            $this->db->where('t.created_at >=', date('Y-m-d 00:00:00'));
+            $this->db->where('t.created_at <=', date('Y-m-d 23:59:59'));
+        } elseif ($period === '7_days') {
+            $this->db->where('t.created_at >=', date('Y-m-d 00:00:00', strtotime('-6 days')));
+        } elseif ($period === '30_days') {
+            $this->db->where('t.created_at >=', date('Y-m-d 00:00:00', strtotime('-29 days')));
         }
 
         if ($search !== '') {
