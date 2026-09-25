@@ -3,6 +3,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 if (!function_exists('ui_modal_action_group')) {
+    // Shared UI helper ni para ui modal action group; main caller/integration pangitaa sa application/views/ ug application/controllers/ nga nag-build sa shared UI, so didto tan-awa if mangita ka asa ni gigamit.
     function ui_modal_action_group($actions) {
         if (empty($actions) || !is_array($actions)) {
             return '';
@@ -35,6 +36,7 @@ if (!function_exists('ui_modal_action_group')) {
 }
 
 if (!function_exists('ui_modal_form_attributes')) {
+    // Shared UI helper ni para ui modal form attributes; main caller/integration pangitaa sa application/views/ ug application/controllers/ nga nag-build sa shared UI, so didto tan-awa if mangita ka asa ni gigamit.
     function ui_modal_form_attributes($confirmation = array(), $extra = array()) {
         $attributes = array_merge(
             array('data-modal-form' => '1'),
@@ -81,6 +83,7 @@ if (!function_exists('ui_modal_form_attributes')) {
 }
 
 if (!function_exists('ui_style_enabled_for')) {
+    // Shared UI helper ni para ui style enabled for; main caller/integration pangitaa sa application/views/ ug application/controllers/ nga nag-build sa shared UI, so didto tan-awa if mangita ka asa ni gigamit.
     function ui_style_enabled_for($rules, $controller, $method = '', $default = TRUE) {
         $rules = is_array($rules) ? $rules : array();
         $controller = strtolower(trim((string) $controller));
