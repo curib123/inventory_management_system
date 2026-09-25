@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Categories extends CI_Controller {
 
+    // Setup ni sa Categories controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
@@ -18,6 +19,7 @@ class Categories extends CI_Controller {
         $this->load->model('User_model');
     }
 
+    // Mao ni ang index flow sa Categories; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() {
         $this->require_permission('categories.view');
 
@@ -27,11 +29,13 @@ class Categories extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
+    // Mao ni ang add flow sa Categories; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function add() {
         $this->require_permission('categories.create');
         $this->category_form();
     }
 
+    // Mao ni ang view flow sa Categories; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function view($id) {
         $this->require_permission('categories.view');
 
@@ -46,6 +50,7 @@ class Categories extends CI_Controller {
         ));
     }
 
+    // Mao ni ang edit flow sa Categories; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function edit($id) {
         $this->require_permission('categories.edit');
 
@@ -57,6 +62,7 @@ class Categories extends CI_Controller {
         $this->category_form((int) $id, $category);
     }
 
+    // Mao ni ang delete flow sa Categories; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function delete($id) {
         $this->require_permission('categories.delete');
 
@@ -98,6 +104,7 @@ class Categories extends CI_Controller {
         redirect('categories');
     }
 
+    // Mao ni ang datatable flow sa Categories; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function datatable() {
         $this->require_permission('categories.view');
 
@@ -166,6 +173,7 @@ class Categories extends CI_Controller {
         $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
+    // Internal helper ni para category form; tawagon ra sulod application/controllers/Categories.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function category_form($id = NULL, $category = NULL) {
         $this->form_validation->set_rules('category_name', 'Category Name', 'trim|required|max_length[100]');
 
@@ -197,6 +205,7 @@ class Categories extends CI_Controller {
         redirect('categories');
     }
 
+    // Internal helper ni para render category form; tawagon ra sulod application/controllers/Categories.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function render_category_form($id, $category, $form_error = '') {
         $data['category'] = $category;
         $data['page_title'] = $id === NULL ? 'Add Category' : 'Edit Category';
@@ -205,6 +214,7 @@ class Categories extends CI_Controller {
         $this->load->view('modal/categories/form', $data);
     }
 
+    // Internal helper ni para require permission; tawagon ra sulod application/controllers/Categories.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
         if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
