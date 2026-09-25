@@ -689,7 +689,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var hasSearch = searchInput && searchInput.value.trim() !== '';
 
             if (filterCount) {
-                filterCount.textContent = activeFilters + (activeFilters === 1 ? ' active' : ' active');
+                filterCount.textContent = activeFilters + (activeFilters === 1 ? ' filter active' : ' filters active');
                 filterCount.classList.toggle('d-none', activeFilters === 0);
             }
 
