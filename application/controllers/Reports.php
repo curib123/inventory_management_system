@@ -14,8 +14,6 @@ class Reports extends CI_Controller {
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
         }
-
-        $this->load->model('User_model');
         $this->require_permission('reports.view');
     }
 
