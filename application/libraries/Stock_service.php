@@ -221,6 +221,24 @@ class Stock_service {
         return $this->CI->supplier_service->search_options($query, $limit);
     }
 
+    // Business lookup ni para supplier products; application/controllers/Stock.php ang caller, with active-supplier ug valid-mode rules centralized diri.
+    public function supplier_products($supplier_id, $mode) {
+        $supplier_id = (int) $supplier_id;
+        $mode = $mode === 'stock_out' ? 'stock_out' : 'stock_in';
+        $supplier = $this->CI->Supplier_model->get_by_id($supplier_id);
+
+        if (!$supplier || !(int) $supplier->status) {
+            return array('success' => FALSE, 'status' => 404, 'message' => 'Supplier not found or inactive.');
+        }
+
+        return array(
+            'success' => TRUE,
+            'supplier' => $supplier,
+            'products' => $this->CI->Product_model->get_active_by_supplier($supplier_id, $mode),
+            'mode' => $mode
+        );
+    }
+
     // Search option builder ni para adjustment products; application/controllers/Stock.php ang caller, with supplier-scope validation before query.
     public function adjustment_product_options($query, $supplier_scope, $limit = 20) {
         $supplier_scope = trim((string) $supplier_scope);
