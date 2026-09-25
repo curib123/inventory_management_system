@@ -15,33 +15,31 @@ class Stock_model extends CI_Model {
             return array('success' => FALSE, 'message' => 'A valid stock transaction with at least one item is required.');
         }
 
-        if ($type === 'stock_in') {
-            $supplier_id = filter_var(
-                $supplier_id,
-                FILTER_VALIDATE_INT,
-                array('options' => array(
-                    'min_range' => 1,
-                    'max_range' => Stock_rules::MAX_STOCK
-                ))
+        $supplier_id = filter_var(
+            $supplier_id,
+            FILTER_VALIDATE_INT,
+            array('options' => array(
+                'min_range' => 1,
+                'max_range' => Stock_rules::MAX_STOCK
+            ))
+        );
+
+        if ($supplier_id === FALSE) {
+            return array(
+                'success' => FALSE,
+                'message' => 'A valid supplier is required for stock transactions.'
             );
+        }
 
-            if ($supplier_id === FALSE) {
-                return array(
-                    'success' => FALSE,
-                    'message' => 'A valid supplier is required for stock-in transactions.'
-                );
-            }
+        $supplier_id = (int) $supplier_id;
+        $active_supplier = $this->db
+            ->where('id', $supplier_id)
+            ->where('status', 1)
+            ->count_all_results('suppliers') > 0;
 
-            $supplier_id = (int) $supplier_id;
-            $active_supplier = $this->db
-                ->where('id', $supplier_id)
-                ->where('status', 1)
-                ->count_all_results('suppliers') > 0;
-
-            if (!$active_supplier) {
-                return array('success' => FALSE, 'message' => 'The selected supplier is invalid or inactive.');
-            }
-        } 
+        if (!$active_supplier) {
+            return array('success' => FALSE, 'message' => 'The selected supplier is invalid or inactive.');
+        }
 
         // Normalize first para duplicate product rows ma-combine before stock update.
         $normalized = $this->normalize_items($items);
@@ -76,9 +74,12 @@ class Stock_model extends CI_Model {
                 return array('success' => FALSE, 'message' => 'One of the selected products is invalid or inactive.');
             }
 
-            if ($type === 'stock_in' && (int) $product->supplier_id !== $supplier_id) {
+            if ((int) $product->supplier_id !== $supplier_id) {
                 $this->db->trans_rollback();
-                return array('success' => FALSE, 'message' => $product->product_name . ' is not assigned to the selected supplier.');
+                return array(
+                    'success' => FALSE,
+                    'message' => $product->product_name . ' is not assigned to the selected supplier.'
+                );
             }
 
             try {
