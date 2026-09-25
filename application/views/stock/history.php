@@ -6,7 +6,7 @@ if ($this->User_model->has_permission($current_user_id, 'stock.stock_in')) {
     $page_actions[] = array(
         'label' => 'Stock In',
         'icon' => 'bi-box-arrow-in-down',
-        'class' => 'btn-success',
+        'class' => 'btn-primary',
         'modal_url' => site_url('stock/in')
     );
 }
@@ -15,7 +15,7 @@ if ($this->User_model->has_permission($current_user_id, 'stock.stock_out')) {
     $page_actions[] = array(
         'label' => 'Stock Out',
         'icon' => 'bi-box-arrow-up',
-        'class' => 'btn-warning',
+        'class' => 'btn-danger',
         'modal_url' => site_url('stock/out')
     );
 }
@@ -24,7 +24,7 @@ if ($this->User_model->has_permission($current_user_id, 'stock.adjust')) {
     $page_actions[] = array(
         'label' => 'Adjustment',
         'icon' => 'bi-sliders',
-        'class' => 'btn-primary',
+        'class' => 'btn-warning',
         'modal_url' => site_url('stock/adjustment')
     );
 

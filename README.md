@@ -199,3 +199,18 @@ OK (tests and assertions passed)
 
 Current unit-test areas include authentication/session behavior, DataTables request/pagination rules, report definitions/export formats, and stock calculation/validation rules. PHPUnit is configured to display TestDox output by default and to fail the run on warnings or risky tests.
 
+
+
+
+
+
+
+# new issues to fix
+
+# The Stock out must be like the stock in modal but in reverse.  (pending)
+# DataTable design left the search must be maximize the free space width and right the limit. (pending)
+# DataTable must organize and align perfectly hide ID in datatables tables. (pending)
+# create a centralized searchable dropdown if the data to fetch have possible more data to handle like product and supplier. (pending)
+# stock adjustment must have searchable dropdown for supplier first when select the supplier all product of supplier is show but this is  optional only in next of it below of it must have searchable product dropdown when select.(pending)
+
+# excel not working export and export csv/excell and print only directly pdf excell must have same table design like in pdf table design. (pending)

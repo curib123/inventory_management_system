@@ -39,12 +39,12 @@ $this->load->view('components/modal/header', array(
     <div class="row g-3">
         <div class="col-12 col-md-6">
             <label for="product_name" class="form-label">Product Name</label>
-            <input type="text" id="product_name" name="product_name" class="form-control" required maxlength="150" value="<?php echo html_escape(set_value('product_name', $product_is_edit ? $product->product_name : '')); ?>">
+            <input type="text" id="product_name" name="product_name" class="form-control" required maxlength="150" value="<?php echo html_escape(set_value('product_name', $product_is_edit ? $product->product_name : '')); ?>" autocomplete="off">
         </div>
 
         <div class="col-12 col-md-6">
             <label for="product_code" class="form-label">Product Code</label>
-            <input type="text" id="product_code" name="product_code" class="form-control" required maxlength="50" value="<?php echo html_escape(set_value('product_code', $product_is_edit ? $product->product_code : '')); ?>">
+            <input type="text" id="product_code" name="product_code" class="form-control" required maxlength="50" value="<?php echo html_escape(set_value('product_code', $product_is_edit ? $product->product_code : '')); ?>" autocomplete="off">
             <div class="form-text">Use a stable business code because this appears in stock history and reports.</div>
         </div>
 
@@ -54,7 +54,7 @@ $this->load->view('components/modal/header', array(
             <select id="category_id" name="category_id" class="form-select" required>
                 <option value="">Select Category</option>
                 <?php foreach ($categories as $category): ?>
-                    <option value="<?php echo (int) $category->id; ?>" <?php echo ((string) $selected_category === (string) $category->id) ? 'selected' : ''; ?>>
+                    <option value="<?php echo (int) $category->id; ?>" <?php echo ((string) $selected_category === (string) $category->id) ? 'selected' : ''; ?> autocomplete="off">
                         <?php echo html_escape($category->category_name . ((int) $category->status === 1 ? '' : ' (Inactive)')); ?>
                     </option>
                 <?php endforeach; ?>
@@ -67,7 +67,7 @@ $this->load->view('components/modal/header', array(
             <select id="supplier_id" name="supplier_id" class="form-select">
                 <option value="">No Supplier</option>
                 <?php foreach ($suppliers as $supplier): ?>
-                    <option value="<?php echo (int) $supplier->id; ?>" <?php echo ((string) $selected_supplier === (string) $supplier->id) ? 'selected' : ''; ?>>
+                    <option value="<?php echo (int) $supplier->id; ?>" <?php echo ((string) $selected_supplier === (string) $supplier->id) ? 'selected' : ''; ?> autocomplete="off">
                         <?php echo html_escape($supplier->supplier_name . ((int) $supplier->status === 1 ? '' : ' (Inactive)')); ?>
                     </option>
                 <?php endforeach; ?>
@@ -81,7 +81,7 @@ $this->load->view('components/modal/header', array(
             <select id="unit" name="unit" class="form-select" required>
                 <option value="">Select Unit</option>
                 <?php foreach ($product_units as $unit_value => $unit_label): ?>
-                    <option value="<?php echo html_escape($unit_value); ?>" <?php echo ((string) $selected_unit === (string) $unit_value) ? 'selected' : ''; ?>>
+                    <option value="<?php echo html_escape($unit_value); ?>" <?php echo ((string) $selected_unit === (string) $unit_value) ? 'selected' : ''; ?> autocomplete="off">
                         <?php echo html_escape($unit_label); ?>
                     </option>
                 <?php endforeach; ?>
@@ -91,17 +91,17 @@ $this->load->view('components/modal/header', array(
 
         <div class="col-12 col-md-4">
             <label for="cost_price" class="form-label">Cost Price</label>
-            <input type="number" id="cost_price" name="cost_price" class="form-control" min="0" step="0.01" required value="<?php echo html_escape(set_value('cost_price', $product_is_edit ? $product->cost_price : '0.00')); ?>">
+            <input type="number" id="cost_price" name="cost_price" class="form-control" min="0" step="0.01" required value="<?php echo html_escape(set_value('cost_price', $product_is_edit ? $product->cost_price : '0.00')); ?>" autocomplete="off">
         </div>
 
         <div class="col-12 col-md-4">
             <label for="selling_price" class="form-label">Selling Price</label>
-            <input type="number" id="selling_price" name="selling_price" class="form-control" min="0" step="0.01" required value="<?php echo html_escape(set_value('selling_price', $product_is_edit ? $product->selling_price : '0.00')); ?>">
+            <input type="number" id="selling_price" name="selling_price" class="form-control" min="0" step="0.01" required value="<?php echo html_escape(set_value('selling_price', $product_is_edit ? $product->selling_price : '0.00')); ?>" autocomplete="off">
         </div>
 
         <div class="col-12 col-md-6">
             <label for="reorder_level" class="form-label">Reorder Level</label>
-            <input type="number" id="reorder_level" name="reorder_level" class="form-control" min="0" step="1" required value="<?php echo html_escape(set_value('reorder_level', $product_is_edit ? $product->reorder_level : '0')); ?>">
+            <input type="number" id="reorder_level" name="reorder_level" class="form-control" min="0" step="1" required value="<?php echo html_escape(set_value('reorder_level', $product_is_edit ? $product->reorder_level : '0')); ?>" autocomplete="off">
             <div class="form-text">Low-stock monitoring uses this value to identify products that need replenishment.</div>
         </div>
 

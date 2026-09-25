@@ -6,13 +6,6 @@ $this->load->view('components/modal/header', array(
     'modal_icon' => 'bi-trash3'
 ));
 ?>
-
-<div class="modal-body">
-    <div class="app-confirm-entity mb-3">
-        <div class="app-confirm-entity-label">Role</div>
-        <div class="app-confirm-entity-value"><?php echo html_escape($role->role_name); ?></div>
-    </div>
-
     <?php if (!empty($delete_error)): ?>
         <div class="alert alert-warning mb-0" role="alert">
             <div class="fw-semibold mb-1">Deletion is not available</div>
@@ -23,7 +16,7 @@ $this->load->view('components/modal/header', array(
         $this->load->view('components/modal/confirmation', array(
             'confirmation_variant' => 'danger',
             'confirmation_icon' => 'bi-trash3',
-            'confirmation_title' => 'Delete Role?',
+            'confirmation_title' => 'Delete Role? ' . html_escape($role->role_name),
             'confirmation_message' => 'Deleting permanently removes this role and its permission assignment.',
             'confirmation_items' => array(
                 'This action cannot be undone.',

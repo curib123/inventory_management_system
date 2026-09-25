@@ -8,11 +8,7 @@ $this->load->view('components/modal/header', array(
 ?>
 
 <div class="modal-body">
-    <div class="app-confirm-entity mb-3">
-        <div class="app-confirm-entity-label">Supplier</div>
-        <div class="app-confirm-entity-value"><?php echo html_escape($supplier->supplier_name); ?></div>
-    </div>
-
+   
     <?php if (!empty($delete_error)): ?>
         <div class="alert alert-warning mb-0" role="alert">
             <div class="fw-semibold mb-1">Deletion is not available</div>
@@ -23,7 +19,7 @@ $this->load->view('components/modal/header', array(
         $this->load->view('components/modal/confirmation', array(
             'confirmation_variant' => 'danger',
             'confirmation_icon' => 'bi-trash3',
-            'confirmation_title' => 'Delete Supplier?',
+            'confirmation_title' => 'Delete ' . html_escape($supplier->supplier_name) . ' Supplier ?',
             'confirmation_message' => 'Deleting removes this supplier from future supplier and Stock In selection.',
             'confirmation_items' => array(
                 'This action cannot be undone.',

@@ -25,12 +25,9 @@ $chip_id_prefix = isset($chip_id_prefix) ? $chip_id_prefix : 'choice';
             <?php echo $chip_disabled ? 'disabled' : ''; ?>
         >
         <label class="app-choice-chip" for="<?php echo html_escape($id); ?>">
-            <span class="app-choice-chip-label"><?php echo html_escape($label); ?></span>
-            <?php if ($code !== ''): ?>
-                <code class="app-choice-chip-code"><?php echo html_escape($code); ?></code>
-            <?php endif; ?>
+            <span class="app-choice-chip-label text-center"><?php echo html_escape($label); ?></span>
             <?php if ($description !== ''): ?>
-                <span class="app-choice-chip-description"><?php echo html_escape($description); ?></span>
+                <span class="app-choice-chip-description text-center"><?php echo html_escape($description); ?></span>
             <?php endif; ?>
         </label>
     <?php endforeach; ?>

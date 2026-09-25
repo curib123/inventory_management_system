@@ -85,12 +85,6 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
                 </a>
             <?php endif; ?>
 
-            <?php if ($this->User_model->has_permission($current_user_id, 'categories.view')): ?>
-                <a class="nav-link" href="<?php echo site_url('categories'); ?>">
-                    <i class="bi bi-tags"></i>
-                    <span>Categories</span>
-                </a>
-            <?php endif; ?>
 
             <?php if ($this->User_model->has_permission($current_user_id, 'suppliers.view')): ?>
                 <a class="nav-link" href="<?php echo site_url('suppliers'); ?>">
@@ -110,6 +104,13 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
                 <a class="nav-link" href="<?php echo site_url('stock/low-stock'); ?>">
                     <i class="bi bi-exclamation-triangle"></i>
                     <span>Low Stock</span>
+                </a>
+            <?php endif; ?>
+
+            <?php if ($this->User_model->has_permission($current_user_id, 'categories.view')): ?>
+                <a class="nav-link" href="<?php echo site_url('categories'); ?>">
+                    <i class="bi bi-tags"></i>
+                    <span>Categories</span>
                 </a>
             <?php endif; ?>
 
@@ -143,7 +144,7 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
 
         <div class="logout-section">
             <?php echo form_open('logout'); ?>
-                <button type="submit" class="btn btn-outline-light w-100">
+                <button type="submit" class="btn btn-outline-danger w-100">
                     <i class="bi bi-box-arrow-right me-2"></i>
                     Logout
                 </button>

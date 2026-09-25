@@ -34,7 +34,7 @@ $this->load->view('components/modal/header', array(
 
     <div class="mb-3">
         <label for="category_name" class="form-label">Category Name</label>
-        <input type="text" id="category_name" name="category_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('category_name', $category_is_edit ? $category->category_name : '')); ?>">
+        <input type="text" id="category_name" name="category_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('category_name', $category_is_edit ? $category->category_name : '')); ?>" autocomplete="off">
         <div class="form-text">Use a clear business name that staff can recognize in product lists and reports.</div>
     </div>
 

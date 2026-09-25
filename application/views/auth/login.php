@@ -27,18 +27,20 @@ $ui_page_styled = $ui_page_styled && ui_style_enabled_for(
     >
     <?php endif; ?>
 
+    <link rel="stylesheet" href="<?= html_escape(base_url('assets/css/login.css')); ?>">
+
     <title>Login | Inventory Management System</title>
 </head>
 
-<body class="<?php echo $ui_page_styled ? 'bg-body-tertiary' : ''; ?>">
+<body class=" <?php echo $ui_page_styled ? 'auth-page' : ''; ?>">
     <main class="container min-vh-100 d-flex align-items-center justify-content-center py-4">
-        <div class="card shadow-sm border-0 w-100"<?php echo $ui_page_styled ? ' style="max-width: 420px;"' : ''; ?>>
+        <div class="card shadow-lg border-0 w-100"<?php echo $ui_page_styled ? ' style="max-width: 500px;"' : ''; ?>>
             <div class="card-body p-4 p-md-5">
                 <div class="text-center mb-4">
                     <div class="display-6 text-primary mb-2">
                         <i class="bi bi-box-seam"></i>
                     </div>
-                    <h1 class="h4 mb-1">Inventory Management System</h1>
+                    <h1 class="h3 mb-1 ">Inventory Management System</h1>
                     <p class="text-body-secondary mb-0">Sign in to continue</p>
                 </div>
 

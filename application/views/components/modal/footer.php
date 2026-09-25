@@ -6,7 +6,7 @@ $submit_class = isset($submit_class) ? $submit_class : 'btn-primary';
 $submit_icon = isset($submit_icon) ? $submit_icon : '';
 ?>
 <div class="modal-footer">
-    <button type="button" class="btn <?php echo html_escape($close_class); ?>" data-modal-close>
+    <button type="button" class="btn btn-outline-danger <?php echo html_escape($close_class); ?>" data-modal-close>
         <?php echo html_escape($close_label); ?>
     </button>
 

@@ -25,13 +25,16 @@ $ui_page_styled = $ui_page_styled && ui_style_enabled_for(
         rel="stylesheet"
         href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
     >
+
+    <link rel="stylesheet" href="<?= html_escape(base_url('assets/css/login.css')); ?>">
+
     <?php endif; ?>
 
     <title>Initial Setup | Inventory Management System</title>
 </head>
-<body class="<?php echo $ui_page_styled ? 'bg-body-tertiary' : ''; ?>">
+<body class="<?php echo $ui_page_styled ? 'auth-page' : ''; ?>">
     <main class="container min-vh-100 d-flex align-items-center justify-content-center py-4">
-        <div class="card shadow-sm border-0 w-100"<?php echo $ui_page_styled ? ' style="max-width: 640px;"' : ''; ?>>
+        <div class="card shadow-lg border-0 w-100"<?php echo $ui_page_styled ? ' style="max-width: 640px;"' : ''; ?>>
             <div class="card-body p-4 p-md-5">
                 <div class="text-center mb-4">
                     <div class="display-6 text-primary mb-2">
@@ -39,7 +42,7 @@ $ui_page_styled = $ui_page_styled && ui_style_enabled_for(
                     </div>
                     <h1 class="h4 mb-1">Create the First Administrator</h1>
                     <p class="text-body-secondary mb-0">
-                        This setup is available only while no user account exists.
+                        Note: This setup is available only while no user account exists.
                     </p>
                 </div>
 

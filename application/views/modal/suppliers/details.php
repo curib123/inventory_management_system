@@ -8,7 +8,6 @@ $this->load->view('components/modal/header', array(
 
 <div class="modal-body">
     <dl class="row app-detail-list mb-0">
-        <dt class="col-sm-4">ID</dt><dd class="col-sm-8"><?php echo (int) $supplier->id; ?></dd>
         <dt class="col-sm-4">Name</dt><dd class="col-sm-8"><?php echo html_escape($supplier->supplier_name); ?></dd>
         <dt class="col-sm-4">Contact Person</dt><dd class="col-sm-8"><?php echo html_escape($supplier->contact_person ?: 'N/A'); ?></dd>
         <dt class="col-sm-4">Phone</dt><dd class="col-sm-8"><?php echo html_escape($supplier->phone ?: 'N/A'); ?></dd>

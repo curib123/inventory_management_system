@@ -6,6 +6,7 @@ $card_class = isset($card_class) ? $card_class : '';
 ?>
 <div class="card app-table-card shadow-sm border-0 <?php echo html_escape($card_class); ?>">
     <div class="card-body">
+        
         <div class="table-responsive">
             <table
                 <?php if ($table_id !== ''): ?>id="<?php echo html_escape($table_id); ?>"<?php endif; ?>

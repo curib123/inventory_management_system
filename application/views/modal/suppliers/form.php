@@ -45,7 +45,7 @@ $this->load->view('components/modal/header', array(
 
         <div class="col-12 col-md-6">
             <label for="phone" class="form-label">Phone</label>
-            <input type="text" id="phone" name="phone" class="form-control" maxlength="30" value="<?php echo html_escape(set_value('phone', $supplier_is_edit ? $supplier->phone : '')); ?>">
+            <input type="text" id="phone" name="phone" class="form-control" maxlength="13" value="<?php echo html_escape(set_value('phone', $supplier_is_edit ? $supplier->phone : '')); ?>">
         </div>
 
         <div class="col-12 col-md-6">

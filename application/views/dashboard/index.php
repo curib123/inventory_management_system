@@ -35,7 +35,7 @@ $chart_data = array(
         <?php if ((int) $low_stock_items > 0): ?>
             <div class="app-dashboard-attention">
                 <span class="app-dashboard-attention-icon">
-                    <i class="bi bi-exclamation-triangle"></i>
+                    <i class="bi bi-exclamation-triangle text-warning"></i>
                 </span>
                 <div>
                     <div class="fw-semibold">

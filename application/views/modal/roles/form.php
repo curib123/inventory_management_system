@@ -127,10 +127,7 @@ foreach ((array) $permissions as $permission) {
                 <section class="app-permission-group">
                     <div class="app-permission-group-header">
                         <div>
-                            <div class="fw-semibold"><?php echo html_escape($group['module_name']); ?></div>
-                            <div class="small text-body-secondary">
-                                <code><?php echo html_escape($group['module_key']); ?></code>
-                            </div>
+                            <div class="fw-semibold"><?php echo html_escape($group['module_name']); ?></div>               
                         </div>
                     </div>
 
