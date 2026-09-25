@@ -6,6 +6,7 @@ class Stock_rules {
 
     const MAX_STOCK = 2147483647;
 
+    // Shared service ni para validate stock value; main caller/integration pangitaa sa application/models/Stock_model.php, so didto tan-awa if mangita ka asa ni gigamit.
     public function validate_stock_value($stock) {
         $stock = filter_var(
             $stock,
@@ -25,6 +26,7 @@ class Stock_rules {
         return (int) $stock;
     }
 
+    // Shared service ni para validate quantity; main caller/integration pangitaa sa application/models/Stock_model.php, so didto tan-awa if mangita ka asa ni gigamit.
     public function validate_quantity($quantity) {
         $quantity = filter_var(
             $quantity,
@@ -44,6 +46,7 @@ class Stock_rules {
         return (int) $quantity;
     }
 
+    // Shared service ni para calculate stock; main caller/integration pangitaa sa application/models/Stock_model.php, so didto tan-awa if mangita ka asa ni gigamit.
     public function calculate_stock($current_stock, $quantity, $type) {
         if (!in_array($type, array('stock_in', 'stock_out'), TRUE)) {
             throw new InvalidArgumentException('Invalid stock transaction type.');
