@@ -43,8 +43,8 @@ class Report_model extends CI_Model {
         return $this->db->get()->result_array();
     }
 
-    public function get_datatable($report, $start, $length, $search, $order_column, $order_dir) {
-        $this->build_datatable_query($report, $search);
+    public function get_datatable($report, $start, $length, $search, $order_column, $order_dir, $filters = array()) {
+        $this->build_datatable_query($report, $search, $filters);
         $this->select_report_columns($report);
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
@@ -58,8 +58,8 @@ class Report_model extends CI_Model {
         return $this->db->count_all_results();
     }
 
-    public function count_datatable_filtered($report, $search) {
-        $this->build_datatable_query($report, $search);
+    public function count_datatable_filtered($report, $search, $filters = array()) {
+        $this->build_datatable_query($report, $search, $filters);
         return $this->db->count_all_results();
     }
 
@@ -77,11 +77,21 @@ class Report_model extends CI_Model {
         $this->db->select('t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, s.supplier_name, u.username, t.remarks, t.created_at');
     }
 
-    private function build_datatable_query($report, $search) {
+    private function build_datatable_query($report, $search, $filters = array()) {
         if ($report === 'inventory' || $report === 'valuation') {
             $this->db->from('products p');
             $this->db->join('categories c', 'c.id = p.category_id', 'left');
             $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
+
+            $stock = isset($filters['stock']) ? strtolower((string) $filters['stock']) : '';
+            if ($stock === 'out') {
+                $this->db->where('p.stock <=', 0);
+            } elseif ($stock === 'low') {
+                $this->db->where('p.stock >', 0);
+                $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
+            } elseif ($stock === 'healthy') {
+                $this->db->where('p.stock > p.reorder_level', NULL, FALSE);
+            }
 
             if ($search !== '') {
                 $this->db->group_start();
@@ -100,6 +110,13 @@ class Report_model extends CI_Model {
             $this->db->join('categories c', 'c.id = p.category_id', 'left');
             $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
             $this->db->where('p.status', 1);
+
+            $severity = isset($filters['severity']) ? strtolower((string) $filters['severity']) : '';
+            if ($severity === 'out') {
+                $this->db->where('p.stock <=', 0);
+            } elseif ($severity === 'low') {
+                $this->db->where('p.stock >', 0);
+            }
 
             if ($search !== '') {
                 $this->db->group_start();
@@ -122,6 +139,11 @@ class Report_model extends CI_Model {
             $this->db->where('t.type', 'stock_in');
         } elseif ($report === 'stock-out') {
             $this->db->where('t.type', 'stock_out');
+        } elseif ($report === 'movement') {
+            $type = isset($filters['type']) ? strtolower((string) $filters['type']) : '';
+            if (in_array($type, array('stock_in', 'stock_out', 'adjustment'), TRUE)) {
+                $this->db->where('t.type', $type);
+            }
         }
 
         if ($search !== '') {
