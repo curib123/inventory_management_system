@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Suppliers extends CI_Controller {
 
+    // Setup ni sa Suppliers controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
@@ -18,6 +19,7 @@ class Suppliers extends CI_Controller {
         $this->load->model('User_model');
     }
 
+    // Mao ni ang index flow sa Suppliers; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() {
         $this->require_permission('suppliers.view');
 
@@ -27,11 +29,13 @@ class Suppliers extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
+    // Mao ni ang add flow sa Suppliers; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function add() {
         $this->require_permission('suppliers.create');
         $this->supplier_form();
     }
 
+    // Mao ni ang view flow sa Suppliers; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function view($id) {
         $this->require_permission('suppliers.view');
 
@@ -43,6 +47,7 @@ class Suppliers extends CI_Controller {
         $this->load->view('modal/suppliers/details', $data);
     }
 
+    // Mao ni ang edit flow sa Suppliers; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function edit($id) {
         $this->require_permission('suppliers.edit');
 
@@ -54,6 +59,7 @@ class Suppliers extends CI_Controller {
         $this->supplier_form((int) $id, $supplier);
     }
 
+    // Mao ni ang delete flow sa Suppliers; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function delete($id) {
         $this->require_permission('suppliers.delete');
 
@@ -98,6 +104,7 @@ class Suppliers extends CI_Controller {
         redirect('suppliers');
     }
 
+    // Mao ni ang datatable flow sa Suppliers; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function datatable() {
         $this->require_permission('suppliers.view');
 
@@ -175,6 +182,7 @@ class Suppliers extends CI_Controller {
         $this->output->set_content_type('application/json')->set_output(json_encode($payload));
     }
 
+    // Internal helper ni para supplier form; tawagon ra sulod application/controllers/Suppliers.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function supplier_form($id = NULL, $supplier = NULL) {
         $this->form_validation->set_rules('supplier_name', 'Supplier Name', 'trim|required|max_length[150]');
         $this->form_validation->set_rules('contact_person', 'Contact Person', 'trim|max_length[100]');
@@ -206,6 +214,7 @@ class Suppliers extends CI_Controller {
         redirect('suppliers');
     }
 
+    // Internal helper ni para render supplier form; tawagon ra sulod application/controllers/Suppliers.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function render_supplier_form($id, $supplier, $form_error = '') {
         $data['supplier'] = $supplier;
         $data['page_title'] = $id === NULL ? 'Add Supplier' : 'Edit Supplier';
@@ -214,6 +223,7 @@ class Suppliers extends CI_Controller {
         $this->load->view('modal/suppliers/form', $data);
     }
 
+    // Internal helper ni para require permission; tawagon ra sulod application/controllers/Suppliers.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
         if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
