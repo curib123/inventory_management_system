@@ -9,7 +9,10 @@ if (!defined('ENVIRONMENT')) {
 }
 
 if (ENVIRONMENT === 'development') {
-    error_reporting(E_ALL);
+    // CodeIgniter 3 predates PHP 8.2 dynamic-property deprecations.
+    // Keep real development errors visible without allowing deprecation
+    // notices from the framework core to corrupt headers/AJAX responses.
+    error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
     ini_set('display_errors', '1');
 } else {
     error_reporting(0);
