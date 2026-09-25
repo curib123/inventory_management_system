@@ -113,9 +113,9 @@ class Roles extends CI_Controller {
         );
 
         $current_user_id = (int) $this->session->userdata('user_id');
-        $can_edit_role = $this->User_model->has_permission($current_user_id, 'roles.edit');
-        $can_manage_permissions = $this->User_model->has_permission($current_user_id, 'roles.permissions');
-        $can_delete_role = $this->User_model->has_permission($current_user_id, 'roles.delete');
+        $can_edit_role = $this->authorization_service->has_permission($current_user_id, 'roles.edit');
+        $can_manage_permissions = $this->authorization_service->has_permission($current_user_id, 'roles.permissions');
+        $can_delete_role = $this->authorization_service->has_permission($current_user_id, 'roles.delete');
 
         $rows = array();
 
@@ -175,10 +175,10 @@ class Roles extends CI_Controller {
         $current_user_id = (int) $this->session->userdata('user_id');
 
         $can_edit_role = $id === NULL
-            ? $this->User_model->has_permission($current_user_id, 'roles.create')
-            : $this->User_model->has_permission($current_user_id, 'roles.edit');
+            ? $this->authorization_service->has_permission($current_user_id, 'roles.create')
+            : $this->authorization_service->has_permission($current_user_id, 'roles.edit');
 
-        $can_manage_permissions = $this->User_model->has_permission(
+        $can_manage_permissions = $this->authorization_service->has_permission(
             $current_user_id,
             'roles.permissions'
         );
@@ -289,7 +289,7 @@ class Roles extends CI_Controller {
     private function require_permission($permission_key) {
         $user_id = (int) $this->session->userdata('user_id');
 
-        if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
+        if (!$user_id || !$this->authorization_service->has_permission($user_id, $permission_key)) {
             show_error('You do not have permission to access this page.', 403, 'Access Denied');
         }
     }
@@ -300,7 +300,7 @@ class Roles extends CI_Controller {
 
         if (
             !$user_id ||
-            !$this->User_model->has_any_permission($user_id, $permission_keys)
+            !$this->authorization_service->has_any_permission($user_id, $permission_keys)
         ) {
             show_error('You do not have permission to access this page.', 403, 'Access Denied');
         }
