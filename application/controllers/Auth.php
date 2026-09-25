@@ -4,6 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Auth extends CI_Controller {
 
+    // Setup ni sa Auth controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
         $this->load->model('User_model');
@@ -11,6 +12,7 @@ class Auth extends CI_Controller {
         $this->load->helper(array('url', 'form'));
     }
 
+    // Mao ni ang index flow sa Auth; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function index() {
         if ($this->session->userdata('logged_in')) {
             $this->redirect_to_authorized_page();
@@ -20,6 +22,7 @@ class Auth extends CI_Controller {
         $this->login();
     }
 
+    // Mao ni ang login flow sa Auth; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function login() {
         if ($this->User_model->count_all() === 0) {
             redirect('setup');
@@ -70,6 +73,7 @@ class Auth extends CI_Controller {
         $this->load->view('auth/login');
     }
 
+    // Mao ni ang change password flow sa Auth; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function change_password() {
         if (!$this->session->userdata('logged_in')) {
             show_error('Your session is no longer active.', 401, 'Session Expired');
@@ -160,6 +164,7 @@ class Auth extends CI_Controller {
             ->set_output('');
     }
 
+    // Mao ni ang logout confirm flow sa Auth; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function logout_confirm() {
         if (!$this->session->userdata('logged_in')) {
             show_error('Your session is no longer active.', 401, 'Session Expired');
@@ -172,6 +177,7 @@ class Auth extends CI_Controller {
         $this->load->view('modal/auth/logout');
     }
 
+    // Mao ni ang logout flow sa Auth; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function logout() {
         if ($this->input->method(TRUE) !== 'POST') {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
@@ -181,6 +187,7 @@ class Auth extends CI_Controller {
         redirect('login');
     }
 
+    // Internal helper ni para redirect to authorized page; tawagon ra sulod application/controllers/Auth.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function redirect_to_authorized_page() {
         $user_id = (int) $this->session->userdata('user_id');
 
