@@ -7,7 +7,6 @@ class Auth extends CI_Controller {
     // Setup ni sa Auth controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
-        $this->load->model('User_model');
         $this->load->library(array('Auth_service', 'User_service', 'session', 'form_validation'));
         $this->load->helper(array('url', 'form'));
     }
@@ -24,7 +23,7 @@ class Auth extends CI_Controller {
 
     // Mao ni ang login flow sa Auth; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function login() {
-        if ($this->User_model->count_all() === 0) {
+        if (!$this->auth_service->has_users()) {
             redirect('setup');
             return;
         }
@@ -53,7 +52,6 @@ class Auth extends CI_Controller {
             }
 
             $session_data = $this->auth_service->authenticate(
-                $this->User_model,
                 trim($this->input->post('username', TRUE)),
                 (string) $this->input->post('password', FALSE)
             );
