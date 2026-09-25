@@ -384,8 +384,8 @@ class Stock_model extends CI_Model {
         ));
     }
 
-    public function get_transactions_datatable($start, $length, $search, $order_column, $order_dir) {
-        $this->build_transactions_datatable_query($search);
+    public function get_transactions_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
+        $this->build_transactions_datatable_query($search, $filters);
         $this->db->select('t.id, t.transaction_no, t.type, t.created_at, u.username, s.supplier_name');
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
@@ -395,13 +395,13 @@ class Stock_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function count_transactions_filtered($search) {
-        $this->build_transactions_datatable_query($search);
+    public function count_transactions_filtered($search, $filters = array()) {
+        $this->build_transactions_datatable_query($search, $filters);
         return $this->db->count_all_results();
     }
 
-    public function get_adjustments_datatable($start, $length, $search, $order_column, $order_dir) {
-        $this->build_adjustments_datatable_query($search);
+    public function get_adjustments_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
+        $this->build_adjustments_datatable_query($search, $filters);
         $this->db->select('a.id, a.system_stock, a.actual_stock, a.difference, a.reason, a.created_at, p.product_code, p.product_name, u.username');
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
@@ -411,13 +411,13 @@ class Stock_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function count_adjustments_filtered($search) {
-        $this->build_adjustments_datatable_query($search);
+    public function count_adjustments_filtered($search, $filters = array()) {
+        $this->build_adjustments_datatable_query($search, $filters);
         return $this->db->count_all_results();
     }
 
-    public function get_low_stock_datatable($start, $length, $search, $order_column, $order_dir) {
-        $this->build_low_stock_datatable_query($search);
+    public function get_low_stock_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
+        $this->build_low_stock_datatable_query($search, $filters);
         $this->db->select('p.product_code, p.product_name, p.stock, p.reorder_level, p.unit');
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
@@ -426,15 +426,20 @@ class Stock_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function count_low_stock_filtered($search) {
-        $this->build_low_stock_datatable_query($search);
+    public function count_low_stock_filtered($search, $filters = array()) {
+        $this->build_low_stock_datatable_query($search, $filters);
         return $this->db->count_all_results();
     }
 
-    private function build_transactions_datatable_query($search) {
+    private function build_transactions_datatable_query($search, $filters = array()) {
         $this->db->from('stock_transactions t');
         $this->db->join('users u', 'u.id = t.created_by');
         $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
+
+        $type = isset($filters['type']) ? strtolower((string) $filters['type']) : '';
+        if (in_array($type, array('stock_in', 'stock_out', 'adjustment'), TRUE)) {
+            $this->db->where('t.type', $type);
+        }
 
         if ($search !== '') {
             $this->db->group_start();
@@ -448,10 +453,17 @@ class Stock_model extends CI_Model {
         }
     }
 
-    private function build_adjustments_datatable_query($search) {
+    private function build_adjustments_datatable_query($search, $filters = array()) {
         $this->db->from('stock_adjustments a');
         $this->db->join('products p', 'p.id = a.product_id');
         $this->db->join('users u', 'u.id = a.created_by');
+
+        $difference = isset($filters['difference']) ? strtolower((string) $filters['difference']) : '';
+        if ($difference === 'increase') {
+            $this->db->where('a.difference >', 0);
+        } elseif ($difference === 'decrease') {
+            $this->db->where('a.difference <', 0);
+        }
 
         if ($search !== '') {
             $this->db->group_start();
@@ -464,10 +476,17 @@ class Stock_model extends CI_Model {
         }
     }
 
-    private function build_low_stock_datatable_query($search) {
+    private function build_low_stock_datatable_query($search, $filters = array()) {
         $this->db->from('products p');
         $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
         $this->db->where('p.status', 1);
+
+        $severity = isset($filters['severity']) ? strtolower((string) $filters['severity']) : '';
+        if ($severity === 'out') {
+            $this->db->where('p.stock <=', 0);
+        } elseif ($severity === 'low') {
+            $this->db->where('p.stock >', 0);
+        }
 
         if ($search !== '') {
             $this->db->group_start();
