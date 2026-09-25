@@ -415,7 +415,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
-            select.disabled = true;
             search.setAttribute('aria-busy', 'true');
 
             try {
@@ -449,7 +448,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Keep the current selected value if remote search temporarily fails.
             } finally {
                 if (sequence === searchSequence) {
-                    select.disabled = false;
                     search.removeAttribute('aria-busy');
                 }
             }
@@ -558,9 +556,14 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         var empty = list.querySelector('[data-stock-filter-empty]');
+        var resultCount = list.querySelector('[data-stock-result-count]');
 
         if (empty) {
             empty.classList.toggle('d-none', visibleCount > 0);
+        }
+
+        if (resultCount) {
+            resultCount.textContent = String(visibleCount);
         }
     }
 
