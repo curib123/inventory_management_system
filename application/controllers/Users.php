@@ -118,7 +118,8 @@ class Users extends CI_Controller {
             $request['length'],
             $request['search'],
             $request['order_column'],
-            $request['order_dir']
+            $request['order_dir'],
+            $request['filters']
         );
 
         $rows = array();
@@ -160,7 +161,7 @@ class Users extends CI_Controller {
         $payload = $this->datatable_service->payload(
             $request['draw'],
             $this->User_model->count_all(),
-            $this->User_model->count_datatable_filtered($request['search']),
+            $this->User_model->count_datatable_filtered($request['search'], $request['filters']),
             $rows
         );
 
