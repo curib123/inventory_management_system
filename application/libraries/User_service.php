@@ -78,7 +78,7 @@ class User_service {
     }
 
     // Business flow ni para delete user; application/controllers/Users.php ang caller, then self-delete ug history rules diri gi-check.
-    public function delete($id, $current_session_user_id) {
+    public function delete($id, $current_session_user_id, $execute = TRUE) {
         $id = (int) $id;
         $user = $this->CI->User_model->get_by_id($id);
 
@@ -95,6 +95,10 @@ class User_service {
                 'success' => FALSE,
                 'message' => 'This user has transaction or activity history. Set the account to inactive instead of deleting it.'
             );
+        }
+
+        if (!$execute) {
+            return array('success' => TRUE, 'user' => $user);
         }
 
         if (!$this->CI->User_model->delete($id)) {
