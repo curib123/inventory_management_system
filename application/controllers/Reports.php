@@ -263,7 +263,7 @@ class Reports extends CI_Controller {
             }
 
             $summary['Total Stock'] = number_format($total_stock);
-            $summary['Inventory Value'] = number_format($total_value, 2);
+            $summary['Inventory Value'] = '₱' . number_format($total_value, 2);
             return $summary;
         }
 
@@ -289,7 +289,7 @@ class Reports extends CI_Controller {
         }
 
         $summary['Total Quantity'] = number_format($total_quantity);
-        $summary['Movement Value'] = number_format($movement_value, 2);
+        $summary['Movement Value'] = '₱' . number_format($movement_value, 2);
 
         return $summary;
     }
@@ -791,7 +791,7 @@ private function csv_safe_value($value)
 
         if (in_array($field, $decimal_fields, TRUE) && is_numeric($value)) {
             $sheet->setCellValue($coordinate, (float) $value);
-            $sheet->getStyle($coordinate)->getNumberFormat()->setFormatCode('#,##0.00');
+            $sheet->getStyle($coordinate)->getNumberFormat()->setFormatCode('"₱"#,##0.00');
             return;
         }
 
@@ -878,11 +878,11 @@ private function csv_safe_value($value)
         $font = $dompdf->getFontMetrics()->getFont('Helvetica', 'normal');
         $canvas = $dompdf->getCanvas();
         $canvas->page_text(
-            700,
-            570,
+            max(0, $canvas->get_width() - 105),
+            max(0, $canvas->get_height() - 22),
             'Page {PAGE_NUM} of {PAGE_COUNT}',
             $font,
-            8,
+            7,
             array(0.39, 0.45, 0.55)
         );
 
