@@ -89,7 +89,7 @@ SELECT
     NULL,
     'Administrator',
     'admin',
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC4J2d4K5L7X1Q7X7K',
+    '$2y$12$rKP9AsK52IcOtgAQk4H54.3QivpEL0BVjbZj9SiaB6kyB/Dqav2uO',
     id,
     1
 FROM roles
@@ -108,7 +108,7 @@ SELECT
     NULL,
     'Staff',
     'staff',
-    '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC4J2d4K5L7X1Q7X7K',
+    '$2y$12$rKP9AsK52IcOtgAQk4H54.3QivpEL0BVjbZj9SiaB6kyB/Dqav2uO',
     id,
     1
 FROM roles
