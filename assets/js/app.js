@@ -285,10 +285,159 @@ document.addEventListener('DOMContentLoaded', function () {
         wrapper.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
 
+    function refreshSearchableSelect(select) {
+        if (!select || !select._searchableInput) {
+            return;
+        }
+
+        var query = select._searchableInput.value.trim().toLowerCase();
+
+        Array.from(select.options).forEach(function (option, index) {
+            if (index === 0 || option.value === '') {
+                option.hidden = false;
+                return;
+            }
+
+            var externallyHidden = option.getAttribute('data-filter-hidden') === '1';
+            var searchableText = String(
+                option.getAttribute('data-search-text') || option.textContent || ''
+            ).toLowerCase();
+
+            option.hidden = externallyHidden || (query !== '' && searchableText.indexOf(query) === -1);
+        });
+    }
+
+    function initializeSearchableSelect(select) {
+        if (!select || select.getAttribute('data-searchable-ready') === '1') {
+            return;
+        }
+
+        select.setAttribute('data-searchable-ready', '1');
+
+        var wrapper = document.createElement('div');
+        wrapper.className = 'app-searchable-select';
+
+        var search = document.createElement('input');
+        search.type = 'search';
+        search.className = 'form-control form-control-sm app-searchable-select-search';
+        search.placeholder = select.getAttribute('data-search-placeholder') || 'Search options...';
+        search.autocomplete = 'off';
+        search.setAttribute('aria-label', search.placeholder);
+
+        var parent = select.parentNode;
+        parent.insertBefore(wrapper, select);
+        wrapper.appendChild(search);
+        wrapper.appendChild(select);
+
+        select._searchableInput = search;
+        select._refreshSearchable = function () {
+            refreshSearchableSelect(select);
+        };
+
+        search.addEventListener('input', function () {
+            refreshSearchableSelect(select);
+        });
+
+        select.addEventListener('change', function () {
+            search.value = '';
+            refreshSearchableSelect(select);
+        });
+
+        refreshSearchableSelect(select);
+    }
+
+    function initializeSearchableSelects(container) {
+        if (!container) {
+            return;
+        }
+
+        container.querySelectorAll('select[data-searchable-select]').forEach(function (select) {
+            initializeSearchableSelect(select);
+        });
+    }
+
+    function filterAdjustmentProducts(supplierSelect) {
+        if (!supplierSelect) {
+            return;
+        }
+
+        var targetSelector = supplierSelect.getAttribute('data-product-target');
+        var productSelect = targetSelector ? document.querySelector(targetSelector) : null;
+
+        if (!productSelect) {
+            return;
+        }
+
+        var supplierId = supplierSelect.value;
+
+        Array.from(productSelect.options).forEach(function (option) {
+            if (option.value === '') {
+                option.removeAttribute('data-filter-hidden');
+                option.disabled = false;
+                return;
+            }
+
+            var matches = supplierId === '' ||
+                option.getAttribute('data-supplier-id') === supplierId;
+
+            option.setAttribute('data-filter-hidden', matches ? '0' : '1');
+            option.disabled = !matches;
+        });
+
+        var selectedOption = productSelect.options[productSelect.selectedIndex];
+
+        if (
+            selectedOption &&
+            selectedOption.value !== '' &&
+            selectedOption.getAttribute('data-filter-hidden') === '1'
+        ) {
+            productSelect.value = '';
+        }
+
+        if (typeof productSelect._refreshSearchable === 'function') {
+            productSelect._refreshSearchable();
+        }
+    }
+
+    function filterStockProducts(input) {
+        var list = input ? input.closest('.modal-body') : null;
+
+        if (!list) {
+            return;
+        }
+
+        var query = input.value.trim().toLowerCase();
+        var cards = list.querySelectorAll('[data-stock-product-card]');
+        var visibleCount = 0;
+
+        cards.forEach(function (card) {
+            var text = String(card.getAttribute('data-stock-product-search') || '').toLowerCase();
+            var matches = query === '' || text.indexOf(query) !== -1;
+
+            card.classList.toggle('d-none', !matches);
+
+            if (matches) {
+                visibleCount++;
+            }
+        });
+
+        var empty = list.querySelector('[data-stock-filter-empty]');
+
+        if (empty) {
+            empty.classList.toggle('d-none', visibleCount > 0);
+        }
+    }
+
     function enhanceFeedback(container) {
         if (!container) {
             return;
         }
+
+        initializeSearchableSelects(container);
+
+        container.querySelectorAll('[data-adjustment-supplier]').forEach(function (supplierSelect) {
+            filterAdjustmentProducts(supplierSelect);
+        });
 
         container.querySelectorAll('.alert-danger, .alert-warning').forEach(function (alert) {
             alert.classList.add('app-feedback-alert');
@@ -519,11 +668,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         var current = parseInt(preview.getAttribute('data-current-stock'), 10) || 0;
+        var direction = parseInt(preview.getAttribute('data-stock-direction'), 10) || 1;
         var quantity = /^\d+$/.test(input.value.trim())
             ? parseInt(input.value, 10)
             : 0;
+        var nextStock = current + (direction * quantity);
 
-        preview.textContent = String(current + quantity);
+        preview.textContent = String(nextStock);
+        preview.classList.toggle('text-danger', nextStock < 0);
+        input.classList.toggle('is-invalid', nextStock < 0);
     }
 
     var confirmationStates = new WeakMap();
@@ -814,6 +967,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (quantityInput) {
             updateStockPreview(quantityInput);
         }
+
+        var productFilter = event.target.closest('[data-stock-product-filter]');
+
+        if (productFilter) {
+            filterStockProducts(productFilter);
+        }
     });
 
     document.addEventListener('change', function (event) {
@@ -821,6 +980,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (supplierSelect) {
             loadSupplierProducts(supplierSelect);
+        }
+
+        var adjustmentSupplier = event.target.closest('[data-adjustment-supplier]');
+
+        if (adjustmentSupplier) {
+            filterAdjustmentProducts(adjustmentSupplier);
         }
     });
 
