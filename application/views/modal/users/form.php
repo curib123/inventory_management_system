@@ -3,10 +3,14 @@ $user_is_edit = isset($user) && $user;
 $user_confirmation = array(
     'title' => $user_is_edit ? 'Save user changes?' : 'Create this user account?',
     'message' => $user_is_edit
-        ? 'Review the user profile, role, status, and password changes before saving.'
+        ? 'Review the user profile, role, status, and any password reset before saving.'
         : 'Review the account details and assigned role before creating access.',
-    'impact' => 'Role and status changes control what this user can access. Password changes take effect immediately after saving.',
-    'assist' => 'Confirm the person, username, assigned role, account status, and whether a password change is intended.',
+    'impact' => $user_is_edit
+        ? 'Role, status, and password reset changes can immediately affect this account.'
+        : 'A secure temporary password will be generated automatically and shown once after the account is created.',
+    'assist' => $user_is_edit
+        ? 'Confirm the person, username, assigned role, account status, and whether a password reset is intended.'
+        : 'Copy the generated temporary password after creation and share it securely with the user.'
     'label' => $user_is_edit ? 'Save User Changes' : 'Create User',
     'variant' => 'primary',
     'icon' => 'bi-person-check'
@@ -53,17 +57,36 @@ $this->load->view('components/modal/header', array(
             <div class="form-text">Use a unique username the user can identify and remember.</div>
         </div>
 
-        <div class="col-12">
-            <label for="password" class="form-label">
-                Password<?php echo $user_is_edit ? ' (leave blank to keep current password)' : ''; ?>
-            </label>
-            <input type="password" id="password" name="password" class="form-control" <?php echo $user_is_edit ? '' : 'required'; ?> minlength="8" maxlength="255" autocomplete="new-password">
-            <div class="form-text">
-                <?php echo $user_is_edit
-                    ? 'Only enter a password when you intentionally want to replace the current one.'
-                    : 'Use at least 8 characters. The user can sign in with this password after the account is created.'; ?>
+        <?php if ($user_is_edit): ?>
+            <div class="col-12">
+                <label for="password" class="form-label">
+                    Reset Password <span class="text-body-secondary">(Optional)</span>
+                </label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control"
+                    minlength="8"
+                    maxlength="255"
+                    autocomplete="new-password"
+                >
+                <div class="form-text">
+                    Leave blank to keep the current password. If you reset it here, the user will be prompted to change it after the next login.
+                </div>
             </div>
-        </div>
+        <?php else: ?>
+            <div class="col-12">
+                <?php
+                $this->load->view('components/form/assist_note', array(
+                    'assist_title' => 'Temporary password is generated automatically',
+                    'assist_text' => 'After this account is created, the system will show a secure temporary password once. The user can sign in with it and will be asked to choose a new password.',
+                    'assist_variant' => 'info',
+                    'assist_icon' => 'bi-key'
+                ));
+                ?>
+            </div>
+        <?php endif; ?>
 
         <div class="col-12 col-md-6">
             <label for="role_id" class="form-label">Role</label>
