@@ -45,9 +45,23 @@ $this->load->view('components/page_header', array(
 $this->load->view('components/data_table', array(
     'source' => site_url('stock/history/datatable'),
     'table_id' => 'stock-history-table',
+    'search_placeholder' => 'Search transaction, supplier, user, or date...',
+    'filters' => array(
+        array(
+            'name' => 'type',
+            'label' => 'Movement type',
+            'icon' => 'bi-arrow-left-right',
+            'options' => array(
+                '' => 'All movements',
+                'stock_in' => 'Stock In',
+                'stock_out' => 'Stock Out',
+                'adjustment' => 'Adjustment'
+            )
+        )
+    ),
     'columns' => array(
         array('label' => 'Transaction No.', 'class' => 'text-nowrap'),
-        array('label' => 'Type', 'class' => 'text-nowrap'),
+        array('label' => 'Type', 'class' => 'text-nowrap', 'render' => 'movement'),
         'Supplier',
         'Processed By',
         array('label' => 'Date', 'class' => 'text-nowrap'),
