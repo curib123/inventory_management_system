@@ -63,6 +63,7 @@ $route['stock/history/datatable'] = 'stock/history_datatable';
 $route['stock/details/(:num)'] = 'stock/details/$1';
 $route['stock/in'] = 'stock/stock_in';
 $route['stock/out'] = 'stock/stock_out';
+$route['stock/suppliers/search'] = 'stock/supplier_search';
 $route['stock/supplier-products/(:num)'] = 'stock/supplier_products/$1';
 $route['stock/adjustment'] = 'stock/adjustment';
 $route['stock/adjustments'] = 'stock/adjustments';
