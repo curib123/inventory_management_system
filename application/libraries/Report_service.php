@@ -13,6 +13,11 @@ class Report_service {
         $this->CI->load->library('Report_rules');
     }
 
+    // Business rule ni para supported export format; application/controllers/Reports.php ang caller so format policy stays in report service layer.
+    public function export_format_is_supported($format) {
+        return $this->CI->report_rules->export_format_is_supported($format);
+    }
+
     // Business definition ni para report; application/controllers/Reports.php ang caller, with supported-report validation delegated sa Report_rules.
     public function definition($report) {
         return $this->CI->report_rules->get($report);
