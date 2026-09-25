@@ -4,26 +4,32 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Authorization_service {
 
-    private $CI;
+    private $user_model;
 
-    // Setup ni sa Authorization_service; auto-loaded ni para controllers ug shared views one place ra mag-check permissions.
-    public function __construct() {
-        $this->CI =& get_instance();
-        $this->CI->load->model('User_model');
+    // Setup ni sa Authorization_service; CodeIgniter mo-inject real User_model, while tests pwede mo-pass mock para clean permission boundary.
+    public function __construct($dependencies = array()) {
+        if (isset($dependencies['user_model'])) {
+            $this->user_model = $dependencies['user_model'];
+            return;
+        }
+
+        $CI =& get_instance();
+        $CI->load->model('User_model');
+        $this->user_model = $CI->User_model;
     }
 
     // Business rule ni para one permission check; controllers ug application/views/templates/header.php ang callers, while User_model permission keys query/cache ra.
     public function has_permission($user_id, $permission_key) {
         return in_array(
             (string) $permission_key,
-            $this->CI->User_model->get_user_permission_keys((int) $user_id),
+            $this->user_model->get_user_permission_keys((int) $user_id),
             TRUE
         );
     }
 
     // Business rule ni para any-permission check; controllers ug shared navigation ang callers when one of several permissions can grant access.
     public function has_any_permission($user_id, $permission_keys) {
-        $user_permissions = $this->CI->User_model->get_user_permission_keys((int) $user_id);
+        $user_permissions = $this->user_model->get_user_permission_keys((int) $user_id);
 
         foreach ((array) $permission_keys as $permission_key) {
             if (in_array((string) $permission_key, $user_permissions, TRUE)) {
