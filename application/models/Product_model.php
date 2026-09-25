@@ -4,11 +4,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Product_model extends CI_Model {
 
+    // Setup ni sa Product_model; CodeIgniter mo-run ani when gi-load ang model, with main integration sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php.
     public function __construct() {
         parent::__construct();
         $this->load->database();
     }
 
+    // Data helper ni para get all; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_all($limit = NULL, $offset = 0) {
         $this->db->select('p.*, c.category_name, s.supplier_name');
         $this->db->from('products p');
@@ -23,6 +25,7 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para get active; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_active($limit = NULL, $offset = 0) {
         $this->db->select('p.*, c.category_name, s.supplier_name');
         $this->db->from('products p');
@@ -38,6 +41,7 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para search active; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function search_active($query = '', $supplier_scope = NULL, $limit = 20) {
         $query = trim((string) $query);
         $limit = max(1, min(50, (int) $limit));
@@ -71,6 +75,7 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para get active by supplier; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_active_by_supplier($supplier_id, $mode = 'stock_in') {
         $this->db->select(
             'p.id, p.product_code, p.product_name, p.unit, p.stock, ' .
@@ -94,10 +99,12 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para count all; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function count_all() {
         return $this->db->count_all('products');
     }
 
+    // Data helper ni para get by id; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_by_id($id) {
         $this->db->select('p.*, c.category_name, s.supplier_name');
         $this->db->from('products p');
@@ -108,6 +115,7 @@ class Product_model extends CI_Model {
         return $this->db->get()->row();
     }
 
+    // Data helper ni para code exists; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function code_exists($code, $exclude_id = NULL) {
         $this->db->where('product_code', trim($code));
 
@@ -118,12 +126,14 @@ class Product_model extends CI_Model {
         return $this->db->count_all_results('products') > 0;
     }
 
+    // Data helper ni para has transaction history; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function has_transaction_history($id) {
         return $this->db
             ->where('product_id', (int) $id)
             ->count_all_results('stock_transaction_items') > 0;
     }
 
+    // Data helper ni para save; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function save($data, $id = NULL) {
         if (!$this->relationships_are_valid($data, $id)) {
             return FALSE;
@@ -138,6 +148,7 @@ class Product_model extends CI_Model {
         return $this->db->insert('products', $data);
     }
 
+    // Data helper ni para relationships are valid; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     private function relationships_are_valid($data, $id = NULL) {
         $current = NULL;
 
@@ -219,14 +230,17 @@ class Product_model extends CI_Model {
         return TRUE;
     }
 
+    // Data helper ni para delete; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function delete($id) {
         return $this->db->delete('products', array('id' => (int) $id));
     }
 
+    // Data helper ni para get total products; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_total_products() {
         return $this->db->count_all('products');
     }
 
+    // Data helper ni para get total stock; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_total_stock() {
         $this->db->select_sum('stock');
         $row = $this->db->get('products')->row();
@@ -234,6 +248,7 @@ class Product_model extends CI_Model {
         return ($row && $row->stock !== NULL) ? (int) $row->stock : 0;
     }
 
+    // Data helper ni para get low stock products; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_low_stock_products() {
         $this->db->select('p.*, c.category_name');
         $this->db->from('products p');
@@ -245,6 +260,7 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para get datatable; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
         $this->build_datatable_query($search, $filters);
         $this->db->select(
@@ -260,11 +276,13 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
+    // Data helper ni para count datatable filtered; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     public function count_datatable_filtered($search, $filters = array()) {
         $this->build_datatable_query($search, $filters);
         return $this->db->count_all_results();
     }
 
+    // Data helper ni para build datatable query; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
     private function build_datatable_query($search, $filters = array()) {
         $this->db->from('products p');
         $this->db->join('categories c', 'c.id = p.category_id', 'left');
