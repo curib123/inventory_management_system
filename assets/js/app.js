@@ -154,10 +154,14 @@ document.addEventListener('DOMContentLoaded', function () {
             var documentNode = new DOMParser().parseFromString(html, 'text/html');
             var heading = documentNode.querySelector('[data-error-heading], h1, h2, title');
             var message = documentNode.querySelector('[data-error-message], .app-error-message, main p, body p');
+            var errorId = documentNode.querySelector('[data-error-id]');
+            var errorLog = documentNode.querySelector('[data-error-log]');
 
             return {
                 title: heading ? cleanText(heading.textContent, '') : '',
-                message: message ? cleanText(message.textContent, '') : ''
+                message: message ? cleanText(message.textContent, '') : '',
+                reference: errorId ? cleanText(errorId.textContent, '') : '',
+                log: errorLog ? cleanText(errorLog.textContent, '') : ''
             };
         } catch (error) {
             return {};
@@ -170,6 +174,9 @@ document.addEventListener('DOMContentLoaded', function () {
         var reference = response && response.headers
             ? response.headers.get('X-Error-Reference')
             : '';
+        var logReference = response && response.headers
+            ? response.headers.get('X-Error-Log')
+            : '';
 
         if (server.title && !/^error$/i.test(server.title)) {
             problem.title = server.title;
@@ -180,7 +187,8 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         problem.status = response ? response.status : 0;
-        problem.reference = reference || '';
+        problem.reference = reference || server.reference || '';
+        problem.log = logReference || server.log || '';
 
         return problem;
     }
@@ -192,7 +200,10 @@ document.addEventListener('DOMContentLoaded', function () {
             ? '<span class="app-problem-code">HTTP ' + escapeHtml(problem.status) + '</span>'
             : '<span class="app-problem-code">NETWORK</span>';
         var reference = problem.reference
-            ? '<div class="app-problem-reference"><span>Support reference</span><strong>' + escapeHtml(problem.reference) + '</strong></div>'
+            ? '<div class="app-problem-reference"><span>Error ID</span><strong>' + escapeHtml(problem.reference) + '</strong></div>'
+            : '';
+        var logReference = problem.log
+            ? '<div class="app-problem-reference"><span>Application log</span><strong>' + escapeHtml(problem.log) + '</strong></div>'
             : '';
 
         return '' +
@@ -221,6 +232,7 @@ document.addEventListener('DOMContentLoaded', function () {
                       '</div>'
                     : '') +
                 reference +
+                logReference +
             '</div>';
     }
 
