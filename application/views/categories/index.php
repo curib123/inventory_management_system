@@ -20,11 +20,11 @@ $this->load->view('components/data_table', array(
     'source' => site_url('categories/datatable'),
     'table_id' => 'categories-table',
     'columns' => array(
-        'ID',
+        array('label' => 'ID', 'visible' => false, 'orderable' => false),
         'Category',
-        'Status',
-        'Products',
-        array('label' => 'Actions', 'orderable' => false)
+        array('label' => 'Status', 'class' => 'text-center text-nowrap'),
+        array('label' => 'Products', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')
     )
 ));
 
