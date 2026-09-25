@@ -10,9 +10,9 @@ $this->load->view('components/data_table', array(
     'columns' => array(
         'Code',
         'Product',
-        'Current Stock',
-        'Reorder Level',
-        'Unit'
+        array('label' => 'Current Stock', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Reorder Level', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Unit', 'class' => 'text-nowrap')
     )
 ));
 ?>
