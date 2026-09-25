@@ -270,6 +270,27 @@ SOURCE database/migrations/20260926_add_must_change_password.sql;
 
 Fresh installations already include the column in `database/inventory_management_db.sql`.
 
+## Centralized SaaS UI and error handling
+
+The authenticated application uses a centralized enterprise SaaS design system:
+
+- Shared top navigation, sidebar, page shell, spacing, typography, colors, buttons, badges, forms, and responsive layout.
+- Shared DataTable component for search, contextual filters, reset state, rows-per-page limits, record counts, pagination, responsive scrolling, badges, and action controls.
+- Shared modal container/header/footer and confirmation patterns for Create, Edit, View, Delete, Stock In, Stock Out, Stock Adjustment, Logout, Change Password, alerts, and one-time generated-password screens.
+- Shared searchable-select behavior for database-backed relationship dropdowns. Large Supplier, Product, Category, and Role lookups use server-side search; small fixed enumerations remain standard dropdowns.
+- Central CSS files (`app.css`, `table.css`, `modal.css`, `sidebar.css`) own the normal application styling instead of page-specific inline CSS.
+- Stock Adjustments are explicitly included in the page styling configuration.
+
+Application errors are centralized through `application/core/MY_Exceptions.php` and the shared SaaS-style error page:
+
+- 404, permission/general errors, database failures, PHP runtime errors, and uncaught exceptions use the same visual error experience.
+- Every handled incident receives an Error ID such as `ERR-XXXXXXXXXX`.
+- The same Error ID is returned in `X-Error-Reference`, displayed on the full error page or AJAX/modal error panel, and written into the application log.
+- The page displays the exact dated log file, for example `application/logs/log-2026-09-26.log`.
+- Search that Error ID inside the displayed log file to find the detailed server-side error.
+- Database query/connection details and absolute server paths stay out of the normal browser error page; detailed diagnostics remain in the protected log.
+- `application/logs/` is committed with web-access protection so fresh clones can write traceable logs.
+
 ## Latest QA checklist
 
 - [x] Add relevant filtration to each DataTable. Filters remain contextual rather than adding unnecessary controls to every page.
@@ -281,3 +302,5 @@ Fresh installations already include the column in `database/inventory_management
 - [x] Report CSV, Excel, and Print PDF exports inherit the current report search and active table filters, so downloaded/printed data matches the user's filtered report scope.
 - [x] Stock In, Stock Out, and Movement reports include a server-side Period filter for Today, Last 7 days, Last 30 days, or all dates.
 - [x] New user accounts receive a secure generated temporary password and are prompted to change it after login, with a session-only Ask later option.
+- [x] Authenticated pages, modals, DataTables, search/filter controls, pagination/limits, top navigation, searchable relationship dropdowns, typography, colors, and responsive layout use the centralized SaaS UI system.
+- [x] Application errors use one centralized professional error experience with an Error ID and exact protected log-file reference for debugging.
