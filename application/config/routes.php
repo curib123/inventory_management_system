@@ -66,6 +66,7 @@ $route['stock/out'] = 'stock/stock_out';
 $route['stock/suppliers/search'] = 'stock/supplier_search';
 $route['stock/supplier-products/(:num)'] = 'stock/supplier_products/$1';
 $route['stock/adjustment'] = 'stock/adjustment';
+$route['stock/adjustment/products/search'] = 'stock/adjustment_products_search';
 $route['stock/adjustments'] = 'stock/adjustments';
 $route['stock/adjustments/datatable'] = 'stock/adjustments_datatable';
 $route['stock/low-stock'] = 'stock/low_stock';
