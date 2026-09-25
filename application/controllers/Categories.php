@@ -102,8 +102,8 @@ class Categories extends CI_Controller {
         );
 
         $current_user_id = (int) $this->session->userdata('user_id');
-        $can_edit = $this->User_model->has_permission($current_user_id, 'categories.edit');
-        $can_delete = $this->User_model->has_permission($current_user_id, 'categories.delete');
+        $can_edit = $this->authorization_service->has_permission($current_user_id, 'categories.edit');
+        $can_delete = $this->authorization_service->has_permission($current_user_id, 'categories.delete');
 
         $rows = array();
         foreach ($categories as $category) {
@@ -194,7 +194,7 @@ class Categories extends CI_Controller {
     // Internal helper ni para require permission; tawagon ra sulod application/controllers/Categories.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function require_permission($permission_key) {
         $user_id = $this->session->userdata('user_id');
-        if (!$user_id || !$this->User_model->has_permission($user_id, $permission_key)) {
+        if (!$user_id || !$this->authorization_service->has_permission($user_id, $permission_key)) {
             show_error('You do not have permission to access this page.', 403, 'Access Denied');
         }
     }
