@@ -6,6 +6,10 @@ class AuthUserModelStub {
     public function find_active_by_username($username) {
         return FALSE;
     }
+
+    public function count_all() {
+        return 0;
+    }
 }
 
 class AuthServiceTest extends TestCase {
@@ -25,8 +29,8 @@ class AuthServiceTest extends TestCase {
             ->with('admin')
             ->willReturn($user);
 
-        $service = new Auth_service();
-        $session_data = $service->authenticate($user_model, 'admin', 'StrongPass123!');
+        $service = new Auth_service(array('user_model' => $user_model));
+        $session_data = $service->authenticate('admin', 'StrongPass123!');
 
         $this->assertSame($user->id, $session_data['user_id']);
         $this->assertSame('admin', $session_data['username']);
@@ -65,9 +69,9 @@ class AuthServiceTest extends TestCase {
             ->with('admin')
             ->willReturn($user);
 
-        $service = new Auth_service();
+        $service = new Auth_service(array('user_model' => $user_model));
 
-        $this->assertFalse($service->authenticate($user_model, 'admin', 'wrong-password'));
+        $this->assertFalse($service->authenticate('admin', 'wrong-password'));
     }
 
     public function testSessionDataContainsRoleInformation() {
