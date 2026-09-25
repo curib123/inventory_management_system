@@ -3,7 +3,9 @@
 $this->load->view('components/modal/header', array(
     'modal_title' => 'Confirm Logout',
     'modal_subtitle' => 'End the current signed-in session.',
-    'modal_icon' => 'bi-box-arrow-right'
+    'modal_icon' => 'bi-box-arrow-right',
+    'modal_variant' => 'warning',
+    'modal_eyebrow' => 'Session'
 ));
 ?>
 
