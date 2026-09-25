@@ -4,12 +4,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Report_model extends CI_Model {
  
-    // Report model ni; diri gi-centralize ang queries para limpyo ra ang controllers.
+    // Setup ni sa Report_model; CodeIgniter mo-run ani when gi-load ang model, with main integration sa application/controllers/Reports.php.
     public function __construct() {
         parent::__construct();
         $this->load->database();
     }
-    // Kuhaon diri ang inventory details, apil category, supplier, stock, ug inventory value.
+    // Data helper ni para get inventory report; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_inventory_report() {
         $this->db->select('p.product_code, p.product_name, c.category_name, s.supplier_name, p.unit, p.stock, p.cost_price, (p.stock * p.cost_price) AS inventory_value');
         $this->db->from('products p');
@@ -18,7 +18,7 @@ class Report_model extends CI_Model {
         $this->db->order_by('p.product_name', 'ASC');
         return $this->db->get()->result_array();
     }
-    // Stock movement report ni; apil transaction, product, supplier, ug user info para complete ra.
+    // Data helper ni para get stock movement report; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_stock_movement_report($type = NULL) {
         $this->db->select('t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, s.supplier_name, u.username, t.remarks, t.created_at');
         $this->db->from('stock_transactions t');
@@ -32,7 +32,7 @@ class Report_model extends CI_Model {
         $this->db->order_by('t.created_at', 'DESC');
         return $this->db->get()->result_array();
     }
-    // Low-stock report ni; makita dayon unsay kulang based sa reorder level.
+    // Data helper ni para get low stock report; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_low_stock_report() {
         $this->db->select('p.product_code, p.product_name, c.category_name, p.unit, p.stock, p.reorder_level, (p.reorder_level - p.stock) AS shortage');
         $this->db->from('products p');
@@ -43,6 +43,7 @@ class Report_model extends CI_Model {
         return $this->db->get()->result_array();
     }
 
+    // Data helper ni para get datatable; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_datatable($report, $start, $length, $search, $order_column, $order_dir, $filters = array()) {
         $this->build_datatable_query($report, $search, $filters);
         $this->select_report_columns($report);
@@ -53,6 +54,7 @@ class Report_model extends CI_Model {
         return $this->db->get()->result_array();
     }
 
+    // Data helper ni para get export rows; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_export_rows($report, $search = '', $filters = array()) {
         $this->build_datatable_query($report, trim((string) $search), (array) $filters);
         $this->select_report_columns($report);
@@ -70,16 +72,19 @@ class Report_model extends CI_Model {
         return $this->db->get()->result_array();
     }
 
+    // Data helper ni para count datatable total; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function count_datatable_total($report) {
         $this->build_datatable_query($report, '');
         return $this->db->count_all_results();
     }
 
+    // Data helper ni para count datatable filtered; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function count_datatable_filtered($report, $search, $filters = array()) {
         $this->build_datatable_query($report, $search, $filters);
         return $this->db->count_all_results();
     }
 
+    // Data helper ni para select report columns; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     private function select_report_columns($report) {
         if ($report === 'inventory' || $report === 'valuation') {
             $this->db->select('p.product_code, p.product_name, c.category_name, s.supplier_name, p.unit, p.stock, p.cost_price, (p.stock * p.cost_price) AS inventory_value', FALSE);
@@ -94,6 +99,7 @@ class Report_model extends CI_Model {
         $this->db->select('t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, s.supplier_name, u.username, t.remarks, t.created_at');
     }
 
+    // Data helper ni para build datatable query; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     private function build_datatable_query($report, $search, $filters = array()) {
         if ($report === 'inventory' || $report === 'valuation') {
             $this->db->from('products p');
