@@ -9,7 +9,7 @@ class Reports extends CI_Controller {
         parent::__construct();
         $this->load->library('session');
         $this->load->helper(array('url', 'html'));
-        $this->load->library('Datatable_service');
+        $this->load->library(array('Datatable_service', 'Report_service'));
 
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -40,8 +40,8 @@ class Reports extends CI_Controller {
     public function datatable($report) {
         $this->get_definition($report);
 
-        $order_columns = $this->get_report_order_columns($report);
-        $default_order = $this->get_report_default_order($report);
+        $order_columns = $this->report_service->order_columns($report);
+        $default_order = $this->report_service->default_order($report);
         $request = $this->datatable_service->request(
             $this->input,
             $order_columns,
@@ -49,17 +49,9 @@ class Reports extends CI_Controller {
             $default_order['dir']
         );
 
-        $rows = $this->Report_model->get_datatable(
-            $report,
-            $request['start'],
-            $request['length'],
-            $request['search'],
-            $request['order_column'],
-            $request['order_dir'],
-            $request['filters']
-        );
-
-        $fields = array_keys($this->get_report_columns($report));
+        $report_data = $this->report_service->datatable($report, $request);
+        $rows = $report_data['rows'];
+        $fields = array_keys($this->report_service->columns($report));
         $data_rows = array();
 
         foreach ($rows as $row) {
@@ -74,8 +66,8 @@ class Reports extends CI_Controller {
 
         $payload = $this->datatable_service->payload(
             $request['draw'],
-            $this->Report_model->count_datatable_total($report),
-            $this->Report_model->count_datatable_filtered($report, $request['search'], $request['filters']),
+            $report_data['total'],
+            $report_data['filtered'],
             $data_rows
         );
 
@@ -105,9 +97,15 @@ class Reports extends CI_Controller {
             $filters = $this->input->get('table_filters', TRUE);
             $filters = is_array($filters) ? $filters : array();
 
-            $rows = $this->Report_model->get_export_rows($report, $search, $filters);
-            $columns = $this->get_report_columns($report);
-            $meta = $this->build_report_meta($report, $definition['title'], $rows);
+            $payload = $this->report_service->export_payload(
+                $report,
+                $search,
+                $filters,
+                $this->session->userdata('username')
+            );
+            $rows = $payload['rows'];
+            $columns = $payload['columns'];
+            $meta = $payload['meta'];
 
             if ($format === 'csv') {
                 $this->export_csv($definition['title'], $columns, $rows, $meta);
@@ -130,7 +128,7 @@ class Reports extends CI_Controller {
         $definition = $this->get_definition($report);
         $data['report_title'] = $definition['title'];
         $data['report_key'] = $report;
-        $data['columns'] = $this->get_report_columns($report);
+        $data['columns'] = $this->report_service->columns($report);
         $data['page_title'] = $definition['title'];
 
         $this->load->view('templates/header', $data);
@@ -138,182 +136,14 @@ class Reports extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
-    // Internal helper ni para get report columns; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
-    private function get_report_columns($report) {
-        if ($report === 'inventory' || $report === 'valuation') {
-            return array(
-                'product_code' => 'Product Code',
-                'product_name' => 'Product Name',
-                'category_name' => 'Category',
-                'supplier_name' => 'Supplier',
-                'unit' => 'Unit',
-                'stock' => 'Stock',
-                'cost_price' => 'Cost Price',
-                'inventory_value' => 'Inventory Value'
-            );
-        }
-
-        if ($report === 'low-stock') {
-            return array(
-                'product_code' => 'Product Code',
-                'product_name' => 'Product Name',
-                'category_name' => 'Category',
-                'unit' => 'Unit',
-                'stock' => 'Stock',
-                'reorder_level' => 'Reorder Level',
-                'shortage' => 'Shortage'
-            );
-        }
-
-        return array(
-            'transaction_no' => 'Transaction No.',
-            'type' => 'Type',
-            'product_code' => 'Product Code',
-            'product_name' => 'Product Name',
-            'quantity' => 'Quantity',
-            'cost_price' => 'Cost Price',
-            'supplier_name' => 'Supplier',
-            'username' => 'Processed By',
-            'remarks' => 'Remarks',
-            'created_at' => 'Date'
-        );
-    }
-
-    // Internal helper ni para get report order columns; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
-    private function get_report_order_columns($report) {
-        if ($report === 'inventory' || $report === 'valuation') {
-            return array(
-                'p.product_code',
-                'p.product_name',
-                'c.category_name',
-                's.supplier_name',
-                'p.unit',
-                'p.stock',
-                'p.cost_price',
-                'inventory_value'
-            );
-        }
-
-        if ($report === 'low-stock') {
-            return array(
-                'p.product_code',
-                'p.product_name',
-                'c.category_name',
-                'p.unit',
-                'p.stock',
-                'p.reorder_level',
-                'shortage'
-            );
-        }
-
-        return array(
-            't.transaction_no',
-            't.type',
-            'p.product_code',
-            'p.product_name',
-            'i.quantity',
-            'i.cost_price',
-            's.supplier_name',
-            'u.username',
-            't.remarks',
-            't.created_at'
-        );
-    }
-
-    // Internal helper ni para get report default order; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
-    private function get_report_default_order($report) {
-        if ($report === 'inventory' || $report === 'valuation') {
-            return array('column' => 'p.product_name', 'dir' => 'asc');
-        }
-
-        if ($report === 'low-stock') {
-            return array('column' => 'p.stock', 'dir' => 'asc');
-        }
-
-        return array('column' => 't.created_at', 'dir' => 'desc');
-    }
-
     // Internal helper ni para get definition; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function get_definition($report) {
         try {
-            return $this->report_rules->get($report);
+            return $this->report_service->definition($report);
         } catch (InvalidArgumentException $exception) {
             show_404();
             exit;
         }
-    }
-
-    // Internal helper ni para get rows; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
-    private function get_rows($definition) {
-        $method = $definition['method'];
-
-        if (!method_exists($this->Report_model, $method)) {
-            throw new RuntimeException('The configured report data method is unavailable.');
-        }
-
-        if (isset($definition['type']) && $definition['type'] !== NULL) {
-            return $this->Report_model->{$method}($definition['type']);
-        }
-
-        return $this->Report_model->{$method}();
-    }
-
-    // Internal helper ni para build report meta; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
-    private function build_report_meta($report, $title, $rows) {
-        return array(
-            'system_name' => 'Inventory Management System',
-            'report_key' => $report,
-            'report_title' => $title,
-            'generated_at' => date('F j, Y g:i A'),
-            'prepared_by' => (string) $this->session->userdata('username'),
-            'record_count' => count($rows),
-            'summary' => $this->build_report_summary($report, $rows)
-        );
-    }
-
-    // Internal helper ni para build report summary; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
-    private function build_report_summary($report, $rows) {
-        $summary = array('Records' => number_format(count($rows)));
-
-        if ($report === 'inventory' || $report === 'valuation') {
-            $total_stock = 0;
-            $total_value = 0.0;
-
-            foreach ($rows as $row) {
-                $total_stock += isset($row['stock']) ? (int) $row['stock'] : 0;
-                $total_value += isset($row['inventory_value']) ? (float) $row['inventory_value'] : 0;
-            }
-
-            $summary['Total Stock'] = number_format($total_stock);
-            $summary['Inventory Value'] = '₱' . number_format($total_value, 2);
-            return $summary;
-        }
-
-        if ($report === 'low-stock') {
-            $shortage = 0;
-
-            foreach ($rows as $row) {
-                $shortage += isset($row['shortage']) ? (int) $row['shortage'] : 0;
-            }
-
-            $summary['Total Shortage'] = number_format($shortage);
-            return $summary;
-        }
-
-        $total_quantity = 0;
-        $movement_value = 0.0;
-
-        foreach ($rows as $row) {
-            $quantity = isset($row['quantity']) ? (int) $row['quantity'] : 0;
-            $cost_price = isset($row['cost_price']) ? (float) $row['cost_price'] : 0;
-            $total_quantity += $quantity;
-            $movement_value += $quantity * $cost_price;
-        }
-
-        $summary['Total Quantity'] = number_format($total_quantity);
-        $summary['Movement Value'] = '₱' . number_format($movement_value, 2);
-
-        return $summary;
     }
 
 // Internal helper ni para export csv; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
