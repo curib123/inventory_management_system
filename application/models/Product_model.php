@@ -38,7 +38,7 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    public function search_active($query = '', $supplier_id = NULL, $limit = 20) {
+    public function search_active($query = '', $supplier_scope = NULL, $limit = 20) {
         $query = trim((string) $query);
         $limit = max(1, min(50, (int) $limit));
 
@@ -50,8 +50,10 @@ class Product_model extends CI_Model {
         $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
         $this->db->where('p.status', 1);
 
-        if ($supplier_id !== NULL && (int) $supplier_id > 0) {
-            $this->db->where('p.supplier_id', (int) $supplier_id);
+        if ($supplier_scope === 'unassigned') {
+            $this->db->where('p.supplier_id IS NULL', NULL, FALSE);
+        } elseif ($supplier_scope !== NULL && (int) $supplier_scope > 0) {
+            $this->db->where('p.supplier_id', (int) $supplier_scope);
         }
 
         if ($query !== '') {
