@@ -84,21 +84,6 @@ $search_placeholder = isset($search_placeholder) && trim((string) $search_placeh
                         <i class="bi bi-arrow-counterclockwise me-1"></i>
                         Reset
                     </button>
-
-                    <div class="app-table-page-size">
-                        <label for="<?php echo html_escape($table_id); ?>-length">Rows</label>
-                        <select
-                            id="<?php echo html_escape($table_id); ?>-length"
-                            class="form-select form-select-sm"
-                            data-table-length
-                            aria-label="Rows per page"
-                        >
-                            <option value="10" selected>10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                            <option value="100">100</option>
-                        </select>
-                    </div>
                 </div>
             </div>
         </div>
