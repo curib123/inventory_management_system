@@ -9,7 +9,7 @@ class Products extends CI_Controller {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
         $this->load->helper(array('form', 'url'));
-        $this->load->library('Datatable_service');
+        $this->load->library(array('Datatable_service', 'Product_service'));
 
         if (!$this->session->userdata('logged_in')) {
             redirect('login');
@@ -71,31 +71,13 @@ class Products extends CI_Controller {
             show_404();
         }
 
-        $delete_error = '';
-        if ($this->Product_model->has_transaction_history($id)) {
-            $delete_error = 'Products with stock transaction history cannot be deleted. Set the product to inactive instead.';
-        }
+        $execute = $this->input->method(TRUE) === 'POST';
+        $result = $this->product_service->delete($id, $execute);
 
-        if ($this->input->method(TRUE) !== 'POST') {
+        if (!$execute || !$result['success']) {
             $this->load->view('modal/products/delete', array(
                 'product' => $product,
-                'delete_error' => $delete_error
-            ));
-            return;
-        }
-
-        if ($delete_error !== '') {
-            $this->load->view('modal/products/delete', array(
-                'product' => $product,
-                'delete_error' => $delete_error
-            ));
-            return;
-        }
-
-        if (!$this->Product_model->delete($id)) {
-            $this->load->view('modal/products/delete', array(
-                'product' => $product,
-                'delete_error' => 'The product could not be deleted.'
+                'delete_error' => $result['success'] ? '' : $result['message']
             ));
             return;
         }
@@ -112,16 +94,10 @@ class Products extends CI_Controller {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
         }
 
-        $query = trim((string) $this->input->get('q', TRUE));
-        $categories = $this->Category_model->search_active($query, 20);
-        $items = array();
-
-        foreach ($categories as $category) {
-            $items[] = array(
-                'id' => (int) $category->id,
-                'text' => (string) $category->category_name
-            );
-        }
+        $items = $this->product_service->category_options(
+            trim((string) $this->input->get('q', TRUE)),
+            20
+        );
 
         $this->output
             ->set_content_type('application/json')
@@ -136,27 +112,10 @@ class Products extends CI_Controller {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
         }
 
-        $query = trim((string) $this->input->get('q', TRUE));
-        $suppliers = $this->Supplier_model->search_active($query, 20);
-        $items = array();
-
-        foreach ($suppliers as $supplier) {
-            $secondary = array();
-
-            if (!empty($supplier->contact_person)) {
-                $secondary[] = $supplier->contact_person;
-            }
-
-            if (!empty($supplier->phone)) {
-                $secondary[] = $supplier->phone;
-            }
-
-            $items[] = array(
-                'id' => (int) $supplier->id,
-                'text' => (string) $supplier->supplier_name,
-                'secondary' => implode(' • ', $secondary)
-            );
-        }
+        $items = $this->product_service->supplier_options(
+            trim((string) $this->input->get('q', TRUE)),
+            20
+        );
 
         $this->output
             ->set_content_type('application/json')
@@ -290,63 +249,20 @@ class Products extends CI_Controller {
             return;
         }
 
-        $code = trim($this->input->post('product_code', TRUE));
-        $category_id = (int) $this->input->post('category_id', TRUE);
-        $supplier_raw = $this->input->post('supplier_id', TRUE);
-        $supplier_id = ($supplier_raw === '' || $supplier_raw === NULL) ? NULL : (int) $supplier_raw;
+        $result = $this->product_service->save($id, array(
+            'supplier_id' => $this->input->post('supplier_id', TRUE),
+            'category_id' => $this->input->post('category_id', TRUE),
+            'product_code' => $this->input->post('product_code', TRUE),
+            'product_name' => $this->input->post('product_name', TRUE),
+            'unit' => $this->input->post('unit', TRUE),
+            'cost_price' => $this->input->post('cost_price', TRUE),
+            'selling_price' => $this->input->post('selling_price', TRUE),
+            'reorder_level' => $this->input->post('reorder_level', TRUE),
+            'status' => $this->input->post('status', TRUE)
+        ), $product);
 
-        if ($this->Product_model->code_exists($code, $id)) {
-            $this->render_product_form($id, $product, 'That product code already exists.');
-            return;
-        }
-
-        $category = $this->Category_model->get_by_id($category_id);
-
-        $uses_existing_category =
-            $id !== NULL &&
-            $product &&
-            (int) $product->category_id === $category_id;
-
-        if (!$category || (!(int) $category->status && !$uses_existing_category)) {
-            $this->render_product_form(
-                $id,
-                $product,
-                'The selected category is invalid or inactive.'
-            );
-            return;
-        }
-
-        if ($supplier_id !== NULL) {
-            $supplier = $this->Supplier_model->get_by_id($supplier_id);
-            $uses_existing_supplier =
-                $id !== NULL &&
-                $product &&
-                (int) $product->supplier_id === $supplier_id;
-
-            if (!$supplier || (!(int) $supplier->status && !$uses_existing_supplier)) {
-                $this->render_product_form(
-                    $id,
-                    $product,
-                    'The selected supplier is invalid or inactive.'
-                );
-                return;
-            }
-        }
-
-        $data = array(
-            'supplier_id' => $supplier_id,
-            'category_id' => $category_id,
-            'product_code' => $code,
-            'product_name' => trim($this->input->post('product_name', TRUE)),
-            'unit' => trim($this->input->post('unit', TRUE)),
-            'cost_price' => (float) $this->input->post('cost_price', TRUE),
-            'selling_price' => (float) $this->input->post('selling_price', TRUE),
-            'reorder_level' => (int) $this->input->post('reorder_level', TRUE),
-            'status' => $this->input->post('status', TRUE) === '0' ? 0 : 1
-        );
-
-        if (!$this->Product_model->save($data, $id)) {
-            $this->render_product_form($id, $product, 'The product could not be saved.');
+        if (!$result['success']) {
+            $this->render_product_form($id, $product, $result['message']);
             return;
         }
 
