@@ -13,13 +13,19 @@ class Auth_service {
             return;
         }
 
-        $CI =& get_instance();
-        $CI->load->model('User_model');
-        $this->user_model = $CI->User_model;
+        if (function_exists('get_instance')) {
+            $CI =& get_instance();
+            $CI->load->model('User_model');
+            $this->user_model = $CI->User_model;
+        }
     }
 
     // Shared service ni para authenticate; application/controllers/Auth.php credentials ra ang ihatag, then lookup ug password verification diri tanan.
     public function authenticate($username, $password) {
+        if (!$this->user_model) {
+            return FALSE;
+        }
+
         $user = $this->user_model->find_active_by_username($username);
 
         if (!$user || !password_verify((string) $password, (string) $user->password)) {
@@ -31,7 +37,7 @@ class Auth_service {
 
     // Business check ni para initial setup; application/controllers/Auth.php ang caller para login controller dili direct mo-query User_model.
     public function has_users() {
-        return $this->user_model->count_all() > 0;
+        return $this->user_model && $this->user_model->count_all() > 0;
     }
 
     // Shared service ni para session data; application/controllers/Auth.php ang caller after successful credential verification.
