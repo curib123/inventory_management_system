@@ -1230,17 +1230,17 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        var supplierId = select.value;
+        var supplierScope = select.value;
         var baseUrl = select.getAttribute('data-products-url');
         var mode = select.getAttribute('data-stock-mode') === 'stock_out'
             ? 'stock_out'
             : 'stock_in';
 
-        if (!supplierId) {
+        if (!supplierScope) {
             container.innerHTML =
                 '<div class="app-stock-product-empty">' +
                     '<i class="bi bi-truck d-block fs-3 mb-2"></i>' +
-                    'Select a supplier to load its products.' +
+                    'Select a supplier or Unassigned Products to load products.' +
                 '</div>';
             return;
         }
@@ -1250,12 +1250,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 '<div class="spinner-border spinner-border-sm me-2" role="status">' +
                     '<span class="visually-hidden">Loading...</span>' +
                 '</div>' +
-                'Loading supplier products...' +
+                'Loading products for the selected scope...' +
             '</div>';
 
         try {
             var response = await fetch(
-                baseUrl.replace(/\/$/, '') + '/' + encodeURIComponent(supplierId) +
+                baseUrl.replace(/\/$/, '') + '/' + encodeURIComponent(supplierScope) +
                     '?mode=' + encodeURIComponent(mode),
                 {
                     method: 'GET',
@@ -1270,7 +1270,7 @@ document.addEventListener('DOMContentLoaded', function () {
             if (!response.ok) {
                 showInlineProblem(
                     container,
-                    responseProblem(response, html, 'load the supplier products')
+                    responseProblem(response, html, 'load products for this supplier/product scope')
                 );
                 return;
             }
@@ -1280,7 +1280,7 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             showInlineProblem(
                 container,
-                statusProblem(0, 'load the supplier products')
+                statusProblem(0, 'load products for this supplier/product scope')
             );
         }
     }
