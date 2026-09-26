@@ -11,7 +11,7 @@ class Report_model extends CI_Model {
     }
     // Data helper ni para get inventory report; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_inventory_report() {
-        $this->db->select('p.product_code, p.product_name, c.category_name, s.supplier_name, p.unit, p.stock, p.cost_price, (p.stock * p.cost_price) AS inventory_value');
+        $this->db->select("p.product_code, p.product_name, c.category_name, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, p.unit, p.stock, p.cost_price, (p.stock * p.cost_price) AS inventory_value", FALSE);
         $this->db->from('products p');
         $this->db->join('categories c', 'c.id = p.category_id', 'left');
         $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
@@ -20,7 +20,7 @@ class Report_model extends CI_Model {
     }
     // Data helper ni para get stock movement report; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_stock_movement_report($type = NULL) {
-        $this->db->select('t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, s.supplier_name, u.username, t.remarks, t.created_at');
+        $this->db->select("t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at", FALSE);
         $this->db->from('stock_transactions t');
         $this->db->join('stock_transaction_items i', 'i.transaction_id = t.id');
         $this->db->join('products p', 'p.id = i.product_id');
@@ -87,7 +87,7 @@ class Report_model extends CI_Model {
     // Data helper ni para select report columns; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     private function select_report_columns($report) {
         if ($report === 'inventory' || $report === 'valuation') {
-            $this->db->select('p.product_code, p.product_name, c.category_name, s.supplier_name, p.unit, p.stock, p.cost_price, (p.stock * p.cost_price) AS inventory_value', FALSE);
+            $this->db->select("p.product_code, p.product_name, c.category_name, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, p.unit, p.stock, p.cost_price, (p.stock * p.cost_price) AS inventory_value", FALSE);
             return;
         }
 
@@ -96,7 +96,7 @@ class Report_model extends CI_Model {
             return;
         }
 
-        $this->db->select('t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, s.supplier_name, u.username, t.remarks, t.created_at');
+        $this->db->select("t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at", FALSE);
     }
 
     // Data helper ni para build datatable query; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
@@ -122,6 +122,11 @@ class Report_model extends CI_Model {
                 $this->db->or_like('p.product_name', $search);
                 $this->db->or_like('c.category_name', $search);
                 $this->db->or_like('s.supplier_name', $search);
+
+                if (stripos('Unassigned Products', $search) !== FALSE) {
+                    $this->db->or_where('p.supplier_id IS NULL', NULL, FALSE);
+                }
+
                 $this->db->or_like('p.unit', $search);
                 $this->db->group_end();
             }
@@ -188,6 +193,11 @@ class Report_model extends CI_Model {
             $this->db->or_like('p.product_code', $search);
             $this->db->or_like('p.product_name', $search);
             $this->db->or_like('s.supplier_name', $search);
+
+            if (stripos('Unassigned Products', $search) !== FALSE) {
+                $this->db->or_where('t.supplier_id IS NULL', NULL, FALSE);
+            }
+
             $this->db->or_like('u.username', $search);
             $this->db->or_like('t.remarks', $search);
             $this->db->or_like('t.created_at', $search);
