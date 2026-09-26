@@ -3,18 +3,18 @@
 $stock_confirmation = $transaction_type === 'stock_in'
     ? array(
         'title' => 'Confirm Stock In?',
-        'message' => 'Review the supplier and entered quantities before adding stock.',
+        'message' => 'Review the supplier/product scope and entered quantities before adding stock.',
         'impact' => 'This transaction increases inventory quantities and becomes part of permanent stock history.',
-        'assist' => 'Make sure the supplier is correct and only the intended products have quantities greater than zero.',
+        'assist' => 'Make sure the supplier or Unassigned Products scope is correct and only intended products have quantities greater than zero.',
         'label' => 'Confirm Stock In',
         'variant' => 'primary',
         'icon' => 'bi-box-arrow-in-down'
     )
     : array(
         'title' => 'Confirm Stock Out?',
-        'message' => 'Review the supplier and entered quantities before removing stock.',
+        'message' => 'Review the supplier/product scope and entered quantities before removing stock.',
         'impact' => 'This transaction reduces inventory and becomes part of permanent stock history.',
-        'assist' => 'Make sure the supplier is correct and only the intended products have quantities greater than zero.',
+        'assist' => 'Make sure the supplier or Unassigned Products scope is correct and only intended products have quantities greater than zero.',
         'label' => 'Confirm Stock Out',
         'variant' => 'warning',
         'icon' => 'bi-box-arrow-up'
@@ -27,8 +27,8 @@ echo form_open(current_url(), ui_modal_form_attributes($stock_confirmation));
 $this->load->view('components/modal/header', array(
     'modal_title' => $page_title,
     'modal_subtitle' => $transaction_type === 'stock_in'
-        ? 'Select one supplier, then enter quantities for any of that supplier\'s products.'
-        : 'Select one supplier, then enter quantities for products leaving that supplier\'s stock.',
+        ? 'Select a supplier or Unassigned Products, then enter quantities for products in that scope.'
+        : 'Select a supplier or Unassigned Products, then enter quantities for products leaving that scope.',
     'modal_icon' => $transaction_type === 'stock_in'
         ? 'bi-box-arrow-in-down'
         : 'bi-box-arrow-up'
@@ -46,15 +46,15 @@ $this->load->view('components/modal/header', array(
     <?php endif; ?>
 
 
-    <!-- Supplier selection for BOTH Stock In and Stock Out -->
-    <?php $selected_supplier = set_value('supplier_id'); ?>
+    <!-- Supplier or Unassigned Products scope for BOTH Stock In and Stock Out -->
+    <?php $selected_supplier = set_value('supplier_scope'); ?>
 
     <div class="mb-4">
-        <label for="stock_supplier_id" class="form-label">Supplier</label>
+        <label for="stock_supplier_id" class="form-label">Supplier / Product Scope</label>
 
         <select
             id="stock_supplier_id"
-            name="supplier_id"
+            name="supplier_scope"
             class="form-select"
             required
             data-stock-supplier
@@ -66,6 +66,11 @@ $this->load->view('components/modal/header', array(
             data-products-url="<?php echo site_url('stock/supplier-products'); ?>"
         >
             <option value="">Search then select a supplier</option>
+            <option
+                value="unassigned"
+                data-static-option="1"
+                <?php echo $selected_supplier === 'unassigned' ? 'selected' : ''; ?>
+            >Unassigned Products</option>
 
             <?php foreach ($suppliers as $supplier): ?>
                 <?php if ((int) $supplier->status === 1): ?>
@@ -80,7 +85,7 @@ $this->load->view('components/modal/header', array(
         </select>
 
         <div class="form-text">
-            Search and select one supplier. All active products assigned to that supplier will be loaded below.
+            Choose a supplier to load only its assigned products, or choose Unassigned Products to load only active products where supplier_id is NULL.
         </div>
     </div>
 
@@ -90,14 +95,14 @@ $this->load->view('components/modal/header', array(
         <div class="app-stock-products-heading-copy">
             <h3 class="h6 mb-1">
                 <?php echo $transaction_type === 'stock_in'
-                    ? 'Supplier Products'
+                    ? 'Products to Receive'
                     : 'Products to Release'; ?>
             </h3>
 
             <p class="small text-body-secondary mb-0">
                 <?php echo $transaction_type === 'stock_in'
-                    ? 'All active supplier products are shown. Low-stock items appear first; enter quantities only for items being received.'
-                    : 'All active supplier products are shown. Enter quantities only for items being released; stock cannot go below zero.'; ?>
+                    ? 'Only active products from the selected supplier or Unassigned Products scope are shown. Low-stock items appear first.'
+                    : 'Only active products from the selected supplier or Unassigned Products scope are shown. Stock cannot go below zero.'; ?>
             </p>
         </div>
 
@@ -132,7 +137,7 @@ $this->load->view('components/modal/header', array(
             <div class="app-stock-product-empty">
                 <i class="bi bi-truck d-block fs-3 mb-2"></i>
 
-                Select a supplier to load its products.
+                Select a supplier or Unassigned Products to load products.
             </div>
 
         <?php endif; ?>
@@ -165,8 +170,8 @@ $this->load->view('components/modal/header', array(
         $this->load->view('components/form/assist_note', array(
             'assist_title' => 'Inventory transaction',
             'assist_text' => $transaction_type === 'stock_in'
-                ? 'Confirm the supplier and quantities carefully. Saving increases stock and creates a permanent transaction record.'
-                : 'Confirm the supplier and quantities carefully. Saving reduces stock and creates a permanent transaction record.',
+                ? 'Confirm the supplier or Unassigned Products scope and quantities carefully. Saving increases stock and creates a permanent transaction record.'
+                : 'Confirm the supplier or Unassigned Products scope and quantities carefully. Saving reduces stock and creates a permanent transaction record.',
             'assist_variant' => $transaction_type === 'stock_in'
                 ? 'info'
                 : 'warning',
