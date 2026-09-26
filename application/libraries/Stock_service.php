@@ -13,27 +13,38 @@ class Stock_service {
         $this->CI->load->library(array('Stock_rules', 'Supplier_service'));
     }
 
-    // Business flow ni para create stock transaction; application/controllers/Stock.php ang caller, while Stock_model persistence/query ra.
-    public function create_transaction($type, $supplier_id, $remarks, $user_id, $items) {
+    // Business flow ni para create stock transaction; application/controllers/Stock.php ang caller, supporting supplier-owned or unassigned product scopes.
+    public function create_transaction($type, $supplier_scope, $remarks, $user_id, $items) {
         if (!in_array($type, array('stock_in', 'stock_out'), TRUE) || empty($items)) {
             return array('success' => FALSE, 'message' => 'A valid stock transaction with at least one item is required.');
         }
 
-        $supplier_id = filter_var(
-            $supplier_id,
-            FILTER_VALIDATE_INT,
-            array('options' => array('min_range' => 1, 'max_range' => Stock_rules::MAX_STOCK))
-        );
+        $supplier_scope = trim((string) $supplier_scope);
+        $is_unassigned = $supplier_scope === 'unassigned';
+        $transaction_supplier_id = NULL;
 
-        if ($supplier_id === FALSE) {
-            return array('success' => FALSE, 'message' => 'A valid supplier is required for stock transactions.');
-        }
+        if (!$is_unassigned) {
+            $supplier_id = filter_var(
+                $supplier_scope,
+                FILTER_VALIDATE_INT,
+                array('options' => array('min_range' => 1, 'max_range' => Stock_rules::MAX_STOCK))
+            );
 
-        $supplier_id = (int) $supplier_id;
-        $supplier = $this->CI->Supplier_model->get_by_id($supplier_id);
+            if ($supplier_id === FALSE) {
+                return array(
+                    'success' => FALSE,
+                    'message' => 'Select a valid supplier or Unassigned Products for the stock transaction.'
+                );
+            }
 
-        if (!$supplier || !(int) $supplier->status) {
-            return array('success' => FALSE, 'message' => 'The selected supplier is invalid or inactive.');
+            $supplier_id = (int) $supplier_id;
+            $supplier = $this->CI->Supplier_model->get_by_id($supplier_id);
+
+            if (!$supplier || !(int) $supplier->status) {
+                return array('success' => FALSE, 'message' => 'The selected supplier is invalid or inactive.');
+            }
+
+            $transaction_supplier_id = $supplier_id;
         }
 
         $normalized = $this->normalize_items($items);
@@ -50,7 +61,7 @@ class Stock_service {
         $transaction_id = $this->CI->Stock_model->insert_transaction(array(
             'transaction_no' => $transaction_no,
             'type' => $type,
-            'supplier_id' => $supplier_id,
+            'supplier_id' => $transaction_supplier_id,
             'remarks' => trim((string) $remarks),
             'created_by' => (int) $user_id
         ));
@@ -68,7 +79,15 @@ class Stock_service {
                 return array('success' => FALSE, 'message' => 'One of the selected products is invalid or inactive.');
             }
 
-            if ((int) $product->supplier_id !== $supplier_id) {
+            if ($is_unassigned) {
+                if ($product->supplier_id !== NULL) {
+                    $this->CI->db->trans_rollback();
+                    return array(
+                        'success' => FALSE,
+                        'message' => $product->product_name . ' is assigned to a supplier and cannot be processed under Unassigned Products.'
+                    );
+                }
+            } elseif ((int) $product->supplier_id !== $transaction_supplier_id) {
                 $this->CI->db->trans_rollback();
                 return array(
                     'success' => FALSE,
@@ -221,10 +240,27 @@ class Stock_service {
         return $this->CI->supplier_service->search_options($query, $limit);
     }
 
-    // Business lookup ni para supplier products; application/controllers/Stock.php ang caller, with active-supplier ug valid-mode rules centralized diri.
-    public function supplier_products($supplier_id, $mode) {
-        $supplier_id = (int) $supplier_id;
+    // Business lookup ni para stock scope products; application/controllers/Stock.php ang caller, supporting supplier IDs or Unassigned Products.
+    public function supplier_products($supplier_scope, $mode) {
+        $supplier_scope = trim((string) $supplier_scope);
         $mode = $mode === 'stock_out' ? 'stock_out' : 'stock_in';
+
+        if ($supplier_scope === 'unassigned') {
+            return array(
+                'success' => TRUE,
+                'supplier' => NULL,
+                'scope' => 'unassigned',
+                'scope_label' => 'Unassigned Products',
+                'products' => $this->CI->Product_model->get_active_by_supplier('unassigned', $mode),
+                'mode' => $mode
+            );
+        }
+
+        if (!ctype_digit($supplier_scope) || (int) $supplier_scope <= 0) {
+            return array('success' => FALSE, 'status' => 400, 'message' => 'Invalid supplier or product scope.');
+        }
+
+        $supplier_id = (int) $supplier_scope;
         $supplier = $this->CI->Supplier_model->get_by_id($supplier_id);
 
         if (!$supplier || !(int) $supplier->status) {
@@ -234,6 +270,8 @@ class Stock_service {
         return array(
             'success' => TRUE,
             'supplier' => $supplier,
+            'scope' => (string) $supplier_id,
+            'scope_label' => (string) $supplier->supplier_name,
             'products' => $this->CI->Product_model->get_active_by_supplier($supplier_id, $mode),
             'mode' => $mode
         );
