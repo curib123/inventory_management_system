@@ -5,10 +5,12 @@ use PHPUnit\Framework\TestCase;
 class DatatableInputStub {
     private $request;
 
+    // Test stub setup ni para fake DataTables request; Datatable_service ra ang caller during tests.
     public function __construct($request) {
         $this->request = $request;
     }
 
+    // Test stub getter ni para request payload; mimics CodeIgniter input getter enough for Datatable_service tests.
     public function get($key = NULL, $xss_clean = TRUE) {
         return $this->request;
     }
@@ -16,6 +18,7 @@ class DatatableInputStub {
 
 class DatatableServiceTest extends TestCase {
 
+    // QA ni para DataTables request parsing; paging, search, ug ordering should ma-normalize correctly.
     public function testRequestReadsServerSidePagingSearchAndOrder() {
         $input = new DatatableInputStub(array(
             'draw' => '3',
@@ -44,6 +47,7 @@ class DatatableServiceTest extends TestCase {
     }
 
 
+    // QA ni para deep pagination; offsets beyond 100 should remain valid and not be capped incorrectly.
     public function testPaginationAllowsOffsetsBeyondOneHundred() {
         $input = new DatatableInputStub(array(
             'start' => '250',
@@ -61,6 +65,7 @@ class DatatableServiceTest extends TestCase {
         $this->assertSame(25, $request['length']);
     }
 
+    // QA ni para invalid page length; unsupported limit should fallback safely to ten rows.
     public function testInvalidLengthFallsBackToTen() {
         $input = new DatatableInputStub(array(
             'length' => '999'
@@ -76,6 +81,7 @@ class DatatableServiceTest extends TestCase {
         $this->assertSame(10, $request['length']);
     }
 
+    // QA ni para unsafe order index; unknown column should fallback to the configured safe default.
     public function testUnknownOrderColumnUsesSafeDefault() {
         $input = new DatatableInputStub(array(
             'order' => array(
@@ -94,6 +100,7 @@ class DatatableServiceTest extends TestCase {
         $this->assertSame('asc', $request['order_dir']);
     }
 
+    // QA ni para DataTables response contract; draw, totals, filtered count, ug data shape should match frontend expectations.
     public function testPayloadMatchesDataTablesServerSideContract() {
         $payload = (new Datatable_service())->payload(
             2,
