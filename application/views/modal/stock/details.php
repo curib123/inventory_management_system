@@ -10,7 +10,7 @@ $this->load->view('components/modal/header', array(
     <dl class="row app-detail-list mb-4">
         <dt class="col-sm-4">Transaction</dt><dd class="col-sm-8"><?php echo html_escape($transaction->transaction_no); ?></dd>
         <dt class="col-sm-4">Type</dt><dd class="col-sm-8"><?php echo html_escape($transaction->type); ?></dd>
-        <dt class="col-sm-4">Supplier</dt><dd class="col-sm-8"><?php echo html_escape($transaction->supplier_name ?: 'N/A'); ?></dd>
+        <dt class="col-sm-4">Supplier / Scope</dt><dd class="col-sm-8"><?php echo html_escape($transaction->supplier_name ?: 'Unassigned Products'); ?></dd>
         <dt class="col-sm-4">Processed By</dt><dd class="col-sm-8"><?php echo html_escape($transaction->username); ?></dd>
         <dt class="col-sm-4">Date</dt><dd class="col-sm-8"><?php echo html_escape($transaction->created_at); ?></dd>
         <dt class="col-sm-4">Remarks</dt><dd class="col-sm-8"><?php echo html_escape($transaction->remarks ?: 'N/A'); ?></dd>
