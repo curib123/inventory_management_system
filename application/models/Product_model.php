@@ -75,14 +75,20 @@ class Product_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    // Data helper ni para get active by supplier; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
-    public function get_active_by_supplier($supplier_id, $mode = 'stock_in') {
+    // Data helper ni para supplier scope products; application/libraries/Stock_service.php ang caller, supporting real supplier IDs or the unassigned scope.
+    public function get_active_by_supplier($supplier_scope, $mode = 'stock_in') {
         $this->db->select(
             'p.id, p.product_code, p.product_name, p.unit, p.stock, ' .
             'p.reorder_level, p.cost_price, p.selling_price, p.supplier_id'
         );
         $this->db->from('products p');
-        $this->db->where('p.supplier_id', (int) $supplier_id);
+
+        if ($supplier_scope === 'unassigned') {
+            $this->db->where('p.supplier_id IS NULL', NULL, FALSE);
+        } else {
+            $this->db->where('p.supplier_id', (int) $supplier_scope);
+        }
+
         $this->db->where('p.status', 1);
 
         if ($mode === 'stock_out') {
