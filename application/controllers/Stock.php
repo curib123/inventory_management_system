@@ -118,7 +118,7 @@ class Stock extends CI_Controller {
     }
 
     // Mao ni ang supplier products flow sa Stock; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
-    public function supplier_products($supplier_id) {
+    public function supplier_products($supplier_scope) {
         $mode = strtolower(trim((string) $this->input->get('mode', TRUE)));
         $mode = $mode === 'stock_out' ? 'stock_out' : 'stock_in';
 
@@ -130,7 +130,7 @@ class Stock extends CI_Controller {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
         }
 
-        $result = $this->stock_service->supplier_products($supplier_id, $mode);
+        $result = $this->stock_service->supplier_products($supplier_scope, $mode);
 
         if (!$result['success']) {
             show_error(
@@ -222,7 +222,7 @@ class Stock extends CI_Controller {
             $rows[] = array(
                 html_escape($transaction->transaction_no),
                 html_escape($transaction->type),
-                html_escape($transaction->supplier_name),
+                html_escape($transaction->supplier_name ?: 'Unassigned Products'),
                 html_escape($transaction->username),
                 html_escape($transaction->created_at),
                 ui_modal_action_group(array(
@@ -323,9 +323,9 @@ class Stock extends CI_Controller {
     // Internal helper ni para transaction form; tawagon ra sulod application/controllers/Stock.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function transaction_form($type) {
         $this->form_validation->set_rules(
-            'supplier_id',
-            'Supplier',
-            'required|integer|greater_than[0]'
+            'supplier_scope',
+            'Supplier / Product Scope',
+            'trim|required|max_length[32]'
         );
 
         $this->form_validation->set_rules('remarks', 'Remarks', 'trim|max_length[255]');
@@ -346,7 +346,7 @@ class Stock extends CI_Controller {
 
         $result = $this->stock_service->create_transaction(
             $type,
-            $this->input->post('supplier_id', TRUE),
+            $this->input->post('supplier_scope', TRUE),
             $this->input->post('remarks', TRUE),
             $this->session->userdata('user_id'),
             $items
@@ -370,14 +370,16 @@ class Stock extends CI_Controller {
         $data['supplier_products'] = array();
         $data['transaction_quantities'] = $this->posted_quantity_map();
 
-        $supplier_id = (int) $this->input->post('supplier_id', TRUE);
+        $supplier_scope = trim((string) $this->input->post('supplier_scope', TRUE));
 
-        if ($supplier_id > 0) {
-            $supplier = $this->Supplier_model->get_by_id($supplier_id);
+        if ($supplier_scope === 'unassigned') {
+            $data['supplier_products'] = $this->Product_model->get_active_by_supplier('unassigned', $type);
+        } elseif ($supplier_scope !== '' && ctype_digit($supplier_scope) && (int) $supplier_scope > 0) {
+            $supplier = $this->Supplier_model->get_by_id((int) $supplier_scope);
 
             if ($supplier && (int) $supplier->status === 1) {
                 $data['suppliers'] = array($supplier);
-                $data['supplier_products'] = $this->Product_model->get_active_by_supplier($supplier_id, $type);
+                $data['supplier_products'] = $this->Product_model->get_active_by_supplier((int) $supplier_scope, $type);
             }
         }
 
