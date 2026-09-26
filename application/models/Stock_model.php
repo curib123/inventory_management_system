@@ -52,7 +52,7 @@ class Stock_model extends CI_Model {
 
     // Data helper ni para get transactions; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_transactions($limit = NULL, $offset = 0) {
-        $this->db->select('t.*, u.username, s.supplier_name');
+        $this->db->select("t.*, u.username, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name", FALSE);
         $this->db->from('stock_transactions t');
         $this->db->join('users u', 'u.id = t.created_by');
         $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
@@ -71,7 +71,7 @@ class Stock_model extends CI_Model {
 
     // Data helper ni para get transaction; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_transaction($id) {
-        $this->db->select('t.*, u.username, s.supplier_name');
+        $this->db->select("t.*, u.username, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name", FALSE);
         $this->db->from('stock_transactions t');
         $this->db->join('users u', 'u.id = t.created_by');
         $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
@@ -185,7 +185,7 @@ class Stock_model extends CI_Model {
     // Data helper ni para get transactions datatable; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_transactions_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
         $this->build_transactions_datatable_query($search, $filters);
-        $this->db->select('t.id, t.transaction_no, t.type, t.created_at, u.username, s.supplier_name');
+        $this->db->select("t.id, t.transaction_no, t.type, t.created_at, u.username, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name", FALSE);
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
         }
@@ -253,6 +253,11 @@ class Stock_model extends CI_Model {
             $this->db->like('t.transaction_no', $search);
             $this->db->or_like('t.type', $search);
             $this->db->or_like('s.supplier_name', $search);
+
+            if (stripos('Unassigned Products', $search) !== FALSE) {
+                $this->db->or_where('t.supplier_id IS NULL', NULL, FALSE);
+            }
+
             $this->db->or_like('u.username', $search);
             $this->db->or_like('t.created_at', $search);
             $this->db->or_like('t.remarks', $search);
