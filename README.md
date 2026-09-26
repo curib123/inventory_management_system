@@ -29,7 +29,7 @@ Phase 3 - Stock in
 
 1.Create Stock in Trasaction
 2.Transaction number
-3.When Select supplier when supplier selected it will fetch all product connected to that supplier selected
+3.Select Supplier or Unassigned Products. Supplier loads only products assigned to that supplier; Unassigned Products loads only products where supplier_id IS NULL
 4.It will add multiple products in 1 transaction
 5.Quantity received from each product selected and show old stock , and total new stock preview 
 6.Increase product stock automatically
@@ -37,10 +37,11 @@ Phase 3 - Stock in
 
 Phase 4. Stock out
 1.Create Stock Out Transaction
-2.Check available stock before processing 
-3.Decrease product stock automatically
-4.Prevent stock from becoming negative
-5.Record stock movement
+2.Select Supplier or Unassigned Products. Supplier loads only its assigned products; Unassigned Products loads only products where supplier_id IS NULL
+3.Check available stock before processing
+4.Decrease product stock automatically
+5.Prevent stock from becoming negative
+6.Record stock movement
 
 Phase 5 - Stock Movement History
 1.Stock In History
@@ -214,7 +215,7 @@ Current unit-test areas include authentication/session behavior, DataTables requ
 - [x] Stock Adjustment now uses a required supplier-first reconciliation flow. Selecting a supplier limits Product search to that supplier's active products; an explicit Unassigned Products scope handles products without a supplier. The modal shows system stock, physical count, live variance, requires a reason, blocks no-op adjustments, and records permanent history.
 - [x] CSV and Excel remain downloadable report files. Excel output is hardened against buffered-output corruption and uses the same professional blue-header, bordered, zebra-row table language as PDF.
 - [x] PDF is now a print-focused export: it opens inline in a new tab as an A4 landscape report instead of forcing a file download.
-- [x] Stock In continues to follow Phase 3: supplier selection fetches only that supplier's active products, supports multiple products in one transaction, shows old/new stock, updates inventory atomically, creates a transaction number, and records movement history.
+- [x] Stock In and Stock Out support Supplier or Unassigned Products scope. Supplier selection loads only that supplier's active products; Unassigned Products loads only active products where supplier_id IS NULL. Unassigned transactions store supplier_id = NULL, remain atomic, and display as Unassigned Products in history/reports.
 - [x] Bootstrap/custom styling remains centralized through shared page, table, modal, form, stock, sidebar, and report components to reduce page-specific merge conflicts.
 
 ### UI styling branches
@@ -304,3 +305,4 @@ Application errors are centralized through `application/core/MY_Exceptions.php` 
 - [x] New user accounts receive a secure generated temporary password and are prompted to change it after login, with a session-only Ask later option.
 - [x] Authenticated pages, modals, DataTables, search/filter controls, pagination/limits, top navigation, searchable relationship dropdowns, typography, colors, and responsive layout use the centralized SaaS UI system.
 - [x] Application errors use one centralized professional error experience with an Error ID and exact protected log-file reference for debugging.
+- [x] Stock In and Stock Out now use the same Supplier or Unassigned Products scope pattern as Stock Adjustment, with server-side ownership validation and NULL supplier transaction headers for unassigned movements.
