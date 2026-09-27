@@ -1,10 +1,9 @@
 /*
 |--------------------------------------------------------------------------
-| Plain page / modal presentation mode
+| Plain page / custom modal presentation mode
 |--------------------------------------------------------------------------
-| Bootstrap and app CSS stay loaded so a styled modal can still open on top
-| of a deliberately plain page. These rules only neutralize the surface that
-| is configured as plain.
+| Bootstrap and app CSS stay loaded for the rest of the application, while the
+| custom action modal remains fully styled on top of a deliberately plain page.
 */
 
 /* Restore browser-default HTML appearance outside the action modal. */
@@ -12,12 +11,12 @@ body.app-page-plain {
     all: revert;
 }
 
-body.app-page-plain :not(#action-modal, #action-modal *, .modal-backdrop, .modal-backdrop *) {
+body.app-page-plain :not(#action-modal, #action-modal *) {
     all: revert;
 }
 
-body.app-page-plain :not(#action-modal, #action-modal *, .modal-backdrop, .modal-backdrop *)::before,
-body.app-page-plain :not(#action-modal, #action-modal *, .modal-backdrop, .modal-backdrop *)::after {
+body.app-page-plain :not(#action-modal, #action-modal *)::before,
+body.app-page-plain :not(#action-modal, #action-modal *)::after {
     all: revert;
     content: none;
 }
@@ -29,8 +28,8 @@ body.app-page-plain [hidden] {
 }
 
 /*
- * Plain-modal mode keeps Bootstrap's modal shell/backdrop functional, while
- * the loaded action content itself renders with browser-default HTML styles.
+ * Plain-modal mode keeps the custom modal shell functional, while the loaded
+ * action content itself renders with browser-default HTML styles.
  */
 body.app-modal-plain #action-modal-content,
 body.app-modal-plain #action-modal-content * {

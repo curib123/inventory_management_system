@@ -9,5 +9,8 @@ assert.match(bodyRule[1], /max-height:\s*calc\(100vh\s*-\s*12rem\)/);
 assert.match(bodyRule[1], /overflow-y:\s*auto/);
 assert.match(css, /#action-modal \.app-modal-dialog\s*\{[\s\S]*?min-height:\s*0/);
 assert.match(css, /#action-modal \.app-modal-content\s*\{[\s\S]*?min-height:\s*0/);
+assert.match(css, /#action-modal \.app-modal-header\s*\{[\s\S]*?display:\s*flex/);
+assert.match(css, /#action-modal \.app-modal-content > form/);
+assert.match(css, /#action-modal \.app-confirmation-stage/);
 
 console.log('PASS custom modal scroll');

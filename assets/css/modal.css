@@ -64,8 +64,25 @@ body.app-modal-open {
         0 0.4rem 1.2rem rgba(15, 23, 42, 0.08);
 }
 
+#action-modal .app-modal-content > form,
+#action-modal .app-confirmation-stage {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+}
+
+#action-modal .app-confirmation-stage {
+    flex: 1 1 auto;
+}
+
 #action-modal .app-modal-header {
     align-items: flex-start;
+    display: flex;
+    flex: 0 0 auto;
+    justify-content: space-between;
+    gap: 1rem;
     padding: 1.2rem 1.35rem;
     border-bottom: 1px solid var(--app-modal-soft-border);
     background:
@@ -574,6 +591,10 @@ body.app-modal-open {
 }
 
 @media (max-width: 575.98px) {
+    #action-modal .app-modal-body {
+        max-height: calc(100vh - 15rem);
+    }
+
     #action-modal .app-modal-dialog {
         width: 100%;
         margin: 0;

@@ -3,6 +3,7 @@ const fs = require('fs');
 
 const javascript = fs.readFileSync('assets/js/app.js', 'utf8');
 const css = fs.readFileSync('assets/css/modal.css', 'utf8');
+const plainModeCss = fs.readFileSync('assets/css/plain-mode.css', 'utf8');
 const container = fs.readFileSync('application/views/modal/container.php', 'utf8');
 
 assert.doesNotMatch(javascript, /bootstrap\.Modal|getOrCreateInstance|hidden\.bs\.modal/);
@@ -20,5 +21,6 @@ assert.match(css, /#action-modal\.is-open/);
 assert.match(css, /#action-modal \.app-modal-dialog/);
 assert.match(css, /backdrop-filter:\s*blur/);
 assert.doesNotMatch(css, /\.modal-(header|body|footer|dialog|content|backdrop)/);
+assert.doesNotMatch(plainModeCss, /modal-backdrop|Bootstrap's modal shell/);
 
 console.log('PASS custom modal');
