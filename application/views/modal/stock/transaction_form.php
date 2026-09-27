@@ -90,6 +90,44 @@ $this->load->view('components/modal/header', array(
     </div>
 
 
+    <!-- Remarks -->
+    <div class="mt-3">
+        <label for="remarks" class="form-label">Remarks</label>
+
+        <input
+            type="text"
+            id="remarks"
+            name="remarks"
+            class="form-control"
+            maxlength="255"
+            value="<?php echo html_escape(set_value('remarks')); ?>"
+        >
+
+        <div class="form-text">
+            Add a short business reason or reference when it helps explain the movement later.
+        </div>
+    </div>
+
+
+    <!-- Assist note -->
+    <div class="mt-3">
+        <?php
+        $this->load->view('components/form/assist_note', array(
+            'assist_title' => 'Inventory transaction',
+            'assist_text' => $transaction_type === 'stock_in'
+                ? 'Confirm the supplier or Unassigned Products scope and quantities carefully. Saving increases stock and creates a permanent transaction record.'
+                : 'Confirm the supplier or Unassigned Products scope and quantities carefully. Saving reduces stock and creates a permanent transaction record.',
+            'assist_variant' => $transaction_type === 'stock_in'
+                ? 'info'
+                : 'warning',
+            'assist_icon' => $transaction_type === 'stock_in'
+                ? 'bi-info-circle'
+                : 'bi-exclamation-triangle'
+        ));
+        ?>
+    </div>
+
+
     <!-- Products -->
     <div class="app-stock-products-heading mb-3">
         <div class="app-stock-products-heading-copy">
@@ -144,43 +182,6 @@ $this->load->view('components/modal/header', array(
 
     </div>
 
-
-    <!-- Remarks -->
-    <div class="mt-3">
-        <label for="remarks" class="form-label">Remarks</label>
-
-        <input
-            type="text"
-            id="remarks"
-            name="remarks"
-            class="form-control"
-            maxlength="255"
-            value="<?php echo html_escape(set_value('remarks')); ?>"
-        >
-
-        <div class="form-text">
-            Add a short business reason or reference when it helps explain the movement later.
-        </div>
-    </div>
-
-
-    <!-- Assist note -->
-    <div class="mt-3">
-        <?php
-        $this->load->view('components/form/assist_note', array(
-            'assist_title' => 'Inventory transaction',
-            'assist_text' => $transaction_type === 'stock_in'
-                ? 'Confirm the supplier or Unassigned Products scope and quantities carefully. Saving increases stock and creates a permanent transaction record.'
-                : 'Confirm the supplier or Unassigned Products scope and quantities carefully. Saving reduces stock and creates a permanent transaction record.',
-            'assist_variant' => $transaction_type === 'stock_in'
-                ? 'info'
-                : 'warning',
-            'assist_icon' => $transaction_type === 'stock_in'
-                ? 'bi-info-circle'
-                : 'bi-exclamation-triangle'
-        ));
-        ?>
-    </div>
 
 </div>
 
