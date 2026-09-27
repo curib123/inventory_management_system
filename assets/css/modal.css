@@ -39,6 +39,7 @@ body.app-modal-open {
     width: 100%;
     max-width: 800px;
     max-height: calc(100vh - 2rem);
+    min-height: 0;
     margin: 0;
     transform: translateY(0.75rem) scale(0.985);
     transition: transform 0.18s ease;
@@ -53,6 +54,7 @@ body.app-modal-open {
     flex-direction: column;
     width: 100%;
     max-height: calc(100vh - 2rem);
+    min-height: 0;
     overflow: hidden;
     border: 1px solid var(--app-modal-border);
     border-radius: 1.1rem;
@@ -165,6 +167,7 @@ body.app-modal-open {
 #action-modal .app-modal-body {
     flex: 1 1 auto;
     min-height: 0;
+    max-height: calc(100vh - 12rem);
     padding: 1.35rem;
     background:
         linear-gradient(180deg, rgba(var(--bs-secondary-rgb), 0.018), transparent 9rem),
