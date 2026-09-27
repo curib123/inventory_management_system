@@ -7,7 +7,7 @@ $modal_variant = isset($modal_variant)
     : 'primary';
 $modal_eyebrow = isset($modal_eyebrow) ? trim((string) $modal_eyebrow) : '';
 ?>
-<div class="modal-header app-modal-header app-modal-header-<?php echo html_escape($modal_variant); ?>">
+<div class="app-modal-header app-modal-header-<?php echo html_escape($modal_variant); ?>">
     <div class="app-modal-heading">
         <?php if ($modal_icon !== ''): ?>
             <span class="app-modal-icon app-modal-icon-<?php echo html_escape($modal_variant); ?>" aria-hidden="true">
@@ -20,7 +20,7 @@ $modal_eyebrow = isset($modal_eyebrow) ? trim((string) $modal_eyebrow) : '';
                 <div class="app-modal-eyebrow"><?php echo html_escape($modal_eyebrow); ?></div>
             <?php endif; ?>
 
-            <h2 class="modal-title app-modal-title" id="action-modal-title"><?php echo html_escape($modal_title); ?></h2>
+        <h2 class="app-modal-title" id="action-modal-title"><?php echo html_escape($modal_title); ?></h2>
 
             <?php if ($modal_subtitle !== ''): ?>
                 <p class="app-modal-subtitle"><?php echo html_escape($modal_subtitle); ?></p>

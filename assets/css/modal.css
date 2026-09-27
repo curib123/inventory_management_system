@@ -6,15 +6,53 @@
     --app-modal-border: rgba(var(--bs-secondary-rgb), 0.16);
     --app-modal-soft-border: rgba(var(--bs-secondary-rgb), 0.11);
     --app-modal-surface-muted: rgba(var(--bs-secondary-rgb), 0.035);
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(15, 23, 42, 0.52);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    transition: opacity 0.18s ease, visibility 0.18s ease;
 }
 
-#action-modal .modal-dialog {
-    width: calc(100% - 2rem);
+#action-modal.is-open {
+    visibility: visible;
+}
+
+#action-modal.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+body.app-modal-open {
+    overflow: hidden;
+}
+
+#action-modal .app-modal-dialog {
+    width: 100%;
     max-width: 800px;
-    margin-inline: auto;
+    max-height: calc(100vh - 2rem);
+    margin: 0;
+    transform: translateY(0.75rem) scale(0.985);
+    transition: transform 0.18s ease;
 }
 
-#action-modal .modal-content {
+#action-modal.is-visible .app-modal-dialog {
+    transform: translateY(0) scale(1);
+}
+
+#action-modal .app-modal-content {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: calc(100vh - 2rem);
     overflow: hidden;
     border: 1px solid var(--app-modal-border);
     border-radius: 1.1rem;
@@ -24,7 +62,7 @@
         0 0.4rem 1.2rem rgba(15, 23, 42, 0.08);
 }
 
-#action-modal .modal-header {
+#action-modal .app-modal-header {
     align-items: flex-start;
     padding: 1.2rem 1.35rem;
     border-bottom: 1px solid var(--app-modal-soft-border);
@@ -124,8 +162,9 @@
     opacity: 1;
 }
 
-#action-modal .modal-body {
-    max-height: calc(100vh - 13rem);
+#action-modal .app-modal-body {
+    flex: 1 1 auto;
+    min-height: 0;
     padding: 1.35rem;
     background:
         linear-gradient(180deg, rgba(var(--bs-secondary-rgb), 0.018), transparent 9rem),
@@ -134,18 +173,19 @@
     overscroll-behavior: contain;
 }
 
-#action-modal .modal-body::-webkit-scrollbar {
+#action-modal .app-modal-body::-webkit-scrollbar {
     width: 0.65rem;
 }
 
-#action-modal .modal-body::-webkit-scrollbar-thumb {
+#action-modal .app-modal-body::-webkit-scrollbar-thumb {
     border: 0.18rem solid transparent;
     border-radius: 999px;
     background: rgba(var(--bs-secondary-rgb), 0.25);
     background-clip: padding-box;
 }
 
-#action-modal .modal-footer {
+#action-modal .app-modal-footer {
+    flex: 0 0 auto;
     display: block;
     padding: 0.9rem 1.35rem;
     border-top: 1px solid var(--app-modal-soft-border);
@@ -173,7 +213,7 @@
     line-height: 1.4;
 }
 
-#action-modal .modal-footer .btn {
+#action-modal .app-modal-footer .btn {
     min-height: 2.45rem;
     min-width: 6.5rem;
     padding-inline: 0.95rem;
@@ -182,15 +222,15 @@
     font-weight: 700;
 }
 
-#action-modal .modal-footer .btn-primary,
-#action-modal .modal-footer .btn-danger,
-#action-modal .modal-footer .btn-success,
-#action-modal .modal-footer .btn-warning {
+#action-modal .app-modal-footer .btn-primary,
+#action-modal .app-modal-footer .btn-danger,
+#action-modal .app-modal-footer .btn-success,
+#action-modal .app-modal-footer .btn-warning {
     box-shadow: 0 0.25rem 0.65rem rgba(15, 23, 42, 0.09);
 }
 
-#action-modal .modal-footer .btn:focus-visible,
-#action-modal .modal-header .btn-close:focus-visible {
+#action-modal .app-modal-footer .btn:focus-visible,
+#action-modal .app-modal-header .btn-close:focus-visible {
     outline: 0;
     box-shadow: 0 0 0 0.22rem rgba(var(--bs-primary-rgb), 0.14);
 }
@@ -492,27 +532,17 @@
     cursor: wait;
 }
 
-/* Modal backdrop */
-.modal-backdrop.show {
-    opacity: 0.52;
-    backdrop-filter: blur(2px);
-}
-
 @media (max-width: 767.98px) {
-    #action-modal .modal-dialog {
-        width: calc(100% - 1.25rem);
-        margin: 0.625rem auto;
+    #action-modal .app-modal-dialog {
+        width: 100%;
+        margin: 0;
     }
 
-    #action-modal .modal-header,
-    #action-modal .modal-body,
-    #action-modal .modal-footer {
+    #action-modal .app-modal-header,
+    #action-modal .app-modal-body,
+    #action-modal .app-modal-footer {
         padding-right: 1rem;
         padding-left: 1rem;
-    }
-
-    #action-modal .modal-body {
-        max-height: calc(100vh - 10.5rem);
     }
 
     #action-modal .app-detail-list {
@@ -541,12 +571,12 @@
 }
 
 @media (max-width: 575.98px) {
-    #action-modal .modal-dialog {
-        width: calc(100% - 0.9rem);
-        margin: 0.45rem auto;
+    #action-modal .app-modal-dialog {
+        width: 100%;
+        margin: 0;
     }
 
-    #action-modal .modal-content {
+    #action-modal .app-modal-content {
         border-radius: 0.95rem;
     }
 

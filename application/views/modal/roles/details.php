@@ -19,7 +19,7 @@ foreach ((array) $permissions as $permission) {
 }
 ?>
 
-<div class="modal-body">
+<div class="app-modal-body">
     <div class="app-role-summary">
         <div class="app-role-summary-main">
             <div class="app-role-summary-label">Role</div>

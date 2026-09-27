@@ -9,7 +9,7 @@ $this->load->view('components/modal/header', array(
 ));
 ?>
 
-<div class="modal-body">
+<div class="app-modal-body">
     <div class="app-confirm-entity mb-3">
         <div class="app-confirm-entity-label">Role</div>
         <div class="app-confirm-entity-value"><?php echo html_escape($role->role_name); ?></div>

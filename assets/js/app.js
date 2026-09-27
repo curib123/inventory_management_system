@@ -4,7 +4,145 @@ document.addEventListener('DOMContentLoaded', function () {
     var sidebarBackdrop = document.getElementById('sidebar-backdrop');
     var modalElement = document.getElementById('action-modal');
     var modalContent = document.getElementById('action-modal-content');
-    var modalInstance = modalElement ? bootstrap.Modal.getOrCreateInstance(modalElement) : null;
+    var modalState = {
+        open: false,
+        previousFocus: null,
+        closeTimer: null
+    };
+
+    function focusableModalElements() {
+        if (!modalElement) {
+            return [];
+        }
+
+        return Array.from(modalElement.querySelectorAll(
+            'a[href], area[href], button:not([disabled]), input:not([disabled]), ' +
+            'select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )).filter(function (element) {
+            return element.offsetWidth > 0 || element.offsetHeight > 0 || element === document.activeElement;
+        });
+    }
+
+    function focusActionModal() {
+        var focusable = focusableModalElements();
+
+        if (focusable.length) {
+            focusable[0].focus();
+            return;
+        }
+
+        if (modalElement) {
+            modalElement.focus();
+        }
+    }
+
+    function clearActionModalContent() {
+        if (!modalContent) {
+            return;
+        }
+
+        modalContent.querySelectorAll('form[data-modal-form]').forEach(function (form) {
+            if (typeof confirmationStates !== 'undefined') {
+                confirmationStates.delete(form);
+            }
+        });
+        modalContent.innerHTML = '';
+    }
+
+    function showActionModal() {
+        if (!modalElement || !modalContent) {
+            return;
+        }
+
+        if (modalState.closeTimer) {
+            window.clearTimeout(modalState.closeTimer);
+            modalState.closeTimer = null;
+        }
+
+        if (!modalState.open) {
+            modalState.previousFocus = document.activeElement;
+        }
+
+        modalState.open = true;
+        modalElement.hidden = false;
+        modalElement.setAttribute('aria-hidden', 'false');
+        modalElement.setAttribute('aria-modal', 'true');
+        modalElement.classList.add('is-open');
+        document.body.classList.add('app-modal-open');
+
+        window.requestAnimationFrame(function () {
+            if (modalState.open && modalElement) {
+                modalElement.classList.add('is-visible');
+                focusActionModal();
+            }
+        });
+    }
+
+    function hideActionModal(restoreFocus) {
+        if (!modalElement || !modalState.open) {
+            return;
+        }
+
+        modalState.open = false;
+        modalElement.classList.remove('is-visible');
+        modalElement.setAttribute('aria-hidden', 'true');
+        modalElement.removeAttribute('aria-modal');
+        document.body.classList.remove('app-modal-open');
+
+        modalState.closeTimer = window.setTimeout(function () {
+            if (modalState.open || !modalElement) {
+                return;
+            }
+
+            modalElement.classList.remove('is-open');
+            modalElement.hidden = true;
+            clearActionModalContent();
+
+            if (restoreFocus && modalState.previousFocus && typeof modalState.previousFocus.focus === 'function') {
+                modalState.previousFocus.focus();
+            }
+
+            modalState.previousFocus = null;
+            modalState.closeTimer = null;
+        }, 180);
+    }
+
+    if (modalElement) {
+        modalElement.addEventListener('keydown', function (event) {
+            if (!modalState.open) {
+                return;
+            }
+
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                hideActionModal(true);
+                return;
+            }
+
+            if (event.key !== 'Tab') {
+                return;
+            }
+
+            var focusable = focusableModalElements();
+
+            if (!focusable.length) {
+                event.preventDefault();
+                modalElement.focus();
+                return;
+            }
+
+            var first = focusable[0];
+            var last = focusable[focusable.length - 1];
+
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
+    }
 
     // Frontend helper ni para escape html; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function escapeHtml(value) {
@@ -244,29 +382,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Frontend helper ni para show problem; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function showProblem(problem) {
-        if (!modalElement || !modalContent || !modalInstance) {
+        if (!modalElement || !modalContent) {
             window.alert((problem.title || 'Request failed') + '\n\n' + (problem.message || ''));
             return;
         }
 
         modalContent.innerHTML =
-            '<div class="modal-header app-modal-header app-modal-header-danger">' +
+            '<div class="app-modal-header app-modal-header-danger">' +
                 '<div class="app-modal-heading">' +
                     '<span class="app-modal-icon app-modal-icon-danger">' +
                         '<i class="bi bi-exclamation-triangle"></i>' +
                     '</span>' +
                     '<div class="app-modal-heading-copy">' +
                         '<div class="app-modal-eyebrow">System message</div>' +
-                        '<h2 class="modal-title app-modal-title" id="action-modal-title">' + escapeHtml(problem.title || 'Request failed') + '</h2>' +
+                        '<h2 class="app-modal-title" id="action-modal-title">' + escapeHtml(problem.title || 'Request failed') + '</h2>' +
                         '<p class="app-modal-subtitle">The system could not complete the requested operation.</p>' +
                     '</div>' +
                 '</div>' +
                 '<button type="button" class="btn-close app-modal-close" data-modal-close aria-label="Close"></button>' +
             '</div>' +
-            '<div class="modal-body">' +
+            '<div class="app-modal-body">' +
                 problemBodyHtml(problem) +
             '</div>' +
-            '<div class="modal-footer app-modal-footer">' +
+            '<div class="app-modal-footer">' +
                 '<div class="app-modal-footer-actions">' +
                     '<button type="button" class="btn btn-outline-secondary" data-modal-close>Close</button>' +
                     '<button type="button" class="btn btn-primary" data-retry-page>' +
@@ -275,7 +413,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 '</div>' +
             '</div>';
 
-        modalInstance.show();
+        showActionModal();
     }
 
     // Frontend helper ni para show inline problem; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
@@ -308,29 +446,6 @@ document.addEventListener('DOMContentLoaded', function () {
         wrapper.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
 
-    // Frontend helper ni para refresh searchable select; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
-    function refreshSearchableSelect(select) {
-        if (!select || !select._searchableInput) {
-            return;
-        }
-
-        var query = select._searchableInput.value.trim().toLowerCase();
-
-        Array.from(select.options).forEach(function (option, index) {
-            if (index === 0 || option.value === '') {
-                option.hidden = false;
-                return;
-            }
-
-            var externallyHidden = option.getAttribute('data-filter-hidden') === '1';
-            var searchableText = String(
-                option.getAttribute('data-search-text') || option.textContent || ''
-            ).toLowerCase();
-
-            option.hidden = externallyHidden || (query !== '' && searchableText.indexOf(query) === -1);
-        });
-    }
-
     // Frontend helper ni para initialize searchable select; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function initializeSearchableSelect(select) {
         if (!select || select.getAttribute('data-searchable-ready') === '1') {
@@ -342,22 +457,51 @@ document.addEventListener('DOMContentLoaded', function () {
         var wrapper = document.createElement('div');
         wrapper.className = 'app-searchable-select';
 
+        var trigger = document.createElement('button');
+        trigger.type = 'button';
+        trigger.className = 'app-searchable-select-trigger';
+        trigger.setAttribute('aria-haspopup', 'listbox');
+        trigger.setAttribute('aria-expanded', 'false');
+        trigger.setAttribute('aria-controls', (select.id || 'searchable-select') + '-options');
+
+        var triggerValue = document.createElement('span');
+        triggerValue.className = 'app-searchable-select-value';
+
+        var triggerCaret = document.createElement('span');
+        triggerCaret.className = 'app-searchable-select-caret';
+        triggerCaret.setAttribute('aria-hidden', 'true');
+        triggerCaret.textContent = '⌄';
+
+        trigger.appendChild(triggerValue);
+        trigger.appendChild(triggerCaret);
+
+        var panel = document.createElement('div');
+        panel.className = 'app-searchable-select-panel';
+        panel.hidden = true;
+
         var search = document.createElement('input');
         search.type = 'search';
-        search.className = 'form-control form-control-sm app-searchable-select-search';
+        search.className = 'app-searchable-select-search';
         search.placeholder = select.getAttribute('data-search-placeholder') || 'Search options...';
         search.autocomplete = 'off';
         search.setAttribute('aria-label', search.placeholder);
 
+        var options = document.createElement('div');
+        options.className = 'app-searchable-select-options';
+        options.id = (select.id || 'searchable-select') + '-options';
+        options.setAttribute('role', 'listbox');
+
+        panel.appendChild(search);
+        panel.appendChild(options);
+
         var parent = select.parentNode;
         parent.insertBefore(wrapper, select);
-        wrapper.appendChild(search);
+        wrapper.appendChild(trigger);
+        wrapper.appendChild(panel);
         wrapper.appendChild(select);
+        select.classList.add('app-searchable-select-native');
 
         select._searchableInput = search;
-        select._refreshSearchable = function () {
-            refreshSearchableSelect(select);
-        };
 
         var remoteUrl = select.getAttribute('data-search-url') || '';
         var remoteMode = select.getAttribute('data-search-mode') || '';
@@ -377,6 +521,9 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         var searchTimer = null;
         var searchSequence = 0;
+        var searchableOptionLimit = 10;
+        var defaultOptionsLoaded = !remoteUrl;
+        var isOpen = false;
 
         if (Number.isNaN(remoteMinLength)) {
             remoteMinLength = 2;
@@ -403,6 +550,101 @@ document.addEventListener('DOMContentLoaded', function () {
                 supplierId: option.getAttribute('data-supplier-id'),
                 supplierName: option.getAttribute('data-supplier-name')
             };
+        }
+
+        function syncSearchableTrigger() {
+            var selectedOption = select.selectedIndex >= 0
+                ? select.options[select.selectedIndex]
+                : null;
+            var hasValue = selectedOption && selectedOption.value !== '';
+            var placeholder = select.getAttribute('data-placeholder') ||
+                (select.options.length ? select.options[0].textContent : 'Select an option');
+
+            triggerValue.textContent = selectedOption && (hasValue || !select.required)
+                ? selectedOption.textContent.trim()
+                : placeholder.trim();
+            triggerValue.classList.toggle('is-placeholder', !hasValue && select.required);
+            trigger.disabled = select.disabled;
+            wrapper.classList.toggle('is-disabled', select.disabled);
+        }
+
+        function closeSearchableDropdown(restoreFocus) {
+            isOpen = false;
+            wrapper.classList.remove('is-open');
+            panel.hidden = true;
+            trigger.setAttribute('aria-expanded', 'false');
+
+            if (restoreFocus) {
+                trigger.focus();
+            }
+        }
+
+        function matchingOptions(query) {
+            var normalizedQuery = String(query || '').trim().toLowerCase();
+            var selectedValue = String(select.value || '');
+            var matches = Array.from(select.options).filter(function (option, index) {
+                if (index === 0 && option.value === '' && select.required) {
+                    return false;
+                }
+
+                if (option.disabled || option.getAttribute('data-filter-hidden') === '1') {
+                    return false;
+                }
+
+                var searchableText = String(
+                    option.getAttribute('data-search-text') || option.textContent || ''
+                ).toLowerCase();
+
+                return normalizedQuery === '' || searchableText.indexOf(normalizedQuery) !== -1;
+            });
+            var limited = matches.slice(0, searchableOptionLimit);
+            var selected = matches.find(function (option) {
+                return String(option.value) === selectedValue;
+            });
+
+            if (selected && limited.indexOf(selected) === -1) {
+                limited.push(selected);
+            }
+
+            return limited;
+        }
+
+        function renderSearchableOptions(query) {
+            options.innerHTML = '';
+
+            var matches = matchingOptions(query);
+
+            if (!matches.length) {
+                var empty = document.createElement('div');
+                empty.className = 'app-searchable-select-empty';
+                empty.textContent = 'No matching options';
+                options.appendChild(empty);
+                return;
+            }
+
+            matches.forEach(function (option) {
+                var optionButton = document.createElement('button');
+                optionButton.type = 'button';
+                optionButton.className = 'app-searchable-select-option';
+                optionButton.setAttribute('role', 'option');
+                optionButton.setAttribute('aria-selected', String(option.value) === String(select.value));
+                optionButton.textContent = option.textContent.trim();
+
+                if (String(option.value) === String(select.value)) {
+                    optionButton.classList.add('is-selected');
+                }
+
+                optionButton.addEventListener('click', function () {
+                    select.value = option.value;
+                    search.value = '';
+                    select.dispatchEvent(new Event('change', { bubbles: true }));
+                    syncSearchableTrigger();
+                    renderSearchableOptions('');
+                    closeSearchableDropdown(true);
+                });
+
+                options.appendChild(optionButton);
+            });
         }
 
         // Frontend helper ni para rebuild remote options; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
@@ -503,17 +745,19 @@ document.addEventListener('DOMContentLoaded', function () {
         async function searchRemoteOptions(query) {
             var selected = selectedSnapshot();
             var sequence = ++searchSequence;
+            var normalizedQuery = String(query || '').trim();
 
             var dependent = dependentSelector ? document.querySelector(dependentSelector) : null;
             var dependentValue = dependent ? dependent.value : '';
 
             if (dependentSelector && !dependentValue) {
                 rebuildRemoteOptions([], selected);
+                renderSearchableOptions(normalizedQuery);
                 return;
             }
 
-            if (query.length < remoteMinLength) {
-                rebuildRemoteOptions([], selected);
+            if (normalizedQuery !== '' && normalizedQuery.length < remoteMinLength) {
+                renderSearchableOptions(normalizedQuery);
                 return;
             }
 
@@ -549,6 +793,8 @@ document.addEventListener('DOMContentLoaded', function () {
                     payload && Array.isArray(payload.items) ? payload.items : [],
                     selected
                 );
+                defaultOptionsLoaded = normalizedQuery === '';
+                renderSearchableOptions(normalizedQuery);
             } catch (error) {
                 // Keep the current selected value if remote search temporarily fails.
             } finally {
@@ -558,33 +804,133 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         }
 
-        select._remoteSearch = searchRemoteOptions;
-
-        search.addEventListener('input', function () {
-            window.clearTimeout(searchTimer);
-
-            if (!remoteUrl) {
-                refreshSearchableSelect(select);
+        function openSearchableDropdown(focusSearch) {
+            if (select.disabled) {
                 return;
             }
 
+            isOpen = true;
+            wrapper.classList.add('is-open');
+            panel.hidden = false;
+            trigger.setAttribute('aria-expanded', 'true');
+            renderSearchableOptions(search.value);
+
+            if (remoteUrl && !defaultOptionsLoaded) {
+                searchRemoteOptions('');
+            }
+
+            if (focusSearch) {
+                window.requestAnimationFrame(function () {
+                    search.focus();
+                });
+            }
+        }
+
+        select._searchableTrigger = trigger;
+        select._syncSearchableDisplay = syncSearchableTrigger;
+        select._setSearchableDisabled = function (disabled) {
+            trigger.disabled = disabled;
+            search.disabled = disabled;
+            wrapper.classList.toggle('is-disabled', disabled);
+
+            if (disabled) {
+                closeSearchableDropdown(false);
+            }
+        };
+        select._refreshSearchable = function () {
+            syncSearchableTrigger();
+            renderSearchableOptions(search.value);
+        };
+        select._remoteSearch = searchRemoteOptions;
+
+        trigger.addEventListener('click', function () {
+            if (isOpen) {
+                closeSearchableDropdown(false);
+            } else {
+                openSearchableDropdown(true);
+            }
+        });
+
+        trigger.addEventListener('keydown', function (event) {
+            if (event.key === 'Enter' || event.key === ' ' || event.key === 'ArrowDown') {
+                event.preventDefault();
+                openSearchableDropdown(true);
+            } else if (event.key === 'Escape') {
+                closeSearchableDropdown(false);
+            }
+        });
+
+        search.addEventListener('input', function () {
+            window.clearTimeout(searchTimer);
             var query = search.value.trim();
+
+            if (!remoteUrl) {
+                renderSearchableOptions(query);
+                return;
+            }
 
             searchTimer = window.setTimeout(function () {
                 searchRemoteOptions(query);
             }, 250);
         });
 
-        select.addEventListener('change', function () {
-            if (!remoteUrl) {
-                search.value = '';
-                refreshSearchableSelect(select);
+        search.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closeSearchableDropdown(true);
+                return;
+            }
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                var firstOption = options.querySelector('.app-searchable-select-option');
+
+                if (firstOption) {
+                    firstOption.focus();
+                }
             }
         });
 
-        if (!remoteUrl) {
-            refreshSearchableSelect(select);
-        }
+        options.addEventListener('keydown', function (event) {
+            var current = event.target.closest('.app-searchable-select-option');
+
+            if (!current) {
+                return;
+            }
+
+            var optionButtons = Array.from(options.querySelectorAll('.app-searchable-select-option'));
+            var currentIndex = optionButtons.indexOf(current);
+
+            if (event.key === 'ArrowDown' && optionButtons[currentIndex + 1]) {
+                event.preventDefault();
+                optionButtons[currentIndex + 1].focus();
+            } else if (event.key === 'ArrowUp') {
+                event.preventDefault();
+
+                if (optionButtons[currentIndex - 1]) {
+                    optionButtons[currentIndex - 1].focus();
+                } else {
+                    search.focus();
+                }
+            } else if (event.key === 'Escape') {
+                event.preventDefault();
+                closeSearchableDropdown(true);
+            }
+        });
+
+        select.addEventListener('change', function () {
+            syncSearchableTrigger();
+            renderSearchableOptions(search.value);
+        });
+
+        document.addEventListener('click', function (event) {
+            if (isOpen && !wrapper.contains(event.target)) {
+                closeSearchableDropdown(false);
+            }
+        });
+
+        syncSearchableTrigger();
+        renderSearchableOptions('');
     }
 
     // Frontend helper ni para initialize searchable selects; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
@@ -616,6 +962,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (productSelect.getAttribute('data-search-url')) {
             productSelect.disabled = !hasSupplierScope;
 
+            if (typeof productSelect._setSearchableDisabled === 'function') {
+                productSelect._setSearchableDisabled(!hasSupplierScope);
+            }
+
             if (productSelect._searchableInput) {
                 productSelect._searchableInput.disabled = !hasSupplierScope;
                 productSelect._searchableInput.placeholder = hasSupplierScope
@@ -632,6 +982,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
             if (productSelect._searchableInput) {
                 productSelect._searchableInput.value = '';
+            }
+
+            if (typeof productSelect._syncSearchableDisplay === 'function') {
+                productSelect._syncSearchableDisplay();
             }
 
             Array.from(productSelect.options).forEach(function (option, index) {
@@ -691,7 +1045,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        var modalBody = productSelect.closest('.modal-body');
+        var modalBody = productSelect.closest('.app-modal-body');
 
         if (!modalBody) {
             return;
@@ -743,7 +1097,7 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        var modalBody = actualInput.closest('.modal-body');
+        var modalBody = actualInput.closest('.app-modal-body');
 
         if (!modalBody) {
             return;
@@ -806,7 +1160,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Frontend helper ni para filter stock products; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
     function filterStockProducts(input) {
-        var list = input ? input.closest('.modal-body') : null;
+        var list = input ? input.closest('.app-modal-body') : null;
 
         if (!list) {
             return;
@@ -1170,20 +1524,20 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     async function loadModal(url) {
-        if (!modalElement || !modalContent || !modalInstance) {
+        if (!modalElement || !modalContent) {
             window.location.href = url;
             return;
         }
 
         modalContent.innerHTML =
-            '<div class="modal-body text-center py-5">' +
+            '<div class="app-modal-body text-center py-5">' +
                 '<div class="spinner-border" role="status">' +
                     '<span class="visually-hidden">Loading...</span>' +
                 '</div>' +
                 '<div class="small text-body-secondary mt-3">Loading action...</div>' +
             '</div>';
 
-        modalInstance.show();
+        showActionModal();
 
         try {
             var response = await fetch(url, {
@@ -1205,9 +1559,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (response.headers.get('X-Modal-Close') === '1') {
-                if (modalInstance) {
-                    modalInstance.hide();
-                }
+                hideActionModal(true);
 
                 if (response.headers.get('X-Page-Reload') === '1') {
                     window.location.reload();
@@ -1352,20 +1704,20 @@ document.addEventListener('DOMContentLoaded', function () {
         var stage = document.createElement('div');
         stage.className = 'app-confirmation-stage';
         stage.innerHTML =
-            '<div class="modal-header app-modal-header app-modal-header-' + escapeHtml(variant) + '">' +
+            '<div class="app-modal-header app-modal-header-' + escapeHtml(variant) + '">' +
                 '<div class="app-modal-heading">' +
                     '<span class="app-modal-icon app-modal-icon-' + escapeHtml(variant) + '">' +
                         '<i class="bi ' + escapeHtml(icon) + '"></i>' +
                     '</span>' +
                     '<div class="app-modal-heading-copy">' +
                         '<div class="app-modal-eyebrow">Confirmation</div>' +
-                        '<h2 class="modal-title app-modal-title" id="action-modal-title">' + escapeHtml(title) + '</h2>' +
+                        '<h2 class="app-modal-title" id="action-modal-title">' + escapeHtml(title) + '</h2>' +
                         '<p class="app-modal-subtitle">Review the impact before committing this change.</p>' +
                     '</div>' +
                 '</div>' +
                 '<button type="button" class="btn-close app-modal-close" data-confirm-cancel aria-label="Go back"></button>' +
             '</div>' +
-            '<div class="modal-body">' +
+            '<div class="app-modal-body">' +
                 '<div class="app-confirmation-review">' +
                     '<div class="app-confirmation-review-icon app-confirmation-review-icon-' + escapeHtml(variant) + '">' +
                         '<i class="bi ' + escapeHtml(icon) + '"></i>' +
@@ -1391,7 +1743,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     'Nothing has been submitted yet. Choose Go Back if you want to review or change any information.' +
                 '</div>' +
             '</div>' +
-            '<div class="modal-footer app-modal-footer">' +
+            '<div class="app-modal-footer">' +
                 '<div class="app-modal-footer-actions">' +
                     '<button type="button" class="btn btn-outline-secondary" data-confirm-cancel>' +
                         '<i class="bi bi-arrow-left me-1"></i>Go Back' +
@@ -1474,7 +1826,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var html = await response.text();
 
             if (!response.ok) {
-                var body = form.querySelector('.modal-body') || form;
+                var body = form.querySelector('.app-modal-body') || form;
                 showInlineProblem(
                     body,
                     responseProblem(response, html, 'save these changes')
@@ -1483,9 +1835,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             if (response.headers.get('X-Modal-Close') === '1') {
-                if (modalInstance) {
-                    modalInstance.hide();
-                }
+                hideActionModal(true);
 
                 if (response.headers.get('X-Page-Reload') === '1') {
                     window.location.reload();
@@ -1497,7 +1847,7 @@ document.addEventListener('DOMContentLoaded', function () {
             modalContent.innerHTML = html;
             enhanceFeedback(modalContent);
         } catch (error) {
-            var formBody = form.querySelector('.modal-body') || form;
+            var formBody = form.querySelector('.app-modal-body') || form;
             showInlineProblem(
                 formBody,
                 statusProblem(0, 'save these changes')
@@ -1782,9 +2132,15 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        if (event.target.closest('[data-modal-close]') && modalInstance) {
+        if (modalState.open && event.target === modalElement) {
             event.preventDefault();
-            modalInstance.hide();
+            hideActionModal(true);
+            return;
+        }
+
+        if (event.target.closest('[data-modal-close]') && modalState.open) {
+            event.preventDefault();
+            hideActionModal(true);
         }
     });
 
@@ -1806,17 +2162,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         submitModalForm(form, submitButton);
     });
-
-    if (modalElement) {
-        modalElement.addEventListener('hidden.bs.modal', function () {
-            if (modalContent) {
-                modalContent.querySelectorAll('form[data-modal-form]').forEach(function (form) {
-                    confirmationStates.delete(form);
-                });
-                modalContent.innerHTML = '';
-            }
-        });
-    }
 
     enhanceFeedback(document);
 

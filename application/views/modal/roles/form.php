@@ -36,7 +36,7 @@ foreach ((array) $permissions as $permission) {
 }
 ?>
 
-<div class="modal-body">
+<div class="app-modal-body">
     <?php if (validation_errors() || !empty($form_error)): ?>
         <div class="alert alert-danger" role="alert">
             <?php echo validation_errors('', ' '); ?>

@@ -7,7 +7,7 @@ $submit_class = isset($submit_class) ? $submit_class : 'btn-primary';
 $submit_icon = isset($submit_icon) ? $submit_icon : '';
 $footer_note = isset($footer_note) ? trim((string) $footer_note) : '';
 ?>
-<div class="modal-footer app-modal-footer">
+<div class="app-modal-footer">
     <?php if ($footer_note !== ''): ?>
         <div class="app-modal-footer-note">
             <i class="bi bi-info-circle" aria-hidden="true"></i>

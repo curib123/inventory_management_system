@@ -6,7 +6,7 @@ $this->load->view('components/modal/header', array(
 ));
 ?>
 
-<div class="modal-body">
+<div class="app-modal-body">
     <dl class="row app-detail-list mb-4">
         <dt class="col-sm-4">Transaction</dt><dd class="col-sm-8"><?php echo html_escape($transaction->transaction_no); ?></dd>
         <dt class="col-sm-4">Type</dt><dd class="col-sm-8"><?php echo html_escape($transaction->type); ?></dd>

@@ -9,7 +9,7 @@ $this->load->view('components/modal/header', array(
 ));
 ?>
 
-<div class="modal-body">
+<div class="app-modal-body">
     <?php
     $this->load->view('components/modal/confirmation', array(
         'confirmation_variant' => 'warning',

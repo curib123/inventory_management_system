@@ -34,7 +34,7 @@ $this->load->view('components/modal/header', array(
 ));
 ?>
 
-<div class="modal-body">
+<div class="app-modal-body">
     <?php if (validation_errors()): ?>
         <div class="alert alert-danger"><?php echo validation_errors(); ?></div>
     <?php endif; ?>

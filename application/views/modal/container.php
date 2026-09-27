@@ -1,11 +1,13 @@
 <div
-    class="modal fade app-action-modal"
+    class="app-action-modal"
     id="action-modal"
     tabindex="-1"
     aria-hidden="true"
     aria-labelledby="action-modal-title"
+    role="dialog"
+    hidden
 >
-    <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable app-modal-dialog">
-        <div class="modal-content app-modal-content" id="action-modal-content"></div>
+    <div class="app-modal-dialog" role="document">
+        <div class="app-modal-content" id="action-modal-content"></div>
     </div>
 </div>

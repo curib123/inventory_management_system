@@ -945,31 +945,173 @@ body {
    -------------------------------------------------------------------------- */
 .app-searchable-select {
     position: relative;
-    display: grid;
-    gap: 0.45rem;
+    width: 100%;
+}
+
+.app-searchable-select-native {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    padding: 0 !important;
+    margin: -1px !important;
+    overflow: hidden !important;
+    clip: rect(0, 0, 0, 0) !important;
+    white-space: nowrap !important;
+    border: 0 !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
+
+.app-searchable-select-trigger {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    min-height: 2.7rem;
+    padding: 0.62rem 0.8rem 0.62rem 0.9rem;
+    border: 1px solid rgba(100, 116, 139, 0.28);
+    border-radius: 0.7rem;
+    background: #fff;
+    color: #1e293b;
+    font: inherit;
+    font-size: 0.88rem;
+    line-height: 1.35;
+    text-align: left;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.app-searchable-select-trigger:hover {
+    border-color: rgba(37, 99, 235, 0.45);
+    background: #f8fafc;
+}
+
+.app-searchable-select-trigger:focus-visible {
+    outline: 0;
+    border-color: rgba(37, 99, 235, 0.7);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.12);
+}
+
+.app-searchable-select.is-open .app-searchable-select-trigger {
+    border-color: rgba(37, 99, 235, 0.7);
+    box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.1);
+}
+
+.app-searchable-select.is-disabled .app-searchable-select-trigger,
+.app-searchable-select-trigger:disabled {
+    cursor: not-allowed;
+    background: #f1f5f9;
+    color: #94a3b8;
+    opacity: 0.82;
+}
+
+.app-searchable-select-value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-searchable-select-value.is-placeholder {
+    color: #64748b;
+}
+
+.app-searchable-select-caret {
+    flex: 0 0 auto;
+    margin-left: 0.75rem;
+    color: #64748b;
+    font-size: 1.1rem;
+    line-height: 1;
+    transform: translateY(-0.1rem);
+    transition: transform 0.15s ease;
+}
+
+.app-searchable-select.is-open .app-searchable-select-caret {
+    transform: rotate(180deg) translateY(0.1rem);
+}
+
+.app-searchable-select-panel {
+    position: absolute;
+    top: calc(100% + 0.35rem);
+    right: 0;
+    left: 0;
+    z-index: 1080;
+    padding: 0.5rem;
+    border: 1px solid rgba(100, 116, 139, 0.24);
+    border-radius: 0.8rem;
+    background: #fff;
+    box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.16), 0 0.25rem 0.75rem rgba(15, 23, 42, 0.08);
+}
+
+.app-searchable-select-panel[hidden] {
+    display: none !important;
 }
 
 .app-searchable-select-search {
+    display: block;
     width: 100%;
-    min-width: 0;
-    min-height: 2.55rem;
-    padding-left: 0.85rem;
-    border-radius: 0.7rem;
-    background: var(--bs-body-bg);
+    min-height: 2.45rem;
+    padding: 0.55rem 0.72rem;
+    border: 1px solid rgba(100, 116, 139, 0.24);
+    border-radius: 0.58rem;
+    background: #f8fafc;
+    color: #1e293b;
+    font: inherit;
+    font-size: 0.83rem;
+    outline: 0;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+
+.app-searchable-select-search:focus {
+    border-color: rgba(37, 99, 235, 0.55);
+    background: #fff;
+    box-shadow: 0 0 0 0.18rem rgba(37, 99, 235, 0.1);
 }
 
 .app-searchable-select-search::placeholder {
-    color: var(--bs-secondary-color);
+    color: #64748b;
 }
 
-.app-searchable-select .form-select {
+.app-searchable-select-options {
+    max-height: 15rem;
+    margin-top: 0.42rem;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+
+.app-searchable-select-option {
+    display: block;
     width: 100%;
-    min-height: 2.65rem;
+    padding: 0.62rem 0.68rem;
+    border: 0;
+    border-radius: 0.52rem;
+    background: transparent;
+    color: #334155;
+    font: inherit;
+    font-size: 0.83rem;
+    line-height: 1.35;
+    text-align: left;
+    cursor: pointer;
+    transition: background-color 0.12s ease, color 0.12s ease;
 }
 
-.app-searchable-select:focus-within .app-searchable-select-search,
-.app-searchable-select:focus-within .form-select {
-    border-color: rgba(var(--bs-primary-rgb), 0.45);
+.app-searchable-select-option:hover,
+.app-searchable-select-option:focus-visible {
+    outline: 0;
+    background: #eff6ff;
+    color: #1d4ed8;
+}
+
+.app-searchable-select-option.is-selected {
+    background: #dbeafe;
+    color: #1d4ed8;
+    font-weight: 700;
+}
+
+.app-searchable-select-empty {
+    padding: 0.8rem 0.68rem;
+    color: #64748b;
+    font-size: 0.8rem;
+    text-align: center;
 }
 
 .app-stock-products-heading {

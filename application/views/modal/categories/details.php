@@ -6,7 +6,7 @@ $this->load->view('components/modal/header', array(
 ));
 ?>
 
-<div class="modal-body">
+<div class="app-modal-body">
     <dl class="row app-detail-list mb-0">
         <dt class="col-sm-4">Name</dt><dd class="col-sm-8"><?php echo html_escape($category->category_name); ?></dd>
         <dt class="col-sm-4">Status</dt><dd class="col-sm-8"><span class="badge <?php echo $category->status ? 'text-bg-success' : 'text-bg-secondary'; ?>"><?php echo $category->status ? 'Active' : 'Inactive'; ?></span></dd>

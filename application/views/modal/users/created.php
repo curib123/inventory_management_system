@@ -8,7 +8,7 @@ $this->load->view('components/modal/header', array(
 ));
 ?>
 
-<div class="modal-body">
+<div class="app-modal-body">
     <div class="app-confirmation-review">
         <div class="app-confirmation-review-icon app-confirmation-review-icon-success">
             <i class="bi bi-check2-circle" aria-hidden="true"></i>
@@ -54,7 +54,7 @@ $this->load->view('components/modal/header', array(
     </div>
 </div>
 
-<div class="modal-footer app-modal-footer">
+<div class="app-modal-footer">
     <div class="app-modal-footer-note">
         <i class="bi bi-info-circle" aria-hidden="true"></i>
         <span>This temporary password is intentionally shown only once.</span>
