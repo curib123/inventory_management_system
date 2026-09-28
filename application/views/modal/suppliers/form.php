@@ -3,9 +3,6 @@ $supplier_is_edit = isset($supplier) && $supplier;
 $supplier_confirmation = $supplier_is_edit
     ? array(
         'title' => 'Save supplier changes?',
-        'message' => 'Review the supplier details before updating this record.',
-        'impact' => 'Supplier changes can affect product assignments and Stock In workflows.',
-        'assist' => 'Confirm the supplier identity, contact details, address, and status.',
         'label' => 'Save Changes',
         'variant' => 'primary',
         'icon' => 'bi-check2-circle'
