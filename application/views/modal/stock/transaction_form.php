@@ -84,27 +84,8 @@ $this->load->view('components/modal/header', array(
     </div>
 
 
-    <!-- Remarks -->
-    <div class="mt-3">
-        <label for="remarks" class="form-label">Remarks</label>
-
-        <input
-            type="text"
-            id="remarks"
-            name="remarks"
-            class="form-control"
-            maxlength="255"
-            value="<?php echo html_escape(set_value('remarks')); ?>"
-        >
-
-        <div class="form-text">
-            Add a short business reason or reference when it helps explain the movement later.
-        </div>
-    </div>
-
-
     <!-- Assist note -->
-    <div class="mt-3">
+    <div class="m-3">
         <?php
         $this->load->view('components/form/assist_note', array(
             'assist_title' => 'Inventory transaction',
@@ -124,20 +105,7 @@ $this->load->view('components/modal/header', array(
 
     <!-- Products -->
     <div class="app-stock-products-heading mb-3">
-        <div class="app-stock-products-heading-copy">
-            <h3 class="h6 mb-1">
-                <?php echo $transaction_type === 'stock_in'
-                    ? 'Products to Receive'
-                    : 'Products to Release'; ?>
-            </h3>
-
-            <p class="small text-body-secondary mb-0">
-                <?php echo $transaction_type === 'stock_in'
-                    ? 'Only active products from the selected supplier or Unassigned Products scope are shown. Low-stock items appear first.'
-                    : 'Only active products from the selected supplier or Unassigned Products scope are shown. Stock cannot go below zero.'; ?>
-            </p>
-        </div>
-
+      
         <div class="app-stock-product-search">
             <i class="bi bi-search" aria-hidden="true"></i>
             <input
@@ -174,6 +142,24 @@ $this->load->view('components/modal/header', array(
 
         <?php endif; ?>
 
+    </div>
+
+        <!-- Remarks -->
+    <div class="mt-3">
+        <label for="remarks" class="form-label">Remarks</label>
+
+        <input
+            type="text"
+            id="remarks"
+            name="remarks"
+            class="form-control"
+            maxlength="255"
+            value="<?php echo html_escape(set_value('remarks')); ?>"
+        >
+
+        <div class="form-text">
+            Add a short business reason or reference when it helps explain the movement later.
+        </div>
     </div>
 
 
