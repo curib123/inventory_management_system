@@ -25,7 +25,7 @@
 </script>
 
 <script src="https://cdn.datatables.net/v/bs5/dt-3.1.1/datatables.min.js"></script>
-<script src="<?php echo base_url('assets/js/app.js'); ?>"></script>
+<script src="<?php echo base_url('assets/js/app.js?v=' . (@filemtime(FCPATH . 'assets/js/app.js') ?: '1')); ?>"></script>
 
 </body>
 </html>
