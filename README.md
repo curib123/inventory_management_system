@@ -123,7 +123,7 @@ Build an Inventory Management System using CodeIgniter 3. The Focus is not only 
 - Product Setup - Supplier Setup - Stock in - Inventory Update - Stock out - Inventory Update - Stock movement  history - stock adjustment -dashboard - reports
 
 
-# issues to fix 
+# Issues Fixed
 
-- in product table highlights the low stock stock to warning
-- make sure sidebar links have active focus design
+- [x] Product table highlights low-stock rows with a warning state and out-of-stock rows with a danger state.
+- [x] Sidebar links show a persistent active state for the current section and a visible keyboard focus state.
