@@ -27,6 +27,31 @@
 >
 
 <?php if ($this->session->userdata('user_id')): ?>
+<?php
+$current_user_id = (int) $this->session->userdata('user_id');
+$current_controller = strtolower((string) $this->router->fetch_class());
+$current_method = strtolower((string) $this->router->fetch_method());
+
+$sidebar_active = array(
+    'dashboard' => $current_controller === 'dashboard',
+    'products' => $current_controller === 'products',
+    'suppliers' => $current_controller === 'suppliers',
+    'stock' => $current_controller === 'stock' && $current_method !== 'low_stock',
+    'low_stock' => $current_controller === 'stock' && $current_method === 'low_stock',
+    'categories' => $current_controller === 'categories',
+    'reports' => $current_controller === 'reports',
+    'users' => $current_controller === 'users',
+    'roles' => $current_controller === 'roles'
+);
+
+$sidebar_link_class = function ($key) use ($sidebar_active) {
+    return 'nav-link' . (!empty($sidebar_active[$key]) ? ' active' : '');
+};
+
+$sidebar_aria_current = function ($key) use ($sidebar_active) {
+    return !empty($sidebar_active[$key]) ? ' aria-current="page"' : '';
+};
+?>
 
 <div class="d-flex min-vh-100">
     <aside class="sidebar" id="sidebar">
@@ -38,17 +63,15 @@
         <div class="sidebar-heading">Main Menu</div>
 
         <nav class="nav flex-column" aria-label="Main navigation">
-            <?php $current_user_id = (int) $this->session->userdata('user_id'); ?>
-
             <?php if ($this->authorization_service->has_permission($current_user_id, 'dashboard.view')): ?>
-                <a class="nav-link" href="<?php echo site_url('dashboard'); ?>">
+                <a class="<?php echo $sidebar_link_class('dashboard'); ?>" href="<?php echo site_url('dashboard'); ?>"<?php echo $sidebar_aria_current('dashboard'); ?>>
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
             <?php endif; ?>
 
             <?php if ($this->authorization_service->has_permission($current_user_id, 'products.view')): ?>
-                <a class="nav-link" href="<?php echo site_url('products'); ?>">
+                <a class="<?php echo $sidebar_link_class('products'); ?>" href="<?php echo site_url('products'); ?>"<?php echo $sidebar_aria_current('products'); ?>>
                     <i class="bi bi-box"></i>
                     <span>Products Management</span>
                 </a>
@@ -56,28 +79,28 @@
 
 
             <?php if ($this->authorization_service->has_permission($current_user_id, 'suppliers.view')): ?>
-                <a class="nav-link" href="<?php echo site_url('suppliers'); ?>">
+                <a class="<?php echo $sidebar_link_class('suppliers'); ?>" href="<?php echo site_url('suppliers'); ?>"<?php echo $sidebar_aria_current('suppliers'); ?>>
                     <i class="bi bi-truck"></i>
                     <span>Suppliers Management</span>
                 </a>
             <?php endif; ?>
 
             <?php if ($this->authorization_service->has_permission($current_user_id, 'stock.history')): ?>
-                <a class="nav-link" href="<?php echo site_url('stock'); ?>">
+                <a class="<?php echo $sidebar_link_class('stock'); ?>" href="<?php echo site_url('stock'); ?>"<?php echo $sidebar_aria_current('stock'); ?>>
                     <i class="bi bi-arrow-left-right"></i>
                     <span>Stock Management</span>
                 </a>
             <?php endif; ?>
 
             <?php if ($this->authorization_service->has_permission($current_user_id, 'stock.view')): ?>
-                <a class="nav-link" href="<?php echo site_url('stock/low-stock'); ?>">
+                <a class="<?php echo $sidebar_link_class('low_stock'); ?>" href="<?php echo site_url('stock/low-stock'); ?>"<?php echo $sidebar_aria_current('low_stock'); ?>>
                     <i class="bi bi-exclamation-triangle"></i>
                     <span>Low Stock Monitoring</span>
                 </a>
             <?php endif; ?>
 
             <?php if ($this->authorization_service->has_permission($current_user_id, 'categories.view')): ?>
-                <a class="nav-link" href="<?php echo site_url('categories'); ?>">
+                <a class="<?php echo $sidebar_link_class('categories'); ?>" href="<?php echo site_url('categories'); ?>"<?php echo $sidebar_aria_current('categories'); ?>>
                     <i class="bi bi-tags"></i>
                     <span>Categories Setup</span>
                 </a>
@@ -86,7 +109,7 @@
             <?php if ($this->authorization_service->has_permission($current_user_id, 'reports.view')): ?>
                 <div class="sidebar-heading">Reports</div>
 
-                <a class="nav-link" href="<?php echo site_url('reports'); ?>">
+                <a class="<?php echo $sidebar_link_class('reports'); ?>" href="<?php echo site_url('reports'); ?>"<?php echo $sidebar_aria_current('reports'); ?>>
                     <i class="bi bi-bar-chart"></i>
                     <span>Reports And Exports</span>
                 </a>
@@ -96,14 +119,14 @@
                 <div class="sidebar-heading">Administration </div>
 
                 <?php if ($this->authorization_service->has_permission($current_user_id, 'users.view')): ?>
-                    <a class="nav-link" href="<?php echo site_url('users'); ?>">
+                    <a class="<?php echo $sidebar_link_class('users'); ?>" href="<?php echo site_url('users'); ?>"<?php echo $sidebar_aria_current('users'); ?>>
                         <i class="bi bi-people"></i>
                         <span>Users Management</span>
                     </a>
                 <?php endif; ?>
 
                 <?php if ($this->authorization_service->has_permission($current_user_id, 'roles.view')): ?>
-                    <a class="nav-link" href="<?php echo site_url('roles'); ?>">
+                    <a class="<?php echo $sidebar_link_class('roles'); ?>" href="<?php echo site_url('roles'); ?>"<?php echo $sidebar_aria_current('roles'); ?>>
                         <i class="bi bi-shield-lock"></i>
                         <span>Roles Management</span>
                     </a>
