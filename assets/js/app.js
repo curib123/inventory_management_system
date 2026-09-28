@@ -1846,6 +1846,22 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (response.redirected) {
+                var redirectedHtml = await response.text();
+
+                try {
+                    var redirectedDocument = new DOMParser().parseFromString(redirectedHtml, 'text/html');
+                    var redirectedSuccess = redirectedDocument.querySelector('[data-flash-success-template]');
+
+                    if (redirectedSuccess && window.sessionStorage) {
+                        window.sessionStorage.setItem(
+                            'app-pending-success-modal',
+                            redirectedSuccess.innerHTML
+                        );
+                    }
+                } catch (redirectParseError) {
+                    // Keep navigation working even when there is no success payload to preserve.
+                }
+
                 window.location.href = response.url;
                 return;
             }
