@@ -77,7 +77,7 @@ class Supplier_model extends CI_Model {
         $this->db->select('p.*');
         $this->db->from('products p');
         $this->db->where('p.supplier_id', (int) $supplier_id);
-        $this->db->where('p.status', 1);
+        $this->db->order_by('p.status', 'DESC');
         $this->db->order_by('(p.stock <= p.reorder_level)', 'DESC', FALSE);
         $this->db->order_by('p.stock', 'ASC');
         $this->db->order_by('p.product_name', 'ASC');
