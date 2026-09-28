@@ -53,7 +53,7 @@ $this->load->view('components/page_header', array(
         <?php if ($this->authorization_service->has_permission($this->session->userdata('user_id'), 'reports.export')): ?>
             <div class="app-report-export-note mt-3">
                 <i class="bi bi-printer me-1"></i>
-                CSV, Excel, and Print PDF use the current report search and filters. Print PDF opens a print-ready A4 landscape report with text and table data only; charts and visual graphs are excluded.
+                CSV, Excel, and Print PDF use the current report search and filters. CSV exports clean structured data, Excel provides the styled spreadsheet layout, and Print PDF uses text and tables only.
             </div>
         <?php endif; ?>
     </div>
