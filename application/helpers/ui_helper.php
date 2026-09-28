@@ -56,7 +56,7 @@ if (!function_exists('ui_modal_form_attributes')) {
         $attributes['data-confirm-message'] = html_escape(
             isset($confirmation['message'])
                 ? (string) $confirmation['message']
-                : 'Review the information before continuing.'
+                : ''
         );
         $attributes['data-confirm-label'] = html_escape(
             isset($confirmation['label'])
