@@ -24,7 +24,7 @@ $this->load->view('components/data_table', array(
         'Code',
         'Product',
         array('label' => 'Current Stock', 'class' => 'text-end text-nowrap', 'render' => 'stock_alert'),
-        array('label' => 'Reorder Level', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Reorder Level', 'class' => 'text-end text-nowrap', 'render' => 'stock_value'),
         array('label' => 'Unit', 'class' => 'text-nowrap')
     )
 ));
