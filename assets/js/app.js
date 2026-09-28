@@ -1213,14 +1213,6 @@ document.addEventListener('DOMContentLoaded', function () {
             alert.classList.add('app-feedback-alert');
             alert.setAttribute('role', 'alert');
 
-            if (!alert.querySelector('.app-feedback-label')) {
-                var label = document.createElement('div');
-                label.className = 'app-feedback-label fw-semibold mb-1';
-                label.innerHTML = alert.classList.contains('alert-warning')
-                    ? '<i class="bi bi-exclamation-triangle me-1"></i>Please review'
-                    : '<i class="bi bi-exclamation-circle me-1"></i>Action needs attention';
-                alert.insertBefore(label, alert.firstChild);
-            }
         });
 
         var firstAlert = container.querySelector('.alert-danger, .alert-warning');
@@ -1754,7 +1746,7 @@ document.addEventListener('DOMContentLoaded', function () {
         );
         var icon = form.getAttribute('data-confirm-icon') || 'bi-check2-circle';
         var title = form.getAttribute('data-confirm-title') || 'Confirm changes';
-        var message = form.getAttribute('data-confirm-message') || 'Review the information before continuing.';
+        var message = form.getAttribute('data-confirm-message') || '';
         var label = form.getAttribute('data-confirm-label') || 'Confirm';
         var assist = form.getAttribute('data-confirm-assist') || '';
         var impact = form.getAttribute('data-confirm-impact') || '';
@@ -1775,44 +1767,25 @@ document.addEventListener('DOMContentLoaded', function () {
                         '<i class="bi ' + escapeHtml(icon) + '"></i>' +
                     '</span>' +
                     '<div class="app-modal-heading-copy">' +
-                        '<div class="app-modal-eyebrow">Confirmation</div>' +
                         '<h2 class="app-modal-title" id="action-modal-title">' + escapeHtml(title) + '</h2>' +
-                        '<p class="app-modal-subtitle">Review the impact before committing this change.</p>' +
                     '</div>' +
                 '</div>' +
-                '<button type="button" class="btn-close app-modal-close" data-confirm-cancel aria-label="Go back"></button>' +
+                '<button type="button" class="btn-close app-modal-close" data-confirm-cancel aria-label="Cancel"></button>' +
             '</div>' +
             '<div class="app-modal-body">' +
-                '<div class="app-confirmation-review">' +
-                    '<div class="app-confirmation-review-icon app-confirmation-review-icon-' + escapeHtml(variant) + '">' +
-                        '<i class="bi ' + escapeHtml(icon) + '"></i>' +
-                    '</div>' +
-                    '<div>' +
-                        '<div class="app-confirmation-review-title">Review before continuing</div>' +
-                        '<p class="app-confirmation-review-message mb-0">' + escapeHtml(message) + '</p>' +
-                    '</div>' +
-                '</div>' +
+                (message
+                    ? '<p class="app-confirmation-review-message mb-0">' + escapeHtml(message) + '</p>'
+                    : '') +
                 (impact
-                    ? '<div class="app-confirmation-impact">' +
-                        '<div class="app-confirmation-impact-label">What this changes</div>' +
-                        '<div>' + escapeHtml(impact) + '</div>' +
-                      '</div>'
+                    ? '<p class="small text-body-secondary mt-2 mb-0">' + escapeHtml(impact) + '</p>'
                     : '') +
                 (assist
-                    ? '<div class="app-confirmation-assist">' +
-                        '<i class="bi bi-lightbulb me-2"></i>' +
-                        '<span>' + escapeHtml(assist) + '</span>' +
-                      '</div>'
+                    ? '<p class="small text-body-secondary mt-2 mb-0">' + escapeHtml(assist) + '</p>'
                     : '') +
-                '<div class="small text-body-secondary mt-3">' +
-                    'Nothing has been submitted yet. Choose Go Back if you want to review or change any information.' +
-                '</div>' +
             '</div>' +
             '<div class="app-modal-footer">' +
                 '<div class="app-modal-footer-actions">' +
-                    '<button type="button" class="btn btn-outline-secondary" data-confirm-cancel>' +
-                        '<i class="bi bi-arrow-left me-1"></i>Go Back' +
-                    '</button>' +
+                    '<button type="button" class="btn btn-outline-secondary" data-confirm-cancel>Cancel</button>' +
                     '<button type="button" class="btn btn-' + escapeHtml(variant) + '" data-confirm-proceed>' +
                         '<i class="bi ' + escapeHtml(icon) + ' me-1"></i>' + escapeHtml(label) +
                     '</button>' +
