@@ -1314,14 +1314,15 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         if (renderType === 'difference') {
-            var difference = Number(raw);
+            var displayDifference = raw === '' ? '0' : raw;
+            var difference = Number(displayDifference);
             var differenceClass = difference > 0
                 ? 'app-table-badge-success'
                 : (difference < 0 ? 'app-table-badge-danger' : 'app-table-badge-secondary');
             var prefix = difference > 0 ? '+' : '';
 
             return '<span class="badge rounded-pill app-table-badge ' + differenceClass + '">' +
-                escapeHtml(prefix + raw) +
+                escapeHtml(prefix + displayDifference) +
             '</span>';
         }
 
@@ -1554,6 +1555,25 @@ document.addEventListener('DOMContentLoaded', function () {
             });
 
             if (response.redirected) {
+                // Fetch follows CodeIgniter redirects automatically. The redirected GET can consume
+                // flashdata before the browser performs its own navigation, so preserve the rendered
+                // success modal from that response and restore it on the destination page.
+                var redirectedHtml = await response.text();
+
+                try {
+                    var redirectedDocument = new DOMParser().parseFromString(redirectedHtml, 'text/html');
+                    var redirectedSuccess = redirectedDocument.querySelector('[data-flash-success-template]');
+
+                    if (redirectedSuccess && window.sessionStorage) {
+                        window.sessionStorage.setItem(
+                            'app-pending-success-modal',
+                            redirectedSuccess.innerHTML
+                        );
+                    }
+                } catch (redirectParseError) {
+                    // Navigation should still continue even if the success payload cannot be extracted.
+                }
+
                 window.location.href = response.url;
                 return;
             }
@@ -2173,11 +2193,25 @@ document.addEventListener('DOMContentLoaded', function () {
     enhanceFeedback(document);
 
     var successTemplate = document.querySelector('[data-flash-success-template]');
+    var pendingSuccessHtml = '';
+
+    try {
+        pendingSuccessHtml = window.sessionStorage
+            ? (window.sessionStorage.getItem('app-pending-success-modal') || '')
+            : '';
+
+        if (pendingSuccessHtml && window.sessionStorage) {
+            window.sessionStorage.removeItem('app-pending-success-modal');
+        }
+    } catch (storageError) {
+        pendingSuccessHtml = '';
+    }
+
     var passwordPrompt = document.querySelector('[data-password-change-prompt-url]');
 
-    if (successTemplate && modalContent) {
+    if ((pendingSuccessHtml || successTemplate) && modalContent) {
         window.requestAnimationFrame(function () {
-            modalContent.innerHTML = successTemplate.innerHTML;
+            modalContent.innerHTML = pendingSuccessHtml || successTemplate.innerHTML;
             enhanceFeedback(modalContent);
             showActionModal();
         });
