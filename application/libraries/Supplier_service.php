@@ -84,4 +84,12 @@ class Supplier_service {
 
         return $items;
     }
+
+    public function count_product($supplier_id){
+        return $this->CI->Supplier_model->count_products($supplier_id);
+       
+    }
+    public function get_supplier_products($supplier_id){
+        return $this->CI->Supplier_model->get_supplier_products($supplier_id);
+    }
 }

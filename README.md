@@ -306,3 +306,15 @@ Application errors are centralized through `application/core/MY_Exceptions.php` 
 - [x] Authenticated pages, modals, DataTables, search/filter controls, pagination/limits, top navigation, searchable relationship dropdowns, typography, colors, and responsive layout use the centralized SaaS UI system.
 - [x] Application errors use one centralized professional error experience with an Error ID and exact protected log-file reference for debugging.
 - [x] Stock In and Stock Out now use the same Supplier or Unassigned Products scope pattern as Stock Adjustment, with server-side ownership validation and NULL supplier transaction headers for unassigned movements.
+
+
+
+fix issues
+
+in supplier , product and all table that have status is not showing active and inactive status
+in supplier view modal make the product of supplier when click render the product view modal
+in report print pdf for stock out, stock and movement etc only show data text not visual graphs in why its have visual remove it make it data only 
+fix also why theres no success modal alert like successfull added product etc.
+in stock history table type not showing
+highlights the stocks data in table
+in Low Stock Monitoring table current stock no display

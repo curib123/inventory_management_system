@@ -35,17 +35,17 @@ $this->load->view('components/modal/header', array(
     <div class="row g-3">
         <div class="col-12 col-md-6">
             <label for="supplier_name" class="form-label">Supplier Name</label>
-            <input type="text" id="supplier_name" name="supplier_name" class="form-control" required maxlength="150" value="<?php echo html_escape(set_value('supplier_name', $supplier_is_edit ? $supplier->supplier_name : '')); ?>">
+            <input type="text" id="supplier_name" name="supplier_name" class="form-control" required maxlength="150" value="<?php echo html_escape(set_value('supplier_name', $supplier_is_edit ? $supplier->supplier_name : '')); ?>" autocomplete="off">
         </div>
 
         <div class="col-12 col-md-6">
             <label for="contact_person" class="form-label">Contact Person</label>
-            <input type="text" id="contact_person" name="contact_person" class="form-control" maxlength="100" value="<?php echo html_escape(set_value('contact_person', $supplier_is_edit ? $supplier->contact_person : '')); ?>">
+            <input type="text" id="contact_person" name="contact_person" class="form-control" maxlength="100" value="<?php echo html_escape(set_value('contact_person', $supplier_is_edit ? $supplier->contact_person : '')); ?>" autocomplete="off">
         </div>
 
         <div class="col-12 col-md-6">
             <label for="phone" class="form-label">Phone</label>
-            <input type="text" id="phone" name="phone" class="form-control" maxlength="13" value="<?php echo html_escape(set_value('phone', $supplier_is_edit ? $supplier->phone : '')); ?>">
+            <input type="text" id="phone" name="phone" class="form-control" maxlength="13" value="<?php echo html_escape(set_value('phone', $supplier_is_edit ? $supplier->phone : '')); ?>" autocomplete="off">
         </div>
 
         <div class="col-12 col-md-6">

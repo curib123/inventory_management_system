@@ -12,7 +12,28 @@ $this->load->view('components/modal/header', array(
         <dt class="col-sm-4">Contact Person</dt><dd class="col-sm-8"><?php echo html_escape($supplier->contact_person ?: 'N/A'); ?></dd>
         <dt class="col-sm-4">Phone</dt><dd class="col-sm-8"><?php echo html_escape($supplier->phone ?: 'N/A'); ?></dd>
         <dt class="col-sm-4">Address</dt><dd class="col-sm-8"><?php echo html_escape($supplier->address ?: 'N/A'); ?></dd>
+        <?php $products = $supplier->get_supplier_products; ?>
+
+<dt class="col-sm-4">Products Available</dt>
+<dd>
+    <?php if (!empty($products)): ?>
+        <ul class="mb-0">
+            <?php foreach ($products as $product): ?>
+                <li class="m-2">
+                    <a href="<?= site_url('products/view/' . $product->id); ?>"
+                       class="text-decoration-none view-product-modal">
+                        <?= html_escape($product->product_name ?? 'N/A'); ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+    <?php else: ?>
+        N/A
+    <?php endif; ?>
+</dd>
+        <dt class="col-sm-4">Total Products</dt><dd><?php echo html_escape($supplier->total_products ?: 'N/A'); ?></dd>
         <dt class="col-sm-4">Status</dt><dd class="col-sm-8"><span class="badge <?php echo $supplier->status ? 'text-bg-success' : 'text-bg-secondary'; ?>"><?php echo $supplier->status ? 'Active' : 'Inactive'; ?></span></dd>
+
     </dl>
 </div>
 

@@ -34,17 +34,20 @@ class Suppliers extends CI_Controller {
         $this->supplier_form();
     }
 
-    // Mao ni ang view flow sa Suppliers; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
-    public function view($id) {
-        $this->require_permission('suppliers.view');
+    public function view($id){
+         $this->require_permission('suppliers.view');
 
-        $data['supplier'] = $this->Supplier_model->get_by_id($id);
-        if (!$data['supplier']) {
-            show_404();
-        }
+         $data['supplier'] = $this->Supplier_model->get_by_id($id);
 
-        $this->load->view('modal/suppliers/details', $data);
-    }
+            if (!$data['supplier']) {
+          show_404();
+         }
+
+    $data['supplier']->get_supplier_products = $this->supplier_service->get_supplier_products($id);
+    $data['supplier']->total_products = $this->supplier_service->count_product($id);
+
+    $this->load->view('modal/suppliers/details', $data);
+     }
 
     // Mao ni ang edit flow sa Suppliers; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function edit($id) {
@@ -148,6 +151,7 @@ class Suppliers extends CI_Controller {
                 $supplier->status ? 'Active' : 'Inactive',
                 $actions
             );
+
         }
 
         $payload = $this->datatable_service->payload(
