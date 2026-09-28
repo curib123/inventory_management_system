@@ -5,7 +5,7 @@
 
 .auth-page {
   position: relative;
-  background-color: #304861;
+  background-color: #060708;
   overflow-x: hidden;
   overflow-y: auto;
 
@@ -16,7 +16,7 @@
   position: fixed;
   inset: -18px;
   background: url('../image/bg-1.jpg') center / cover no-repeat;
-  filter: blur(5px);
+  filter: blur(10px);
   pointer-events: none;
   z-index: 0;
 }
@@ -40,7 +40,7 @@
 .login-card {
     border: 0;
     min-width: 350px;
-    border-radius: 1rem;
+    border-radius: 2rem;
     overflow: hidden;
     z-index: 9999;
 }
@@ -49,8 +49,8 @@
 /* Inventory Logo */
 
 .login-logo {
-    width: 64px;
-    height: 64px;
+    width: 100px;
+    height: 100px;
 }
 
 
