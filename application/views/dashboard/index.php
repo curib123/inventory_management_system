@@ -33,19 +33,24 @@ $chart_data = array(
         </div>
 
         <?php if ((int) $low_stock_items > 0): ?>
-            <div class="app-dashboard-attention">
-                <span class="app-dashboard-attention-icon">
-                    <i class="bi bi-exclamation-triangle text-warning"></i>
-                </span>
-                <div>
-                    <div class="fw-semibold">
-                        <?php echo number_format((int) $low_stock_items); ?> item<?php echo (int) $low_stock_items === 1 ? '' : 's'; ?> need attention
-                    </div>
-                    <div class="small text-body-secondary">
-                        Includes active products at or below their reorder level.
-                    </div>
-                </div>
+          <a href="<?php echo site_url('stock/low-stock'); ?>" class="text-decoration-none text-reset">
+    <div class="app-dashboard-attention">
+        <span class="app-dashboard-attention-icon">
+            <i class="bi bi-exclamation-triangle text-warning"></i>
+        </span>
+
+        <div>
+            <div class="fw-semibold">
+                <?php echo number_format((int) $low_stock_items); ?>
+                item<?php echo (int) $low_stock_items === 1 ? '' : 's'; ?> need attention
             </div>
+
+            <div class="small text-body-secondary">
+                Includes active products at or below their reorder level.
+            </div>
+        </div>
+    </div>
+</a>
         <?php endif; ?>
     </div>
 
