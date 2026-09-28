@@ -172,6 +172,30 @@
     background: rgba(var(--bs-primary-rgb), 0.035);
 }
 
+.app-data-table tbody tr.app-table-row-warning > td {
+    background: rgba(var(--bs-warning-rgb), 0.08);
+}
+
+.app-data-table tbody tr.app-table-row-warning > td:first-child {
+    box-shadow: inset 3px 0 0 var(--bs-warning);
+}
+
+.app-data-table tbody tr.app-table-row-warning:hover > td {
+    background: rgba(var(--bs-warning-rgb), 0.13);
+}
+
+.app-data-table tbody tr.app-table-row-danger > td {
+    background: rgba(var(--bs-danger-rgb), 0.075);
+}
+
+.app-data-table tbody tr.app-table-row-danger > td:first-child {
+    box-shadow: inset 3px 0 0 var(--bs-danger);
+}
+
+.app-data-table tbody tr.app-table-row-danger:hover > td {
+    background: rgba(var(--bs-danger-rgb), 0.12);
+}
+
 .app-data-table tbody tr:last-child td {
     border-bottom: 0;
 }
