@@ -81,7 +81,7 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
             <?php if ($this->authorization_service->has_permission($current_user_id, 'products.view')): ?>
                 <a class="nav-link" href="<?php echo site_url('products'); ?>">
                     <i class="bi bi-box"></i>
-                    <span>Products</span>
+                    <span>Products Management</span>
                 </a>
             <?php endif; ?>
 
@@ -89,28 +89,28 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
             <?php if ($this->authorization_service->has_permission($current_user_id, 'suppliers.view')): ?>
                 <a class="nav-link" href="<?php echo site_url('suppliers'); ?>">
                     <i class="bi bi-truck"></i>
-                    <span>Suppliers</span>
+                    <span>Suppliers Management</span>
                 </a>
             <?php endif; ?>
 
             <?php if ($this->authorization_service->has_permission($current_user_id, 'stock.history')): ?>
                 <a class="nav-link" href="<?php echo site_url('stock'); ?>">
                     <i class="bi bi-arrow-left-right"></i>
-                    <span>Stock History</span>
+                    <span>Stock Management</span>
                 </a>
             <?php endif; ?>
 
             <?php if ($this->authorization_service->has_permission($current_user_id, 'stock.view')): ?>
                 <a class="nav-link" href="<?php echo site_url('stock/low-stock'); ?>">
                     <i class="bi bi-exclamation-triangle"></i>
-                    <span>Low Stock</span>
+                    <span>Low Stock Monitoring</span>
                 </a>
             <?php endif; ?>
 
             <?php if ($this->authorization_service->has_permission($current_user_id, 'categories.view')): ?>
                 <a class="nav-link" href="<?php echo site_url('categories'); ?>">
                     <i class="bi bi-tags"></i>
-                    <span>Categories</span>
+                    <span>Categories Setup</span>
                 </a>
             <?php endif; ?>
 
@@ -119,24 +119,24 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
 
                 <a class="nav-link" href="<?php echo site_url('reports'); ?>">
                     <i class="bi bi-bar-chart"></i>
-                    <span>Reports</span>
+                    <span>Reports And Exports</span>
                 </a>
             <?php endif; ?>
 
             <?php if ($this->authorization_service->has_any_permission($current_user_id, array('users.view', 'roles.view'))): ?>
-                <div class="sidebar-heading">Administration</div>
+                <div class="sidebar-heading">Administration </div>
 
                 <?php if ($this->authorization_service->has_permission($current_user_id, 'users.view')): ?>
                     <a class="nav-link" href="<?php echo site_url('users'); ?>">
                         <i class="bi bi-people"></i>
-                        <span>Users</span>
+                        <span>Users Management</span>
                     </a>
                 <?php endif; ?>
 
                 <?php if ($this->authorization_service->has_permission($current_user_id, 'roles.view')): ?>
                     <a class="nav-link" href="<?php echo site_url('roles'); ?>">
                         <i class="bi bi-shield-lock"></i>
-                        <span>Roles</span>
+                        <span>Roles Management</span>
                     </a>
                 <?php endif; ?>
             <?php endif; ?>
