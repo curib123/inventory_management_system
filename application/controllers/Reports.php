@@ -165,7 +165,7 @@ private function export_csv($title, $columns, $rows, $meta)
         // UTF-8 BOM for Microsoft Excel compatibility.
         fwrite($handle, "\xEF\xBB\xBF");
 
-        $this->write_csv_metadata($handle, $title, $meta);
+        $this->write_csv_metadata($handle, $title, $meta, $columns);
         $this->write_csv_header($handle, $columns);
         $this->write_csv_data($handle, $columns, $rows);
     } finally {
@@ -176,34 +176,66 @@ private function export_csv($title, $columns, $rows, $meta)
 }
 
 // Internal helper ni para write csv metadata; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
-private function write_csv_metadata($handle, $title, $meta)
+private function write_csv_metadata($handle, $title, $meta, $columns)
 {
-    // CSV cannot store visual styling, so keep a clean business-report structure.
-    $this->write_csv_row($handle, array('REPORT INFORMATION'));
-    $this->write_csv_row($handle, array('System', $meta['system_name'] ?? ''));
-    $this->write_csv_row($handle, array('Report', $title));
-    $this->write_csv_row($handle, array('Generated', $meta['generated_at'] ?? ''));
-    $this->write_csv_row($handle, array(
-        'Prepared By',
-        !empty($meta['prepared_by']) ? $meta['prepared_by'] : 'System User'
-    ));
-    $this->write_csv_row($handle, array(
-        'Record Count',
-        isset($meta['record_count']) ? (int) $meta['record_count'] : 0
-    ));
+    // CSV walay visual styling, so consistent spreadsheet structure ang gamiton para limpyo gihapon tan-awon sa Excel/Sheets.
+    $column_count = max(2, count($columns));
 
-    $this->write_csv_row($handle, array());
-    $this->write_csv_row($handle, array('SUMMARY'));
+    $this->write_csv_padded_row(
+        $handle,
+        array($meta['system_name'] ?? 'Inventory Management System'),
+        $column_count
+    );
+    $this->write_csv_padded_row(
+        $handle,
+        array($title),
+        $column_count
+    );
+    $this->write_csv_padded_row(
+        $handle,
+        array(
+            'Generated',
+            $meta['generated_at'] ?? '',
+            'Prepared By',
+            !empty($meta['prepared_by']) ? $meta['prepared_by'] : 'System User',
+            'Record Count',
+            isset($meta['record_count']) ? (int) $meta['record_count'] : 0
+        ),
+        $column_count
+    );
+
+    $this->write_csv_padded_row($handle, array(), $column_count);
+
+    $this->write_csv_padded_row($handle, array('SUMMARY'), $column_count);
+    $this->write_csv_padded_row($handle, array('Metric', 'Value'), $column_count);
 
     foreach (($meta['summary'] ?? array()) as $label => $value) {
-        $this->write_csv_row($handle, array(
-            $label,
-            $this->csv_safe_value($value)
-        ));
+        $this->write_csv_padded_row(
+            $handle,
+            array($label, $this->csv_safe_value($value)),
+            $column_count
+        );
     }
 
-    $this->write_csv_row($handle, array());
-    $this->write_csv_row($handle, array('DATA'));
+    $this->write_csv_padded_row($handle, array(), $column_count);
+    $this->write_csv_padded_row($handle, array('DATA'), $column_count);
+}
+
+// Internal helper ni para keep same CSV column width; para dili gubot tan-awon ang report sections when opened sa spreadsheet.
+private function write_csv_padded_row($handle, $values, $column_count)
+{
+    $values = is_array($values) ? array_values($values) : array($values);
+    $column_count = max(1, (int) $column_count);
+
+    if (count($values) > $column_count) {
+        $column_count = count($values);
+    }
+
+    while (count($values) < $column_count) {
+        $values[] = '';
+    }
+
+    $this->write_csv_row($handle, $values);
 }
 
 // Internal helper ni para write csv header; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
