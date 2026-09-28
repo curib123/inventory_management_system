@@ -73,6 +73,27 @@ body {
     color: #fff;
 }
 
+.sidebar .nav-link.active,
+.sidebar .nav-link[aria-current="page"] {
+    position: relative;
+    background: var(--app-sidebar-hover);
+    color: #fff;
+    font-weight: 700;
+    box-shadow:
+        inset 3px 0 0 var(--app-sidebar-accent),
+        0 0.35rem 0.9rem rgba(0, 0, 0, 0.16);
+}
+
+.sidebar .nav-link.active i,
+.sidebar .nav-link[aria-current="page"] i {
+    color: var(--app-sidebar-accent);
+}
+
+.sidebar .nav-link:focus-visible {
+    outline: 2px solid rgba(96, 165, 250, 0.8);
+    outline-offset: 2px;
+}
+
 .logout-section {
     position: sticky;
     bottom: 0;
