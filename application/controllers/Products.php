@@ -188,7 +188,7 @@ class Products extends CI_Controller {
                 html_escape($product->product_name),
                 html_escape($product->category_name ?: 'N/A'),
                 html_escape($product->supplier_name ?: 'N/A'),
-                (int) $product->stock,
+                ((int) $product->stock) . '|' . ((int) $product->reorder_level),
                 number_format((float) $product->selling_price, 2),
                 $product->status ? 'Active' : 'Inactive',
                 $actions
