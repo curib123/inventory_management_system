@@ -1305,6 +1305,29 @@ document.addEventListener('DOMContentLoaded', function () {
             '</span>';
         }
 
+        if (renderType === 'product_stock') {
+            var stockParts = raw.split('|');
+            var productStockRaw = stockParts[0] === '' ? '0' : stockParts[0];
+            var reorderRaw = stockParts.length > 1 && stockParts[1] !== '' ? stockParts[1] : '0';
+            var productStock = Number(productStockRaw);
+            var reorderLevel = Number(reorderRaw);
+            var productStockClass = 'app-table-badge-info';
+            var productStockTitle = 'Healthy stock';
+
+            if (productStock <= 0) {
+                productStockClass = 'app-table-badge-danger';
+                productStockTitle = 'Out of stock — reorder level ' + reorderRaw;
+            } else if (productStock <= reorderLevel) {
+                productStockClass = 'app-table-badge-warning';
+                productStockTitle = 'Low stock — reorder level ' + reorderRaw;
+            }
+
+            return '<span class="app-table-number-badge ' + productStockClass + '" title="' +
+                escapeHtml(productStockTitle) + '">' +
+                escapeHtml(productStockRaw) +
+            '</span>';
+        }
+
         if (renderType === 'stock_alert') {
             var stock = Number(raw);
             var stockClass = stock <= 0 ? 'app-table-badge-danger' : 'app-table-badge-warning';
@@ -1376,6 +1399,21 @@ document.addEventListener('DOMContentLoaded', function () {
                 definition.createdCell = (function (resolvedRenderType) {
                     return function (cell, cellData) {
                         cell.innerHTML = renderTableCell(resolvedRenderType, cellData);
+
+                        if (resolvedRenderType === 'product_stock') {
+                            var stockParts = String(cellData === null || cellData === undefined ? '' : cellData).split('|');
+                            var stockValue = Number(stockParts[0] || 0);
+                            var reorderValue = Number(stockParts.length > 1 ? stockParts[1] : 0);
+                            var row = cell.closest('tr');
+
+                            if (row) {
+                                row.classList.toggle('app-table-row-danger', stockValue <= 0);
+                                row.classList.toggle(
+                                    'app-table-row-warning',
+                                    stockValue > 0 && stockValue <= reorderValue
+                                );
+                            }
+                        }
                     };
                 }(renderType));
                 configured = true;
