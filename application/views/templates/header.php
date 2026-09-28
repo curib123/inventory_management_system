@@ -145,7 +145,7 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
         <div class="logout-section">
             <button
                 type="button"
-                class="btn btn-outline-danger w-100"
+                class="btn app-logout-button w-100"
                 data-modal-url="<?php echo site_url('logout/confirm'); ?>"
             >
                 <i class="bi bi-box-arrow-right me-2"></i>
@@ -232,16 +232,47 @@ $ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
             <?php endif; ?>
 
             <?php if ($flash_success): ?>
-                <div class="alert alert-success alert-dismissible fade show app-feedback-alert" role="status">
-                    <div class="d-flex align-items-start gap-2">
-                        <i class="bi bi-check-circle-fill mt-1"></i>
-                        <div>
-                            <div class="fw-semibold">Completed successfully</div>
-                            <div><?php echo html_escape($flash_success); ?></div>
+                <template data-flash-success-template>
+                    <div class="app-modal-header">
+                        <div class="app-modal-heading">
+                            <span class="app-modal-icon app-modal-icon-success">
+                                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                            </span>
+                            <div class="app-modal-heading-copy">
+                                <div class="app-modal-eyebrow">Success</div>
+                                <h2 class="app-modal-title" id="action-modal-title">Completed successfully</h2>
+                                <p class="app-modal-subtitle">The requested change was saved successfully.</p>
+                            </div>
+                        </div>
+                        <button type="button" class="btn-close app-modal-close" data-modal-close aria-label="Close"></button>
+                    </div>
+
+                    <div class="app-modal-body">
+                        <div class="app-confirmation-review">
+                            <div class="app-confirmation-review-icon app-confirmation-review-icon-success">
+                                <i class="bi bi-check-lg" aria-hidden="true"></i>
+                            </div>
+                            <div>
+                                <div class="app-confirmation-review-title">Success</div>
+                                <p class="app-confirmation-review-message mb-0">
+                                    <?php echo html_escape($flash_success); ?>
+                                </p>
+                            </div>
                         </div>
                     </div>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
-                </div>
+
+                    <div class="app-modal-footer">
+                        <div class="app-modal-footer-note">
+                            <i class="bi bi-check-circle" aria-hidden="true"></i>
+                            <span>Your latest changes are now reflected in the system.</span>
+                        </div>
+                        <div class="app-modal-footer-actions">
+                            <button type="button" class="btn btn-success" data-modal-close>
+                                <i class="bi bi-check-lg me-1" aria-hidden="true"></i>Done
+                            </button>
+                        </div>
+                    </div>
+                </template>
             <?php endif; ?>
 
             <?php if ($flash_temporary_password): ?>
