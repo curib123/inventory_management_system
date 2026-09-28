@@ -1,11 +1,9 @@
 <?php echo form_open(current_url(), array('data-modal-form' => '1')); ?>
 <?php
 $this->load->view('components/modal/header', array(
-    'modal_title' => 'Delete Product',
-    'modal_subtitle' => 'Confirm this permanent action before continuing.',
+    'modal_title' => 'Delete Product?',
     'modal_icon' => 'bi-trash3',
-    'modal_variant' => 'danger',
-    'modal_eyebrow' => 'Destructive action'
+    'modal_variant' => 'danger'
 ));
 ?>
 
@@ -17,20 +15,15 @@ $this->load->view('components/modal/header', array(
 
     <?php if (!empty($delete_error)): ?>
         <div class="alert alert-warning mb-0" role="alert">
-            <div class="fw-semibold mb-1">Deletion is not available</div>
-            <div><?php echo html_escape($delete_error); ?></div>
+            <?php echo html_escape($delete_error); ?>
         </div>
     <?php else: ?>
         <?php
         $this->load->view('components/modal/confirmation', array(
             'confirmation_variant' => 'danger',
             'confirmation_icon' => 'bi-trash3',
-            'confirmation_title' => 'Delete Product?',
-            'confirmation_message' => 'Deleting removes this product record from normal inventory management.',
-            'confirmation_items' => array(
-                'This action cannot be undone.',
-                'Products with stock transaction history are protected and cannot be deleted.'
-            )
+            'confirmation_title' => 'This cannot be undone.',
+            'confirmation_message' => 'Products with stock transaction history cannot be deleted.'
         ));
         ?>
     <?php endif; ?>
@@ -38,7 +31,7 @@ $this->load->view('components/modal/header', array(
 
 <?php
 $this->load->view('components/modal/footer', array(
-    'close_label' => !empty($delete_error) ? 'Close' : 'Keep Product',
+    'close_label' => !empty($delete_error) ? 'Close' : 'Cancel',
     'submit_label' => !empty($delete_error) ? '' : 'Delete Product',
     'submit_class' => 'btn-danger',
     'submit_icon' => 'bi-trash3'
