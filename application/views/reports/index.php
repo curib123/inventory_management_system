@@ -120,9 +120,11 @@ foreach ($columns as $field => $label) {
         ? array(
             'label' => $label,
             'class' => 'text-end text-nowrap',
-            'render' => $field === 'stock'
-                ? ($report_key === 'low-stock' ? 'stock_alert' : 'stock_value')
-                : ''
+            'render' => $field === 'stock' && $report_key === 'low-stock'
+                ? 'stock_alert'
+                : (in_array($field, array('stock', 'quantity', 'reorder_level', 'shortage'), TRUE)
+                    ? 'stock_value'
+                    : '')
         )
         : array(
             'label' => $label,
