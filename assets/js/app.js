@@ -1299,11 +1299,17 @@ document.addEventListener('DOMContentLoaded', function () {
             '</span>';
         }
 
+        if (renderType === 'stock_value') {
+            return '<span class="app-table-number-badge app-table-badge-info">' +
+                escapeHtml(raw === '' ? '0' : raw) +
+            '</span>';
+        }
+
         if (renderType === 'stock_alert') {
             var stock = Number(raw);
             var stockClass = stock <= 0 ? 'app-table-badge-danger' : 'app-table-badge-warning';
             return '<span class="app-table-number-badge ' + stockClass + '">' +
-                escapeHtml(raw) +
+                escapeHtml(raw === '' ? '0' : raw) +
             '</span>';
         }
 
@@ -1363,13 +1369,14 @@ document.addEventListener('DOMContentLoaded', function () {
             var renderType = th.getAttribute('data-render');
 
             if (renderType) {
-                definition.render = function (data, type) {
-                    if (type !== 'display') {
-                        return data;
-                    }
-
-                    return renderTableCell(renderType, data);
-                };
+                // Keep raw server values for sorting/searching, then decorate only the visible cell.
+                // This is more reliable across DataTables versions and prevents status/stock text
+                // from disappearing when a custom display renderer is used.
+                definition.createdCell = (function (resolvedRenderType) {
+                    return function (cell, cellData) {
+                        cell.innerHTML = renderTableCell(resolvedRenderType, cellData);
+                    };
+                }(renderType));
                 configured = true;
             }
 
@@ -2165,9 +2172,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
     enhanceFeedback(document);
 
+    var successTemplate = document.querySelector('[data-flash-success-template]');
     var passwordPrompt = document.querySelector('[data-password-change-prompt-url]');
 
-    if (passwordPrompt) {
+    if (successTemplate && modalContent) {
+        window.requestAnimationFrame(function () {
+            modalContent.innerHTML = successTemplate.innerHTML;
+            enhanceFeedback(modalContent);
+            showActionModal();
+        });
+    } else if (passwordPrompt) {
         window.requestAnimationFrame(function () {
             loadModal(passwordPrompt.getAttribute('data-password-change-prompt-url'));
         });
