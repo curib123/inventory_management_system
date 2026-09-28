@@ -1,60 +1,29 @@
-<?php
-$ui_styling_enabled = $this->config->item('ui_styling_enabled') !== FALSE;
-$ui_controller = strtolower((string) $this->router->fetch_class());
-$ui_method = strtolower((string) $this->router->fetch_method());
-$ui_page_styled = $ui_styling_enabled && ui_style_enabled_for(
-    (array) $this->config->item('ui_page_styles'),
-    $ui_controller,
-    $ui_method,
-    TRUE
-);
-$ui_modal_styled = $ui_styling_enabled && ui_style_enabled_for(
-    (array) $this->config->item('ui_modal_styles'),
-    $ui_controller,
-    $ui_method,
-    TRUE
-);
-?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <?php if ($ui_styling_enabled): ?>
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-        crossorigin="anonymous"
-    >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"  rel="stylesheet"  integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"  crossorigin="anonymous">
 
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-    >
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
-    <link
-        rel="stylesheet"
-        href="https://cdn.datatables.net/v/bs5/dt-3.1.1/datatables.min.css"
-    >
-
+    <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-3.1.1/datatables.min.css">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/app.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/table.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/sidebar.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/modal.css'); ?>">
-    <?php if (!$ui_page_styled || !$ui_modal_styled): ?>
     <link rel="stylesheet" href="<?php echo base_url('assets/css/plain-mode.css'); ?>">
-    <?php endif; ?>
-    <?php endif; ?>
+
 
     <title><?php echo html_escape(isset($page_title) ? $page_title : 'Inventory Management System'); ?></title>
 </head>
 
 <body
-    class="<?php echo $ui_page_styled ? 'bg-body-tertiary' : 'app-page-plain'; ?><?php echo $ui_modal_styled ? '' : ' app-modal-plain'; ?>"
-    data-ui-page-style="<?php echo $ui_page_styled ? 'styled' : 'plain'; ?>"
-    data-ui-modal-style="<?php echo $ui_modal_styled ? 'styled' : 'plain'; ?>"
+    class="bg-body-tertiary"
+    data-ui-page-style="styled"
+    data-ui-modal-style="styled"
 >
 
 <?php if ($this->session->userdata('user_id')): ?>

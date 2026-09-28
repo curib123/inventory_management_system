@@ -1,40 +1,23 @@
-<?php
-$ui_page_styled = $this->config->item('ui_styling_enabled') !== FALSE;
-$ui_page_styled = $ui_page_styled && ui_style_enabled_for(
-    (array) $this->config->item('ui_page_styles'),
-    'auth',
-    'login',
-    TRUE
-);
-?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <?php if ($ui_page_styled): ?>
-    <link
-        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB"
-        crossorigin="anonymous"
-    >
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"  rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous" >
 
-    <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css"
-    >
-    <?php endif; ?>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+   
 
     <link rel="stylesheet" href="<?= html_escape(base_url('assets/css/login.css')); ?>">
 
     <title>Login | Inventory Management System</title>
 </head>
 
-<body class=" <?php echo $ui_page_styled ? 'auth-page' : ''; ?>">
+<body class="auth-page">
     <main class="container min-vh-100 d-flex align-items-center justify-content-center py-4">
-        <div class="card shadow-lg border-0 w-100"<?php echo $ui_page_styled ? ' style="max-width: 500px;"' : ''; ?>>
+        <div class="card shadow-lg border-0 w-100"style="max-width: 500px;">
             <div class="card-body p-4 p-md-5">
                 <div class="text-center mb-4">
                     <div class="display-6 text-primary mb-2">
