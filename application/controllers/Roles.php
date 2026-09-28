@@ -122,7 +122,7 @@ class Roles extends CI_Controller {
             $id = (int) $role->id;
             $action_items = array(
                 array(
-                    'label' => 'View',
+                    'label' => 'View Role And Permission',
                     'url' => site_url('roles/view/' . $id),
                     'variant' => 'secondary',
                     'icon' => 'bi-eye'
@@ -131,7 +131,7 @@ class Roles extends CI_Controller {
 
             if ($can_edit_role || $can_manage_permissions) {
                 $action_items[] = array(
-                    'label' => $can_edit_role ? 'Edit' : 'Permissions',
+                    'label' => $can_edit_role ? 'Edit Role and Assign Permission' : 'Permissions',
                     'url' => site_url('roles/edit/' . $id),
                     'variant' => 'primary',
                     'icon' => $can_edit_role ? 'bi-pencil' : 'bi-shield-check'
@@ -140,7 +140,7 @@ class Roles extends CI_Controller {
 
             if ($can_delete_role && (int) $role->user_count === 0) {
                 $action_items[] = array(
-                    'label' => 'Delete',
+                    'label' => 'Delete Role',
                     'url' => site_url('roles/delete/' . $id),
                     'variant' => 'danger',
                     'icon' => 'bi-trash'

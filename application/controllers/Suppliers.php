@@ -117,7 +117,7 @@ class Suppliers extends CI_Controller {
             $id = (int) $supplier->id;
             $action_items = array(
                 array(
-                    'label' => 'View',
+                    'label' => 'View Supplier',
                     'url' => site_url('suppliers/view/' . $id),
                     'variant' => 'secondary',
                     'icon' => 'bi-eye'
@@ -126,7 +126,7 @@ class Suppliers extends CI_Controller {
 
             if ($can_edit) {
                 $action_items[] = array(
-                    'label' => 'Edit',
+                    'label' => 'Edit Supplier',
                     'url' => site_url('suppliers/edit/' . $id),
                     'variant' => 'primary',
                     'icon' => 'bi-pencil'
@@ -135,7 +135,7 @@ class Suppliers extends CI_Controller {
 
             if ($can_delete) {
                 $action_items[] = array(
-                    'label' => 'Delete',
+                    'label' => 'Delete Supplier',
                     'url' => site_url('suppliers/delete/' . $id),
                     'variant' => 'danger',
                     'icon' => 'bi-trash'

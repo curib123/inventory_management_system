@@ -227,7 +227,7 @@ class Stock extends CI_Controller {
                 html_escape($transaction->created_at),
                 ui_modal_action_group(array(
                     array(
-                        'label' => 'Details',
+                        'label' => 'Transaction Details',
                         'url' => site_url('stock/details/' . (int) $transaction->id),
                         'variant' => 'secondary',
                         'icon' => 'bi-eye'
