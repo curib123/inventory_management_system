@@ -318,3 +318,5 @@ fix also why theres no success modal alert like successfull added product etc.
 in stock history table type not showing
 highlights the stocks data in table
 in Low Stock Monitoring table current stock no display
+in Stock Adjustments table the difference there no display fix it
+logout botton in sidebar must have nice modern design and fixed/sticky position at the bottom

@@ -38,22 +38,22 @@ $this->load->view('components/modal/header', array(
     <div class="row g-3">
         <div class="col-12 col-md-6">
             <label for="first_name" class="form-label">First Name</label>
-            <input type="text" id="first_name" name="first_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('first_name', $user_is_edit ? $user->first_name : '')); ?>">
+            <input type="text" id="first_name" name="first_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('first_name', $user_is_edit ? $user->first_name : '')); ?>" autocomplete="off">
         </div>
 
         <div class="col-12 col-md-6">
             <label for="middle_name" class="form-label">Middle Name</label>
-            <input type="text" id="middle_name" name="middle_name" class="form-control" maxlength="100" value="<?php echo html_escape(set_value('middle_name', $user_is_edit ? $user->middle_name : '')); ?>">
+            <input type="text" id="middle_name" name="middle_name" class="form-control" maxlength="100" value="<?php echo html_escape(set_value('middle_name', $user_is_edit ? $user->middle_name : '')); ?>" autocomplete="off">
         </div>
 
         <div class="col-12 col-md-6">
             <label for="last_name" class="form-label">Last Name</label>
-            <input type="text" id="last_name" name="last_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('last_name', $user_is_edit ? $user->last_name : '')); ?>">
+            <input type="text" id="last_name" name="last_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('last_name', $user_is_edit ? $user->last_name : '')); ?>" autocomplete="off">
         </div>
 
         <div class="col-12 col-md-6">
             <label for="username" class="form-label">Username</label>
-            <input type="text" id="username" name="username" class="form-control" required minlength="3" maxlength="50" value="<?php echo html_escape(set_value('username', $user_is_edit ? $user->username : '')); ?>">
+            <input type="text" id="username" name="username" class="form-control" required minlength="3" maxlength="50" value="<?php echo html_escape(set_value('username', $user_is_edit ? $user->username : '')); ?>" autocomplete="off">
             <div class="form-text">Use a unique username the user can identify and remember.</div>
         </div>
 
@@ -69,7 +69,7 @@ $this->load->view('components/modal/header', array(
                     class="form-control"
                     minlength="8"
                     maxlength="255"
-                    autocomplete="new-password"
+                    autocomplete="off"
                 >
                 <div class="form-text">
                     Leave blank to keep the current password. If you reset it here, the user will be prompted to change it after the next login.

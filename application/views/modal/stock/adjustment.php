@@ -237,6 +237,7 @@ $this->load->view('components/modal/header', array(
                 class="form-control"
                 maxlength="255"
                 required
+                autocomplete="off"
                 placeholder="Example: Physical count after cycle count found 2 damaged units"
                 value="<?php echo html_escape(set_value('reason')); ?>"
             >
