@@ -49,7 +49,7 @@ $this->load->view('components/data_table', array(
         'Name',
         'Category',
         'Supplier',
-        array('label' => 'Stock', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Stock', 'class' => 'text-end text-nowrap', 'render' => 'stock_value'),
         array('label' => 'Selling Price', 'class' => 'text-end text-nowrap'),
         array('label' => 'Status', 'class' => 'text-center text-nowrap', 'render' => 'status'),
         array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')
