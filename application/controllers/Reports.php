@@ -326,7 +326,7 @@ private function csv_safe_value($value)
 
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle(substr($title, 0, 31));
-        $sheet->getSheetView()->setZoomScale(90);
+        $sheet->getSheetView()->setZoomScale(95);
         $sheet->setShowGridlines(FALSE);
 
         $column_count = max(1, count($columns));
@@ -358,10 +358,12 @@ private function csv_safe_value($value)
                 'startColor' => array('argb' => '0F172A')
             ),
             'alignment' => array(
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                'indent' => 1
             )
         ));
-        $sheet->getRowDimension(1)->setRowHeight(26);
+        $sheet->getRowDimension(1)->setRowHeight(25);
 
         $sheet->getStyle('A2:' . $last_column . '2')->applyFromArray(array(
             'font' => array(
@@ -370,10 +372,12 @@ private function csv_safe_value($value)
                 'color' => array('argb' => '0F172A')
             ),
             'alignment' => array(
-                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                'indent' => 1
             )
         ));
-        $sheet->getRowDimension(2)->setRowHeight(28);
+        $sheet->getRowDimension(2)->setRowHeight(32);
 
         $sheet->getStyle('A3:' . $last_column . '3')->applyFromArray(array(
             'font' => array(
@@ -385,9 +389,15 @@ private function csv_safe_value($value)
                     'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM,
                     'color' => array('argb' => '2563EB')
                 )
+            ),
+            'alignment' => array(
+                'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                'indent' => 1
             )
         ));
-        $sheet->getRowDimension(3)->setRowHeight(22);
+        $sheet->getRowDimension(3)->setRowHeight(24);
+        $sheet->getRowDimension(4)->setRowHeight(10);
 
         // KPI summary cards. Two columns are used per card where space allows.
         $summary_index = 0;
@@ -424,7 +434,9 @@ private function csv_safe_value($value)
                     )
                 ),
                 'alignment' => array(
-                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER
+                    'horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_LEFT,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
+                    'indent' => 1
                 )
             ));
 
@@ -440,8 +452,9 @@ private function csv_safe_value($value)
             $summary_index++;
         }
 
-        $sheet->getRowDimension(5)->setRowHeight(18);
-        $sheet->getRowDimension(6)->setRowHeight(25);
+        $sheet->getRowDimension(5)->setRowHeight(20);
+        $sheet->getRowDimension(6)->setRowHeight(28);
+        $sheet->getRowDimension(7)->setRowHeight(12);
 
         // Data header.
         $column_index = 1;
@@ -473,7 +486,7 @@ private function csv_safe_value($value)
                 'wrapText' => TRUE
             )
         ));
-        $sheet->getRowDimension($header_row)->setRowHeight(27);
+        $sheet->getRowDimension($header_row)->setRowHeight(30);
 
         $row_number = $data_start_row;
 
@@ -557,13 +570,18 @@ private function csv_safe_value($value)
                     )
                 ),
                 'alignment' => array(
-                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_TOP,
+                    'vertical' => \PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER,
                     'wrapText' => TRUE
                 )
             ));
 
             for ($data_row = $data_start_row; $data_row <= $last_data_row; $data_row++) {
-                $sheet->getRowDimension($data_row)->setRowHeight(22);
+                $source_row = isset($rows[$data_row - $data_start_row])
+                    ? $rows[$data_row - $data_start_row]
+                    : array();
+                $sheet->getRowDimension($data_row)->setRowHeight(
+                    $this->excel_data_row_height($columns, $source_row)
+                );
 
                 if (($data_row - $data_start_row) % 2 === 1) {
                     $sheet->getStyle('A' . $data_row . ':' . $last_column . $data_row)
@@ -606,10 +624,12 @@ private function csv_safe_value($value)
 
         $sheet->getPageSetup()->setRowsToRepeatAtTopByStartAndEnd($header_row, $header_row);
         $sheet->getPageMargins()
-            ->setTop(0.45)
-            ->setRight(0.35)
-            ->setBottom(0.55)
-            ->setLeft(0.35);
+            ->setTop(0.55)
+            ->setRight(0.45)
+            ->setBottom(0.65)
+            ->setLeft(0.45)
+            ->setHeader(0.25)
+            ->setFooter(0.3);
 
         $sheet->getHeaderFooter()->setOddHeader('&L&B' . $title . '&R' . $meta['generated_at']);
         $sheet->getHeaderFooter()->setOddFooter(
@@ -710,25 +730,53 @@ private function csv_safe_value($value)
         }
     }
 
+    // Internal helper ni para excel data row height; mohatag ug extra vertical space if taas ang text para dili cramped sa Excel.
+    private function excel_data_row_height($columns, $row) {
+        $longest = 0;
+
+        foreach ($columns as $field => $label) {
+            if (!in_array($field, array('product_name', 'category_name', 'supplier_name', 'remarks'), TRUE)) {
+                continue;
+            }
+
+            $value = isset($row[$field]) ? trim((string) $row[$field]) : '';
+            $longest = max($longest, strlen($value));
+        }
+
+        if ($longest > 90) {
+            return 42;
+        }
+
+        if ($longest > 55) {
+            return 34;
+        }
+
+        if ($longest > 32) {
+            return 28;
+        }
+
+        return 24;
+    }
+
     // Internal helper ni para excel column width; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function excel_column_width($field) {
         $widths = array(
-            'transaction_no' => 19,
+            'transaction_no' => 20,
             'type' => 13,
-            'product_code' => 16,
-            'product_name' => 28,
-            'category_name' => 21,
-            'supplier_name' => 24,
-            'unit' => 12,
+            'product_code' => 17,
+            'product_name' => 31,
+            'category_name' => 23,
+            'supplier_name' => 27,
+            'unit' => 13,
             'stock' => 12,
             'quantity' => 12,
             'reorder_level' => 15,
             'shortage' => 12,
-            'cost_price' => 15,
-            'inventory_value' => 18,
-            'username' => 18,
-            'remarks' => 32,
-            'created_at' => 22
+            'cost_price' => 16,
+            'inventory_value' => 19,
+            'username' => 19,
+            'remarks' => 38,
+            'created_at' => 23
         );
 
         return isset($widths[$field]) ? $widths[$field] : 18;
