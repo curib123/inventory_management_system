@@ -2,15 +2,6 @@
 $user_is_edit = isset($user) && $user;
 $user_confirmation = array(
     'title' => $user_is_edit ? 'Save user changes?' : 'Create this user account?',
-    'message' => $user_is_edit
-        ? 'Review the user profile, role, status, and any password reset before saving.'
-        : 'Review the account details and assigned role before creating access.',
-    'impact' => $user_is_edit
-        ? 'Role, status, and password reset changes can immediately affect this account.'
-        : 'A secure temporary password will be generated automatically and shown once after the account is created.',
-    'assist' => $user_is_edit
-        ? 'Confirm the person, username, assigned role, account status, and whether a password reset is intended.'
-        : 'Copy the generated temporary password after creation and share it securely with the user.',
     'label' => $user_is_edit ? 'Save User Changes' : 'Create User',
     'variant' => 'primary',
     'icon' => 'bi-person-check'

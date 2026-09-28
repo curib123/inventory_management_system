@@ -8,7 +8,6 @@ $this->load->view('components/modal/header', array(
 
 <div class="app-modal-body">
     <dl class="row app-detail-list mb-0">
-        <dt class="col-sm-4">ID</dt><dd class="col-sm-8"><?php echo (int) $product->id; ?></dd>
         <dt class="col-sm-4">Code</dt><dd class="col-sm-8"><?php echo html_escape($product->product_code); ?></dd>
         <dt class="col-sm-4">Name</dt><dd class="col-sm-8"><?php echo html_escape($product->product_name); ?></dd>
         <dt class="col-sm-4">Category</dt><dd class="col-sm-8"><?php echo html_escape($product->category_name ?: 'N/A'); ?></dd>

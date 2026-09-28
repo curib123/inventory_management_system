@@ -1,9 +1,6 @@
 <?php
 $adjustment_confirmation = array(
     'title' => 'Confirm stock adjustment?',
-    'message' => 'Review the product, system stock, physical count, variance, and reason before applying this correction.',
-    'impact' => 'This replaces the recorded stock with the verified physical count and creates a permanent adjustment history entry.',
-    'assist' => 'Use Stock Adjustment only for verified reconciliation differences. Normal receiving and releasing must use Stock In or Stock Out.',
     'label' => 'Apply Adjustment',
     'variant' => 'warning',
     'icon' => 'bi-sliders'

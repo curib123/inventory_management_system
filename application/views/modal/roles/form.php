@@ -2,9 +2,6 @@
 $role_is_edit = isset($role) && $role;
 $role_confirmation = array(
     'title' => $role_is_edit ? 'Save role and permission changes?' : 'Create this role?',
-    'message' => 'Review the role settings and selected permission chips before continuing.',
-    'impact' => 'Permission changes can immediately alter what every user assigned to this role can view or modify.',
-    'assist' => 'Confirm the selected permissions match the responsibilities of users assigned to this role.',
     'label' => (!$can_edit_role && $can_manage_permissions) ? 'Save Permissions' : ($role_is_edit ? 'Save Role Changes' : 'Create Role'),
     'variant' => 'warning',
     'icon' => 'bi-shield-check'

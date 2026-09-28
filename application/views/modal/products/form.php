@@ -4,9 +4,6 @@ $product_is_edit = isset($product) && $product;
 $product_confirmation = $product_is_edit
     ? array(
         'title' => 'Save product changes?',
-        'message' => 'Review the product information before updating this inventory record.',
-        'impact' => 'Supplier, unit, pricing, reorder level, and status changes can affect stock workflows and reports.',
-        'assist' => 'Confirm that the product identity, supplier, unit, prices, reorder level, and status are correct.',
         'label' => 'Save Changes',
         'variant' => 'primary',
         'icon' => 'bi-check2-circle'

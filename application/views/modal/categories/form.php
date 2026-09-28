@@ -3,9 +3,6 @@ $category_is_edit = isset($category) && $category;
 $category_confirmation = $category_is_edit
     ? array(
         'title' => 'Save category changes?',
-        'message' => 'Confirm the category name and status before updating it.',
-        'impact' => 'Category changes appear anywhere linked products are grouped or reported.',
-        'assist' => 'Check the category name and whether it should remain active.',
         'label' => 'Save Changes',
         'variant' => 'primary',
         'icon' => 'bi-check2-circle'

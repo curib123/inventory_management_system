@@ -3,18 +3,12 @@
 $stock_confirmation = $transaction_type === 'stock_in'
     ? array(
         'title' => 'Confirm Stock In?',
-        'message' => 'Review the supplier/product scope and entered quantities before adding stock.',
-        'impact' => 'This transaction increases inventory quantities and becomes part of permanent stock history.',
-        'assist' => 'Make sure the supplier or Unassigned Products scope is correct and only intended products have quantities greater than zero.',
         'label' => 'Confirm Stock In',
         'variant' => 'primary',
         'icon' => 'bi-box-arrow-in-down'
     )
     : array(
         'title' => 'Confirm Stock Out?',
-        'message' => 'Review the supplier/product scope and entered quantities before removing stock.',
-        'impact' => 'This transaction reduces inventory and becomes part of permanent stock history.',
-        'assist' => 'Make sure the supplier or Unassigned Products scope is correct and only intended products have quantities greater than zero.',
         'label' => 'Confirm Stock Out',
         'variant' => 'warning',
         'icon' => 'bi-box-arrow-up'

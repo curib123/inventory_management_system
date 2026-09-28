@@ -311,12 +311,4 @@ Application errors are centralized through `application/core/MY_Exceptions.php` 
 
 fix issues
 
-in supplier , product and all table that have status is not showing active and inactive status
-in supplier view modal make the product of supplier when click render the product view modal
-in report print pdf for stock out, stock and movement etc only show data text not visual graphs in why its have visual remove it make it data only 
-fix also why theres no success modal alert like successfull added product etc.
-in stock history table type not showing
-highlights the stocks data in table
-in Low Stock Monitoring table current stock no display
-in Stock Adjustments table the difference there no display fix it
-logout botton in sidebar must have nice modern design and fixed/sticky position at the bottom
+in product table highlights the low stock stock to warning

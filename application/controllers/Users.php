@@ -138,18 +138,18 @@ class Users extends CI_Controller {
         foreach ($users as $user) {
             $id = (int) $user->id;
             $action_items = array(
-                array('label' => 'View', 'url' => site_url('users/view/' . $id), 'variant' => 'secondary', 'icon' => 'bi-eye')
+                array('label' => 'View User', 'url' => site_url('users/view/' . $id), 'variant' => 'secondary', 'icon' => 'bi-eye')
             );
 
             if ($this->authorization_service->has_permission($current_user_id, 'users.edit')) {
-                $action_items[] = array('label' => 'Edit', 'url' => site_url('users/edit/' . $id), 'variant' => 'primary', 'icon' => 'bi-pencil');
+                $action_items[] = array('label' => 'Edit User', 'url' => site_url('users/edit/' . $id), 'variant' => 'primary', 'icon' => 'bi-pencil');
             }
 
             if (
                 $id !== $current_user_id &&
                 $this->authorization_service->has_permission($current_user_id, 'users.delete')
             ) {
-                $action_items[] = array('label' => 'Delete', 'url' => site_url('users/delete/' . $id), 'variant' => 'danger', 'icon' => 'bi-trash');
+                $action_items[] = array('label' => 'Delete User', 'url' => site_url('users/delete/' . $id), 'variant' => 'danger', 'icon' => 'bi-trash');
             }
 
             $actions = ui_modal_action_group($action_items);

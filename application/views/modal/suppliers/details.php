@@ -27,7 +27,7 @@ $this->load->view('components/modal/header', array(
                             >
                                 <?php echo html_escape(isset($product->product_name) ? $product->product_name : 'N/A'); ?>
                             </a>
-                            <span class="badge <?php echo (int) $product->status === 1 ? 'text-bg-success' : 'text-bg-secondary'; ?>">
+                            <span class="badge <?php echo (int) $product->status === 1 ? 'text-success' : 'text-secondary'; ?>">
                                 <?php echo (int) $product->status === 1 ? 'Active' : 'Inactive'; ?>
                             </span>
                         </div>
