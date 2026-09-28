@@ -183,21 +183,21 @@ private function write_csv_metadata($handle, $title, $meta, $columns)
 
     $this->write_csv_padded_row(
         $handle,
-        array($meta['system_name'] ?? 'Inventory Management System'),
+        array($this->csv_safe_value($meta['system_name'] ?? 'Inventory Management System')),
         $column_count
     );
     $this->write_csv_padded_row(
         $handle,
-        array($title),
+        array($this->csv_safe_value($title)),
         $column_count
     );
     $this->write_csv_padded_row(
         $handle,
         array(
             'Generated',
-            $meta['generated_at'] ?? '',
+            $this->csv_safe_value($meta['generated_at'] ?? ''),
             'Prepared By',
-            !empty($meta['prepared_by']) ? $meta['prepared_by'] : 'System User',
+            $this->csv_safe_value(!empty($meta['prepared_by']) ? $meta['prepared_by'] : 'System User'),
             'Record Count',
             isset($meta['record_count']) ? (int) $meta['record_count'] : 0
         ),
@@ -212,7 +212,7 @@ private function write_csv_metadata($handle, $title, $meta, $columns)
     foreach (($meta['summary'] ?? array()) as $label => $value) {
         $this->write_csv_padded_row(
             $handle,
-            array($label, $this->csv_safe_value($value)),
+            array($this->csv_safe_value($label), $this->csv_safe_value($value)),
             $column_count
         );
     }
