@@ -183,7 +183,7 @@ class Product_model extends CI_Model {
         $this->build_datatable_query($search, $filters);
         $this->db->select(
             'p.id, p.product_code, p.product_name, c.category_name, ' .
-            's.supplier_name, p.stock, p.selling_price, p.status'
+            's.supplier_name, p.stock, p.reorder_level, p.selling_price, p.status'
         );
 
         if ($order_column) {
