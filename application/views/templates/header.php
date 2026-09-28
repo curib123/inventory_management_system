@@ -200,11 +200,7 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
                 <div class="alert alert-danger alert-dismissible fade show app-feedback-alert" role="alert">
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-exclamation-circle-fill mt-1"></i>
-                        <div>
-                            <div class="fw-semibold">Action could not be completed</div>
-                            <div><?php echo html_escape($flash_error); ?></div>
-                            <div class="small mt-1 opacity-75">Review the message, refresh the data if needed, and try again.</div>
-                        </div>
+                        <div><?php echo html_escape($flash_error); ?></div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
                 </div>
@@ -214,10 +210,7 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
                 <div class="alert alert-warning alert-dismissible fade show app-feedback-alert" role="alert">
                     <div class="d-flex align-items-start gap-2">
                         <i class="bi bi-exclamation-triangle-fill mt-1"></i>
-                        <div>
-                            <div class="fw-semibold">Please review</div>
-                            <div><?php echo html_escape($flash_warning); ?></div>
-                        </div>
+                        <div><?php echo html_escape($flash_warning); ?></div>
                     </div>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Dismiss"></button>
                 </div>
@@ -225,43 +218,25 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
 
             <?php if ($flash_success): ?>
                 <template data-flash-success-template>
-                    <div class="app-modal-header">
+                    <div class="app-modal-header app-modal-header-success">
                         <div class="app-modal-heading">
                             <span class="app-modal-icon app-modal-icon-success">
                                 <i class="bi bi-check2-circle" aria-hidden="true"></i>
                             </span>
                             <div class="app-modal-heading-copy">
-                                <div class="app-modal-eyebrow">Success</div>
-                                <h2 class="app-modal-title" id="action-modal-title">Completed successfully</h2>
-                                <p class="app-modal-subtitle">The requested change was saved successfully.</p>
+                                <h2 class="app-modal-title" id="action-modal-title">Success</h2>
                             </div>
                         </div>
                         <button type="button" class="btn-close app-modal-close" data-modal-close aria-label="Close"></button>
                     </div>
 
                     <div class="app-modal-body">
-                        <div class="app-confirmation-review">
-                            <div class="app-confirmation-review-icon app-confirmation-review-icon-success">
-                                <i class="bi bi-check-lg" aria-hidden="true"></i>
-                            </div>
-                            <div>
-                                <div class="app-confirmation-review-title">Success</div>
-                                <p class="app-confirmation-review-message mb-0">
-                                    <?php echo html_escape($flash_success); ?>
-                                </p>
-                            </div>
-                        </div>
+                        <p class="mb-0"><?php echo html_escape($flash_success); ?></p>
                     </div>
 
                     <div class="app-modal-footer">
-                        <div class="app-modal-footer-note">
-                            <i class="bi bi-check-circle" aria-hidden="true"></i>
-                            <span>Your latest changes are now reflected in the system.</span>
-                        </div>
                         <div class="app-modal-footer-actions">
-                            <button type="button" class="btn btn-success" data-modal-close>
-                                <i class="bi bi-check-lg me-1" aria-hidden="true"></i>Done
-                            </button>
+                            <button type="button" class="btn btn-success" data-modal-close>Done</button>
                         </div>
                     </div>
                 </template>
