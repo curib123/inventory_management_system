@@ -41,8 +41,8 @@ $this->load->view('components/data_table', array(
     ),
     'columns' => array(
         'Product',
-        array('label' => 'System Stock', 'class' => 'text-end text-nowrap'),
-        array('label' => 'Actual Stock', 'class' => 'text-end text-nowrap'),
+        array('label' => 'System Stock', 'class' => 'text-end text-nowrap', 'render' => 'stock_value'),
+        array('label' => 'Actual Stock', 'class' => 'text-end text-nowrap', 'render' => 'stock_value'),
         array('label' => 'Difference', 'class' => 'text-end text-nowrap', 'render' => 'difference'),
         'Reason',
         'Processed By',
