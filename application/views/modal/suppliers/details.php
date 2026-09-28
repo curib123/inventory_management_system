@@ -20,9 +20,12 @@ $this->load->view('components/modal/header', array(
         <ul class="mb-0">
             <?php foreach ($products as $product): ?>
                 <li class="m-2">
-                    <a href="<?= site_url('products/view/' . $product->id); ?>"
-                       class="text-decoration-none view-product-modal">
-                        <?= html_escape($product->product_name ?? 'N/A'); ?>
+                    <a
+                        href="<?php echo site_url('products/view/' . (int) $product->id); ?>"
+                        class="text-decoration-none view-product-modal"
+                        data-modal-url="<?php echo site_url('products/view/' . (int) $product->id); ?>"
+                    >
+                        <?php echo html_escape(isset($product->product_name) ? $product->product_name : 'N/A'); ?>
                     </a>
                 </li>
             <?php endforeach; ?>
