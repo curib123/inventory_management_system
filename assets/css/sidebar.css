@@ -4,7 +4,7 @@ body {
 }
 
 .sidebar {
-    width: 320px;
+    width: 340px;
     height: 100vh;
     position: fixed;
     top: 0;
@@ -14,7 +14,6 @@ body {
     background: var(--app-sidebar-bg);
     color: #fff;
     z-index: 1050;
-    overflow: scroll;
 }
 
 .sidebar > .nav {
@@ -39,7 +38,7 @@ body {
 }
 
 .sidebar-brand span {
-    font-size: 1.15rem;
+    font-size: 1rem;
     font-weight: 600;
 }
 
@@ -136,7 +135,7 @@ body {
 }
 
 .main-content {
-    margin-left: 320px;
+    margin-left: 350px;
     min-height: 100vh;
     min-width: 0;
 }
