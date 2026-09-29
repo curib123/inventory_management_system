@@ -25,7 +25,7 @@ $this->load->view('components/page_header', array(
                         data-report-export
                         data-export-url="<?php echo site_url('reports/export/' . $report_key . '/csv'); ?>"
                     >
-                        <i class="bi bi-filetype-csv me-1"></i>CSV
+                        <i class="bi bi-filetype-csv me-1"></i> Export CSV
                     </button>
 
                     <button
@@ -34,7 +34,7 @@ $this->load->view('components/page_header', array(
                         data-report-export
                         data-export-url="<?php echo site_url('reports/export/' . $report_key . '/xlsx'); ?>"
                     >
-                        <i class="bi bi-file-earmark-excel me-1"></i>Excel
+                        <i class="bi bi-file-earmark-excel me-1"></i>Export Excel
                     </button>
 
                     <a
