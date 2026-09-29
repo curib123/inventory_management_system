@@ -144,9 +144,9 @@
 .app-data-table thead th {
     padding: 0.85rem 1rem;
     border-top: 0;
-    border-bottom: 1px solid rgba(var(--bs-secondary-rgb), 0.17);
-    background: var(--bs-tertiary-bg);
-    color: var(--bs-secondary-color);
+    border-bottom: 1px solid rgba(var(--bs-primary-rgb), 0.88);
+    background: var(--bs-primary);
+    color: #ffffff;
     font-size: 0.75rem;
     font-weight: 800;
     letter-spacing: 0.035em;
@@ -593,4 +593,15 @@
     .app-table-card .dt-length {
         width: fit-content;
     }
+}
+
+
+.app-data-table thead th:hover {
+    background: var(--bs-primary);
+    color: #ffffff;
+}
+
+.app-data-table thead th .dt-column-order {
+    color: #ffffff !important;
+    opacity: 0.82;
 }
