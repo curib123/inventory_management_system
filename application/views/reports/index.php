@@ -12,7 +12,7 @@ $this->load->view('components/page_header', array(
                 <a class="btn btn-sm <?php echo $report_key === 'inventory' ? 'btn-primary' : 'btn-outline-secondary'; ?>" href="<?php echo site_url('reports/inventory'); ?>">Inventory</a>
                 <a class="btn btn-sm <?php echo $report_key === 'stock-in' ? 'btn-primary' : 'btn-outline-secondary'; ?>" href="<?php echo site_url('reports/stock-in'); ?>">Stock In</a>
                 <a class="btn btn-sm <?php echo $report_key === 'stock-out' ? 'btn-primary' : 'btn-outline-secondary'; ?>" href="<?php echo site_url('reports/stock-out'); ?>">Stock Out</a>
-                <a class="btn btn-sm <?php echo $report_key === 'movement' ? 'btn-primary' : 'btn-outline-secondary'; ?>" href="<?php echo site_url('reports/movement'); ?>">Movement</a>
+                <a class="btn btn-sm <?php echo $report_key === 'movement' ? 'btn-primary' : 'btn-outline-secondary'; ?>" href="<?php echo site_url('reports/movement'); ?>"> Stock Movement History</a>
                 <a class="btn btn-sm <?php echo $report_key === 'low-stock' ? 'btn-primary' : 'btn-outline-secondary'; ?>" href="<?php echo site_url('reports/low-stock'); ?>">Low Stock</a>
                 <a class="btn btn-sm <?php echo $report_key === 'valuation' ? 'btn-primary' : 'btn-outline-secondary'; ?>" href="<?php echo site_url('reports/valuation'); ?>">Valuation</a>
             </div>
