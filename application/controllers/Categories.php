@@ -34,6 +34,7 @@ class Categories extends CI_Controller {
         $this->category_form();
     }
 
+    
     // Mao ni ang view flow sa Categories; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function view($id) {
         $this->require_permission('categories.view');

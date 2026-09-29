@@ -77,6 +77,7 @@ $route['stock/adjustments/datatable'] = 'stock/adjustments_datatable';
 $route['stock/low-stock'] = 'stock/low_stock';
 $route['stock/low-stock/datatable'] = 'stock/low_stock_datatable';
 
+
 //report
 $route['reports'] = 'reports';
 $route['reports/datatable/(:any)'] = 'reports/datatable/$1';
