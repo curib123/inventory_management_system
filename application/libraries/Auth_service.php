@@ -44,6 +44,8 @@ class Auth_service {
     public function session_data($user) {
         return array(
             'user_id' => $user->id,
+            'first_name' => isset($user->first_name) ? $user->first_name : '',
+            'last_name' => isset($user->last_name) ? $user->last_name : '',
             'username' => $user->username,
             'role_id' => $user->role_id,
             'role_name' => $user->role_name,
