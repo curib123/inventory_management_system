@@ -22,6 +22,7 @@ $route['products/categories/search'] = 'products/category_search';
 $route['products/suppliers/search'] = 'products/supplier_search';
 $route['products/add'] = 'products/add';
 $route['products/view/(:num)'] = 'products/view/$1';
+$route['products/movement/(:num)'] = 'products/movement/$1';
 $route['products/edit/(:num)'] = 'products/edit/$1';
 $route['products/delete/(:num)'] = 'products/delete/$1';
 
