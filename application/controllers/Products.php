@@ -49,6 +49,25 @@ class Products extends CI_Controller {
         $this->load->view('modal/products/details', $data);
     }
 
+    // Mao ni ang movement flow sa Products; one-product Stock In/Out/Adjustment history ra ang i-render inside shared modal.
+    public function movement($id) {
+        $this->require_permission('stock.history');
+
+        $sort = strtolower((string) $this->input->get('sort', TRUE)) === 'asc' ? 'asc' : 'desc';
+        $result = $this->product_service->movement_history((int) $id, $sort);
+
+        if (!$result['success'] || !$result['product']) {
+            show_404();
+        }
+
+        $this->load->view('modal/products/movement', array(
+            'product' => $result['product'],
+            'movements' => $result['movements'],
+            'movement_summary' => $result['summary'],
+            'movement_sort' => $result['sort']
+        ));
+    }
+
     // Mao ni ang edit flow sa Products; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
     public function edit($id) {
         $this->require_permission('products.edit');
@@ -150,6 +169,7 @@ class Products extends CI_Controller {
         $current_user_id = (int) $this->session->userdata('user_id');
         $can_edit = $this->authorization_service->has_permission($current_user_id, 'products.edit');
         $can_delete = $this->authorization_service->has_permission($current_user_id, 'products.delete');
+        $can_view_movement = $this->authorization_service->has_permission($current_user_id, 'stock.history');
 
         $rows = array();
         foreach ($products as $product) {
@@ -162,6 +182,15 @@ class Products extends CI_Controller {
                     'icon' => 'bi-eye'
                 )
             );
+
+            if ($can_view_movement) {
+                $action_items[] = array(
+                    'label' => 'Product Movement',
+                    'url' => site_url('products/movement/' . $id),
+                    'variant' => 'info',
+                    'icon' => 'bi-clock-history'
+                );
+            }
 
             if ($can_edit) {
                 $action_items[] = array(
