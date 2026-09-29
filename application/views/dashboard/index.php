@@ -26,7 +26,6 @@ $chart_data = array(
     <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
         <div>
             <div class="app-dashboard-eyebrow">Inventory Overview</div>
-            <h2 class="h4 mb-1">Dashboard</h2>
             <p class="text-body-secondary mb-0">
                 Monitor stock health, inventory value, and movement patterns from one view.
             </p>

@@ -1,6 +1,6 @@
 <?php
 $this->load->view('components/page_header', array(
-    'title' => 'Stock Adjustments',
+    
     'description' => 'Review inventory corrections and record physical stock adjustments.',
     'actions' => array(
         array(

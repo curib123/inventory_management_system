@@ -1,6 +1,6 @@
 <?php
 $this->load->view('components/page_header', array(
-    'title' => $report_title,
+
     'description' => 'Review inventory data and export a manager-ready business report.'
 ));
 ?>

@@ -1,6 +1,6 @@
 <?php
 $this->load->view('components/page_header', array(
-    'title' => 'Low Stock Monitoring',
+   
     'description' => 'Monitor products that have reached or fallen below their reorder level.'
 ));
 

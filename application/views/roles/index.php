@@ -11,7 +11,6 @@ if ($this->authorization_service->has_permission($this->session->userdata('user_
 }
 
 $this->load->view('components/page_header', array(
-    'title' => 'Roles and Permissions',
     'description' => 'Create roles and control which parts of the inventory system each role can access.',
     'actions' => $page_actions
 ));

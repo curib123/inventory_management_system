@@ -37,7 +37,7 @@ if ($this->authorization_service->has_permission($current_user_id, 'stock.adjust
 }
 
 $this->load->view('components/page_header', array(
-    'title' => 'Stock Movement History',
+   
     'description' => 'Track stock-in, stock-out, and adjustment activity across the inventory.',
     'actions' => $page_actions
 ));
