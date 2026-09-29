@@ -1316,3 +1316,115 @@ body {
         transform: rotate(90deg);
     }
 }
+
+
+/* Top navigation user profile */
+.app-topbar-user-section {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+
+.app-topbar-icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    border: 1px solid rgba(var(--bs-secondary-rgb), 0.16);
+    border-radius: 0.78rem;
+    background: var(--bs-body-bg);
+    color: var(--bs-secondary-color);
+    box-shadow: 0 0.15rem 0.45rem rgba(15, 23, 42, 0.035);
+}
+
+.app-topbar-icon-button:hover {
+    border-color: rgba(var(--bs-primary-rgb), 0.24);
+    background: var(--bs-primary-bg-subtle);
+    color: var(--bs-primary);
+}
+
+.app-user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.72rem;
+    min-height: 2.75rem;
+    padding: 0.35rem 0.65rem 0.35rem 0.38rem;
+    border: 1px solid rgba(var(--bs-secondary-rgb), 0.14);
+    border-radius: 0.88rem;
+    background: var(--bs-body-bg);
+    box-shadow: 0 0.18rem 0.55rem rgba(15, 23, 42, 0.04);
+}
+
+.app-user-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.05rem;
+    height: 2.05rem;
+    flex: 0 0 auto;
+    border: 1px solid rgba(var(--bs-primary-rgb), 0.2);
+    border-radius: 0.65rem;
+    background:
+        linear-gradient(135deg, rgba(var(--bs-primary-rgb), 0.16), rgba(var(--bs-primary-rgb), 0.06)),
+        var(--bs-primary-bg-subtle);
+    color: var(--bs-primary-text-emphasis);
+    font-size: 0.76rem;
+    font-weight: 850;
+    letter-spacing: 0.035em;
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.45);
+}
+
+.app-user-profile-copy {
+    min-width: 0;
+    flex-direction: column;
+    justify-content: center;
+    line-height: 1.18;
+}
+
+.app-user-profile-name {
+    max-width: 13rem;
+    overflow: hidden;
+    color: var(--bs-emphasis-color);
+    font-size: 0.8rem;
+    font-weight: 760;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.app-user-profile-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.28rem;
+    max-width: 15rem;
+    margin-top: 0.15rem;
+    overflow: hidden;
+    color: var(--bs-secondary-color);
+    font-size: 0.66rem;
+    font-weight: 600;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .app-topbar-user-section {
+        gap: 0.45rem;
+    }
+
+    .app-topbar-icon-button {
+        width: 2.3rem;
+        height: 2.3rem;
+    }
+
+    .app-user-profile {
+        min-height: 2.45rem;
+        padding: 0.25rem;
+        border-radius: 0.75rem;
+    }
+
+    .app-user-avatar {
+        width: 1.95rem;
+        height: 1.95rem;
+    }
+}
