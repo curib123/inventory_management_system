@@ -11,7 +11,6 @@ if ($this->authorization_service->has_permission($this->session->userdata('user_
 }
 
 $this->load->view('components/page_header', array(
-    'title' => 'User Management',
     'description' => 'Manage user accounts, names, roles, access status, and account activity.',
     'actions' => $page_actions
 ));

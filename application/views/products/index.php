@@ -11,7 +11,7 @@ if ($this->authorization_service->has_permission($this->session->userdata('user_
 }
 
 $this->load->view('components/page_header', array(
-    'title' => 'Products',
+  
     'description' => 'Manage inventory products, pricing, suppliers, and stock settings.',
     'actions' => $page_actions
 ));

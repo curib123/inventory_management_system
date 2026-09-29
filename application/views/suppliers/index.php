@@ -11,7 +11,7 @@ if ($this->authorization_service->has_permission($this->session->userdata('user_
 }
 
 $this->load->view('components/page_header', array(
-    'title' => 'Suppliers',
+    
     'description' => 'Manage supplier information and product sources.',
     'actions' => $page_actions
 ));
