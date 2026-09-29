@@ -9,7 +9,7 @@ class Product_service {
     // Setup ni sa Product_service; gi-load ni sa application/controllers/Products.php para diri tanan product business rules.
     public function __construct() {
         $this->CI =& get_instance();
-        $this->CI->load->model(array('Product_model', 'Category_model', 'Supplier_model'));
+        $this->CI->load->model(array('Product_model', 'Category_model', 'Supplier_model', 'Stock_model'));
     }
 
     // Business flow ni para save product; application/controllers/Products.php ang caller, while models query/persistence ra ang role.
@@ -91,6 +91,105 @@ class Product_service {
         }
 
         return array('success' => TRUE, 'product' => $product);
+    }
+
+    // Business flow ni para product movement history; controller mohatag product ID ug sort, service mo-combine Stock In/Out + adjustments into one audit timeline.
+    public function movement_history($id, $sort = 'desc') {
+        $id = (int) $id;
+        $product = $this->CI->Product_model->get_by_id($id);
+
+        if (!$product) {
+            return array(
+                'success' => FALSE,
+                'not_found' => TRUE,
+                'product' => NULL,
+                'movements' => array(),
+                'summary' => array()
+            );
+        }
+
+        $movements = array();
+
+        foreach ($this->CI->Stock_model->get_product_transaction_movements($id) as $row) {
+            $type = isset($row['type']) ? (string) $row['type'] : '';
+            $quantity = isset($row['quantity']) ? (int) $row['quantity'] : 0;
+
+            $movements[] = array(
+                'source_id' => isset($row['source_id']) ? (int) $row['source_id'] : 0,
+                'type' => $type,
+                'type_label' => $type === 'stock_in' ? 'Stock In' : 'Stock Out',
+                'transaction_no' => isset($row['transaction_no']) ? (string) $row['transaction_no'] : '',
+                'quantity' => $quantity,
+                'signed_quantity' => $type === 'stock_out' ? -$quantity : $quantity,
+                'cost_price' => isset($row['cost_price']) ? (float) $row['cost_price'] : 0.0,
+                'supplier_name' => isset($row['supplier_name']) ? (string) $row['supplier_name'] : 'Unassigned Products',
+                'username' => isset($row['username']) ? (string) $row['username'] : '',
+                'remarks' => isset($row['remarks']) ? trim((string) $row['remarks']) : '',
+                'system_stock' => NULL,
+                'actual_stock' => NULL,
+                'difference' => NULL,
+                'created_at' => isset($row['created_at']) ? (string) $row['created_at'] : ''
+            );
+        }
+
+        foreach ($this->CI->Stock_model->get_product_adjustment_movements($id) as $row) {
+            $difference = isset($row['difference']) ? (int) $row['difference'] : 0;
+
+            $movements[] = array(
+                'source_id' => isset($row['source_id']) ? (int) $row['source_id'] : 0,
+                'type' => 'adjustment',
+                'type_label' => 'Adjustment',
+                'transaction_no' => 'ADJ-' . str_pad((string) (isset($row['source_id']) ? (int) $row['source_id'] : 0), 6, '0', STR_PAD_LEFT),
+                'quantity' => abs($difference),
+                'signed_quantity' => $difference,
+                'cost_price' => NULL,
+                'supplier_name' => '',
+                'username' => isset($row['username']) ? (string) $row['username'] : '',
+                'remarks' => isset($row['reason']) ? trim((string) $row['reason']) : '',
+                'system_stock' => isset($row['system_stock']) ? (int) $row['system_stock'] : 0,
+                'actual_stock' => isset($row['actual_stock']) ? (int) $row['actual_stock'] : 0,
+                'difference' => $difference,
+                'created_at' => isset($row['created_at']) ? (string) $row['created_at'] : ''
+            );
+        }
+
+        $sort = strtolower((string) $sort) === 'asc' ? 'asc' : 'desc';
+
+        usort($movements, function ($left, $right) use ($sort) {
+            $left_time = strtotime(isset($left['created_at']) ? $left['created_at'] : '') ?: 0;
+            $right_time = strtotime(isset($right['created_at']) ? $right['created_at'] : '') ?: 0;
+
+            if ($left_time === $right_time) {
+                $left_id = isset($left['source_id']) ? (int) $left['source_id'] : 0;
+                $right_id = isset($right['source_id']) ? (int) $right['source_id'] : 0;
+                $comparison = $left_id <=> $right_id;
+            } else {
+                $comparison = $left_time <=> $right_time;
+            }
+
+            return $sort === 'asc' ? $comparison : -$comparison;
+        });
+
+        $summary = array(
+            'total' => count($movements),
+            'stock_in' => 0,
+            'stock_out' => 0,
+            'adjustment' => 0
+        );
+
+        foreach ($movements as $movement) {
+            if (isset($summary[$movement['type']])) {
+                $summary[$movement['type']]++;
+            }
+        }
+
+        return array(
+            'success' => TRUE,
+            'product' => $product,
+            'movements' => $movements,
+            'summary' => $summary,
+            'sort' => $sort
+        );
     }
 
     // Search option builder ni para categories; application/controllers/Products.php ang caller para controller dili na mag-format lookup data.
