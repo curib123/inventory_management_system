@@ -1,53 +1,52 @@
+
 <?php
-$this->load->view('components/page_header', array(
-    
+
+$this->load->view('components/page_header', [
     'description' => 'Review inventory corrections and record physical stock adjustments.',
-    'actions' => array(
-        array(
+    'actions' => [
+        [
             'label' => 'New Adjustment',
             'icon' => 'bi-sliders',
             'class' => 'btn-primary',
-            'modal_url' => site_url('stock/adjustment')
-        )
-    )
-));
+            'modal_url' => site_url('stock/adjustment'),
+        ],
+    ],
+]);
 
-$this->load->view('components/data_table', array(
+$this->load->view('components/data_table', [
     'source' => site_url('stock/adjustments/datatable'),
     'table_id' => 'stock-adjustments-table',
     'search_placeholder' => 'Search product, reason, user, or date...',
-    'filters' => array(
-        array(
+    'filters' => [
+        [
             'name' => 'difference',
             'label' => 'Adjustment',
             'icon' => 'bi-sliders',
-            'options' => array(
+            'options' => [
                 '' => 'All adjustments',
                 'increase' => 'Stock increased',
-                'decrease' => 'Stock decreased'
-            )
-        ),
-        array(
+                'decrease' => 'Stock decreased',
+            ],
+        ],
+        [
             'name' => 'period',
             'label' => 'Period',
             'icon' => 'bi-calendar3',
-            'options' => array(
+            'options' => [
                 '' => 'All dates',
                 'today' => 'Today',
                 '7_days' => 'Last 7 days',
-                '30_days' => 'Last 30 days'
-            )
-        )
-    ),
-    'columns' => array(
+                '30_days' => 'Last 30 days',
+            ],
+        ],
+    ],
+    'columns' => [
         'Product',
-        array('label' => 'System Stock', 'class' => 'text-end text-nowrap', 'render' => 'stock_value'),
-        array('label' => 'Actual Stock', 'class' => 'text-end text-nowrap', 'render' => 'stock_value'),
-        array('label' => 'Difference', 'class' => 'text-end text-nowrap', 'render' => 'difference'),
+        ['label' => 'System Stock', 'class' => 'text-end text-nowrap', 'render' => 'stock_value'],
+        ['label' => 'Actual Stock', 'class' => 'text-end text-nowrap', 'render' => 'stock_value'],
+        ['label' => 'Difference', 'class' => 'text-end text-nowrap', 'render' => 'difference'],
         'Reason',
         'Processed By',
-        array('label' => 'Date', 'class' => 'text-nowrap')
-    )
-));
-
-?>
+        ['label' => 'Date', 'class' => 'text-nowrap'],
+    ],
+]);
