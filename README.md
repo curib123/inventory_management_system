@@ -127,3 +127,8 @@ Build an Inventory Management System using CodeIgniter 3. The Focus is not only 
 
 - [x] Product table highlights low-stock rows with a warning state and out-of-stock rows with a danger state.
 - [x] Sidebar links show a persistent active state for the current section and a visible keyboard focus state.
+
+
+# New Add
+
+- In Product Management table add new action button name as product movement when click open a modal that have vertical wizard stepper by date can be sort also all that product ,movement by date all product history of stock in ,stock out and adjustment ,all data of movement to track it have nice ux/ui
