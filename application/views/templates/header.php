@@ -32,6 +32,35 @@ $current_user_id = (int) $this->session->userdata('user_id');
 $current_controller = strtolower((string) $this->router->fetch_class());
 $current_method = strtolower((string) $this->router->fetch_method());
 
+$current_username = trim((string) $this->session->userdata('username'));
+$current_first_name = trim((string) $this->session->userdata('first_name'));
+$current_last_name = trim((string) $this->session->userdata('last_name'));
+$current_role_name = trim((string) $this->session->userdata('role_name'));
+$current_display_name = trim($current_first_name . ' ' . $current_last_name);
+
+if ($current_display_name === '') {
+    $current_display_name = $current_username !== '' ? $current_username : 'User';
+}
+
+$current_name_parts = preg_split('/\s+/', $current_display_name);
+$current_avatar_initials = '';
+
+if (!empty($current_name_parts)) {
+    $current_avatar_initials .= strtoupper(substr($current_name_parts[0], 0, 1));
+
+    if (count($current_name_parts) > 1) {
+        $current_avatar_initials .= strtoupper(substr($current_name_parts[count($current_name_parts) - 1], 0, 1));
+    }
+}
+
+if ($current_avatar_initials === '') {
+    $current_avatar_initials = 'U';
+}
+
+$current_role_label = $current_role_name !== ''
+    ? ucwords(str_replace('_', ' ', $current_role_name))
+    : 'User';
+
 $sidebar_active = array(
     'dashboard' => $current_controller === 'dashboard',
     'products' => $current_controller === 'products',
@@ -167,10 +196,10 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
                 </h1>
             </div>
 
-            <div class="d-flex align-items-center gap-2">
+            <div class="app-topbar-user-section">
                 <button
                     type="button"
-                    class="btn btn-sm btn-outline-secondary"
+                    class="btn app-topbar-icon-button"
                     data-modal-url="<?php echo site_url('account/change-password'); ?>"
                     title="Change password"
                     aria-label="Change password"
@@ -178,13 +207,20 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
                     <i class="bi bi-key" aria-hidden="true"></i>
                 </button>
 
-                <span class="badge text-bg-primary">
-                    <?php echo html_escape($this->session->userdata('role_name')); ?>
-                </span>
-                <span class="fw-semibold d-none d-sm-inline">
-                    <i class="bi bi-person-circle me-1"></i>
-                    <?php echo html_escape($this->session->userdata('username')); ?>
-                </span>
+                <div class="app-user-profile" title="Signed in as <?php echo html_escape($current_display_name); ?>">
+                    <div class="app-user-avatar" aria-hidden="true">
+                        <?php echo html_escape($current_avatar_initials); ?>
+                    </div>
+
+                    <div class="app-user-profile-copy d-none d-sm-flex">
+                        <span class="app-user-profile-name"><?php echo html_escape($current_display_name); ?></span>
+                        <span class="app-user-profile-meta">
+                            @<?php echo html_escape($current_username); ?>
+                            <span aria-hidden="true">•</span>
+                            <?php echo html_escape($current_role_label); ?>
+                        </span>
+                    </div>
+                </div>
             </div>
         </header>
 
