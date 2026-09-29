@@ -135,3 +135,4 @@ Build an Inventory Management System using CodeIgniter 3. The Focus is not only 
 
 - make the user avatar user profile avatar in top nav right section nice and modern redesign
 
+- make the table head color blue
