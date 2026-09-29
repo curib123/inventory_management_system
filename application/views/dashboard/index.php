@@ -20,41 +20,69 @@ $chart_data = array(
     }, (array) $stock_by_category),
     'monthlyMovement' => array_values((array) $monthly_movement)
 );
+
+$dashboard_user_name = trim((string) $this->session->userdata('username'));
+
+if ($dashboard_user_name === '') {
+    $dashboard_user_name = trim(
+        (string) $this->session->userdata('first_name') . ' ' .
+        (string) $this->session->userdata('last_name')
+    );
+}
+
+if ($dashboard_user_name === '') {
+    $dashboard_user_name = 'User';
+}
+
+$dashboard_hour = (int) date('G');
+$dashboard_greeting = $dashboard_hour < 12
+    ? 'Good morning'
+    : ($dashboard_hour < 18 ? 'Good afternoon' : 'Good evening');
 ?>
 
 <div class="app-dashboard">
-    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
-        <div>
-            <div class="app-dashboard-eyebrow">Inventory Overview</div>
-            <p class="text-body-secondary mb-0">
-                Monitor stock health, inventory value, and movement patterns from one view.
+    <section class="app-dashboard-hero mb-4">
+        <div class="app-dashboard-hero-copy">
+            <div class="app-dashboard-eyebrow">Inventory command center</div>
+            <h1 class="app-dashboard-title">
+                <?php echo html_escape($dashboard_greeting); ?>,
+                <?php echo html_escape($dashboard_user_name); ?>
+            </h1>
+            <p class="app-dashboard-subtitle mb-0">
+                Know what needs attention across stock health, inventory value, and movement patterns.
             </p>
         </div>
 
-        <?php if ((int) $low_stock_items > 0): ?>
-          <a href="<?php echo site_url('stock/low-stock'); ?>" class="text-decoration-none text-reset">
-    <div class="app-dashboard-attention">
-        <span class="app-dashboard-attention-icon">
-            <i class="bi bi-exclamation-triangle text-warning"></i>
-        </span>
-
-        <div>
-            <div class="fw-semibold">
-                <?php echo number_format((int) $low_stock_items); ?>
-                item<?php echo (int) $low_stock_items === 1 ? '' : 's'; ?> need attention
+        <div class="app-dashboard-hero-actions">
+            <div class="app-dashboard-hero-meta">
+                <i class="bi bi-calendar3" aria-hidden="true"></i>
+                <span>Today</span>
             </div>
 
-            <div class="small text-body-secondary">
-                Includes active products at or below their reorder level.
-            </div>
+            <?php if ((int) $low_stock_items > 0): ?>
+                <a href="<?php echo site_url('stock/low-stock'); ?>" class="app-dashboard-hero-attention">
+                    <span class="app-dashboard-attention-icon">
+                        <i class="bi bi-exclamation-triangle" aria-hidden="true"></i>
+                    </span>
+                    <span class="app-dashboard-hero-attention-copy">
+                        <strong>
+                            <?php echo number_format((int) $low_stock_items); ?>
+                            item<?php echo (int) $low_stock_items === 1 ? '' : 's'; ?> need attention
+                        </strong>
+                        <small>Review low stock</small>
+                    </span>
+                    <i class="bi bi-arrow-up-right ms-auto" aria-hidden="true"></i>
+                </a>
+            <?php else: ?>
+                <div class="app-dashboard-hero-healthy">
+                    <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                    <span>All stock levels look healthy</span>
+                </div>
+            <?php endif; ?>
         </div>
-    </div>
-</a>
-        <?php endif; ?>
-    </div>
+    </section>
 
-    <div class="row g-3 mb-4">
-        <div class="col-6 col-xl-4 col-xxl-2">
+    <div class="app-dashboard-stat-grid mb-4">
             <div class="card app-dashboard-stat h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="app-dashboard-stat-top">
@@ -67,10 +95,8 @@ $chart_data = array(
                     <div class="app-dashboard-stat-help">All inventory product records</div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-6 col-xl-4 col-xxl-2">
-            <div class="card app-dashboard-stat h-100 shadow-sm border-0">
+        <div class="card app-dashboard-stat h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="app-dashboard-stat-top">
                         <span class="app-dashboard-stat-icon app-dashboard-stat-icon-info">
@@ -82,10 +108,8 @@ $chart_data = array(
                     <div class="app-dashboard-stat-help">Combined units on hand</div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-6 col-xl-4 col-xxl-2">
-            <div class="card app-dashboard-stat h-100 shadow-sm border-0">
+        <div class="card app-dashboard-stat app-dashboard-stat-feature h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="app-dashboard-stat-top">
                         <span class="app-dashboard-stat-icon app-dashboard-stat-icon-success">
@@ -99,10 +123,8 @@ $chart_data = array(
                     <div class="app-dashboard-stat-help">Stock quantity × cost price</div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-6 col-xl-4 col-xxl-2">
-            <div class="card app-dashboard-stat h-100 shadow-sm border-0">
+        <div class="card app-dashboard-stat h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="app-dashboard-stat-top">
                         <span class="app-dashboard-stat-icon app-dashboard-stat-icon-warning">
@@ -114,10 +136,8 @@ $chart_data = array(
                     <div class="app-dashboard-stat-help">At or below reorder level</div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-6 col-xl-4 col-xxl-2">
-            <div class="card app-dashboard-stat h-100 shadow-sm border-0">
+        <div class="card app-dashboard-stat h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="app-dashboard-stat-top">
                         <span class="app-dashboard-stat-icon app-dashboard-stat-icon-success">
@@ -129,10 +149,8 @@ $chart_data = array(
                     <div class="app-dashboard-stat-help">Units received today</div>
                 </div>
             </div>
-        </div>
 
-        <div class="col-6 col-xl-4 col-xxl-2">
-            <div class="card app-dashboard-stat h-100 shadow-sm border-0">
+        <div class="card app-dashboard-stat h-100 shadow-sm border-0">
                 <div class="card-body">
                     <div class="app-dashboard-stat-top">
                         <span class="app-dashboard-stat-icon app-dashboard-stat-icon-danger">
@@ -144,12 +162,11 @@ $chart_data = array(
                     <div class="app-dashboard-stat-help">Units released today</div>
                 </div>
             </div>
-        </div>
     </div>
 
     <div class="row g-4 mb-4">
         <div class="col-12 col-xl-4">
-            <section class="card app-dashboard-chart-card h-100 shadow-sm border-0">
+            <section class="card app-dashboard-chart-card app-dashboard-chart-card-health h-100 shadow-sm border-0">
                 <div class="card-header bg-body border-0">
                     <div class="app-dashboard-chart-heading">
                         <div>
@@ -200,7 +217,7 @@ $chart_data = array(
         </div>
 
         <div class="col-12 col-xl-8">
-            <section class="card app-dashboard-chart-card h-100 shadow-sm border-0">
+            <section class="card app-dashboard-chart-card app-dashboard-chart-card-category h-100 shadow-sm border-0">
                 <div class="card-header bg-body border-0">
                     <div class="app-dashboard-chart-heading">
                         <div>
@@ -233,7 +250,7 @@ $chart_data = array(
         </div>
     </div>
 
-    <section class="card app-dashboard-chart-card shadow-sm border-0">
+    <section class="card app-dashboard-chart-card app-dashboard-chart-card-movement shadow-sm border-0">
         <div class="card-header bg-body border-0">
             <div class="app-dashboard-chart-heading">
                 <div>

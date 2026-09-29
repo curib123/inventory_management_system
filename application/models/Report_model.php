@@ -106,6 +106,8 @@ class Report_model extends CI_Model {
             $this->db->join('categories c', 'c.id = p.category_id', 'left');
             $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
 
+            $this->apply_report_date_filter('p.created_at', $filters);
+
             $stock = isset($filters['stock']) ? strtolower((string) $filters['stock']) : '';
             if ($stock === 'out') {
                 $this->db->where('p.stock <=', 0);
@@ -138,6 +140,8 @@ class Report_model extends CI_Model {
             $this->db->join('categories c', 'c.id = p.category_id', 'left');
             $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
             $this->db->where('p.status', 1);
+
+            $this->apply_report_date_filter('p.created_at', $filters);
 
             $severity = isset($filters['severity']) ? strtolower((string) $filters['severity']) : '';
             if ($severity === 'out') {
@@ -175,16 +179,7 @@ class Report_model extends CI_Model {
             }
         }
 
-        $period = isset($filters['period']) ? strtolower((string) $filters['period']) : '';
-
-        if ($period === 'today') {
-            $this->db->where('t.created_at >=', date('Y-m-d 00:00:00'));
-            $this->db->where('t.created_at <=', date('Y-m-d 23:59:59'));
-        } elseif ($period === '7_days') {
-            $this->db->where('t.created_at >=', date('Y-m-d 00:00:00', strtotime('-6 days')));
-        } elseif ($period === '30_days') {
-            $this->db->where('t.created_at >=', date('Y-m-d 00:00:00', strtotime('-29 days')));
-        }
+        $this->apply_report_date_filter('t.created_at', $filters);
 
         if ($search !== '') {
             $this->db->group_start();
@@ -203,5 +198,58 @@ class Report_model extends CI_Model {
             $this->db->or_like('t.created_at', $search);
             $this->db->group_end();
         }
+    }
+
+    // Query helper ni para consistent date presets ug custom ranges across every report type.
+    private function apply_report_date_filter($column, $filters) {
+        $period = isset($filters['period']) ? strtolower(trim((string) $filters['period'])) : '';
+
+        if ($period === 'today') {
+            $this->db->where($column . ' >=', date('Y-m-d 00:00:00'));
+            $this->db->where($column . ' <=', date('Y-m-d 23:59:59'));
+            return;
+        }
+
+        if ($period === '7_days') {
+            $this->db->where($column . ' >=', date('Y-m-d 00:00:00', strtotime('-6 days')));
+            return;
+        }
+
+        if ($period === '30_days') {
+            $this->db->where($column . ' >=', date('Y-m-d 00:00:00', strtotime('-29 days')));
+            return;
+        }
+
+        if ($period !== 'custom') {
+            return;
+        }
+
+        $from = $this->normalize_report_date(isset($filters['date_from']) ? $filters['date_from'] : '');
+        $to = $this->normalize_report_date(isset($filters['date_to']) ? $filters['date_to'] : '');
+
+        if ($from === NULL || $to === NULL || $from > $to) {
+            return;
+        }
+
+        $this->db->where($column . ' >=', $from . ' 00:00:00');
+        $this->db->where($column . ' <=', $to . ' 23:59:59');
+    }
+
+    // Query helper ni para reject malformed dates before they reach SQL conditions.
+    private function normalize_report_date($value) {
+        $value = trim((string) $value);
+
+        if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return NULL;
+        }
+
+        $date = DateTime::createFromFormat('!Y-m-d', $value);
+        $errors = DateTime::getLastErrors();
+
+        if ($date === FALSE || ($errors !== FALSE && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))) {
+            return NULL;
+        }
+
+        return $date->format('Y-m-d');
     }
 }

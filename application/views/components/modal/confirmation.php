@@ -15,7 +15,8 @@ $confirmation_items = isset($confirmation_items) && is_array($confirmation_items
     <div class="app-confirmation-card-icon" aria-hidden="true">
         <i class="bi <?php echo html_escape($confirmation_icon); ?>"></i>
     </div>
-    <div class="min-w-0">
+    <div class="app-confirmation-card-copy min-w-0">
+        <div class="app-confirmation-card-kicker">Review before continuing</div>
         <div class="app-confirmation-card-title"><?php echo html_escape($confirmation_title); ?></div>
 
         <?php if ($confirmation_message !== ''): ?>

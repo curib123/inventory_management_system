@@ -77,7 +77,7 @@
         }
 
         .meta-cell {
-            width: 33.333%;
+            width: 25%;
             padding-right: 12px;
             vertical-align: top;
         }
@@ -333,6 +333,10 @@
                         <td class="meta-cell">
                             <div class="meta-label">Generated</div>
                             <div class="meta-value"><?php echo html_escape($report_meta['generated_at']); ?></div>
+                        </td>
+                        <td class="meta-cell">
+                            <div class="meta-label">Date range</div>
+                            <div class="meta-value"><?php echo html_escape($report_meta['date_range']); ?></div>
                         </td>
                         <td class="meta-cell">
                             <div class="meta-label">Prepared by</div>

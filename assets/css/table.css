@@ -1,16 +1,17 @@
 .app-table-card {
     overflow: hidden;
-    border: 1px solid rgba(var(--bs-secondary-rgb), 0.16) !important;
-    border-radius: 1rem;
-    box-shadow: 0 0.65rem 1.75rem rgba(15, 23, 42, 0.07);
+    border: 1px solid #dbe5f2 !important;
+    border-radius: 1.1rem;
+    box-shadow: 0 0.8rem 2rem rgba(15, 23, 42, 0.065);
     background: var(--bs-body-bg);
 }
 
 .app-table-toolbar {
-    padding: 1.15rem 1.15rem 1rem;
+    padding: 1.1rem 1.25rem 1rem;
     border-bottom: 1px solid rgba(var(--bs-secondary-rgb), 0.14);
     background:
-        linear-gradient(180deg, rgba(var(--bs-primary-rgb), 0.025), transparent 70%),
+        linear-gradient(135deg, rgba(37, 99, 235, 0.075), transparent 48%),
+        linear-gradient(180deg, #fbfdff, transparent 78%),
         var(--bs-body-bg);
 }
 
@@ -21,10 +22,10 @@
 .app-table-search-label {
     display: block;
     margin-bottom: 0.45rem;
-    color: var(--bs-secondary-color);
+    color: #52647d;
     font-size: 0.76rem;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
@@ -43,13 +44,14 @@
 }
 
 .app-table-search-control .form-control {
-    min-height: 3.1rem;
+    min-height: 2.9rem;
     padding-left: 2.75rem;
     padding-right: 3rem;
-    border: 1px solid rgba(var(--bs-secondary-rgb), 0.22);
-    border-radius: 0.8rem;
-    background: var(--bs-tertiary-bg);
-    font-size: 0.96rem;
+    border: 1px solid #d7e2f0;
+    border-radius: 0.78rem;
+    background: #fff;
+    font-size: 0.9rem;
+    box-shadow: 0 0.18rem 0.55rem rgba(15, 23, 42, 0.03);
     transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
 }
 
@@ -83,7 +85,9 @@
     align-items: flex-end;
     justify-content: space-between;
     gap: 1rem;
-    margin-top: 0.9rem;
+    margin-top: 0.95rem;
+    padding-top: 0.9rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
 }
 
 .app-table-filter-group {
@@ -96,6 +100,11 @@
 
 .app-table-filter {
     min-width: 10.5rem;
+}
+
+.app-table-filter-with-date-range {
+    min-width: min(100%, 18rem);
+    order: -1;
 }
 
 .app-table-filter label {
@@ -112,10 +121,44 @@
 
 .app-table-filter .form-select {
     min-height: 2.35rem;
-    border-color: rgba(var(--bs-secondary-rgb), 0.2);
+    border-color: #d7e2f0;
     border-radius: 0.65rem;
     background-color: var(--bs-body-bg);
     font-size: 0.86rem;
+    box-shadow: 0 0.12rem 0.35rem rgba(15, 23, 42, 0.025);
+}
+
+.app-table-custom-range {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin-top: 0.55rem;
+    padding-top: 0.6rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.16);
+}
+
+.app-table-date-field label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--bs-secondary-color);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.app-table-date-field .form-control {
+    min-height: 2.25rem;
+    border-color: #d7e2f0;
+    border-radius: 0.62rem;
+    font-size: 0.78rem;
+}
+
+.app-table-date-range-error {
+    grid-column: 1 / -1;
+    color: var(--bs-danger-text-emphasis);
+    font-size: 0.72rem;
+    line-height: 1.35;
 }
 
 .app-table-toolbar-actions {
@@ -134,34 +177,90 @@
 
 .app-table-scroll {
     min-height: 9rem;
+    overflow-x: auto;
+    background: #fff;
+    scrollbar-color: rgba(37, 99, 235, 0.35) transparent;
+    scrollbar-width: thin;
 }
 
 .app-data-table {
     width: 100% !important;
+    min-width: 680px;
     margin: 0 !important;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.app-data-table thead {
+    background: linear-gradient(180deg, #0b1220 0%, #101827 48%, #0d1524 100%);
+    border-bottom: 1px solid rgba(120, 169, 255, 0.32);
 }
 
 .app-data-table thead th {
-    padding: 0.85rem 1rem;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 0.82rem 1rem;
     border-top: 0;
-    border-bottom: 1px solid rgba(var(--bs-secondary-rgb), 0.17);
-    background: var(--bs-tertiary-bg);
-    color: var(--bs-secondary-color);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+    background: transparent;
+    color: #fff;
     font-size: 0.75rem;
     font-weight: 800;
-    letter-spacing: 0.035em;
+    letter-spacing: 0.055em;
     text-transform: uppercase;
     vertical-align: middle;
     white-space: nowrap;
 }
 
+/* Bootstrap's .table cell rule is more specific, so keep the table palette explicit. */
+.app-data-table.table > thead > tr > th {
+    background: #101827;
+    color: #d8e2f0;
+    border-right-color: rgba(120, 169, 255, 0.24);
+}
+
+.app-data-table.table > tbody > tr > td {
+    background-color: #fff;
+    color: #24344d;
+}
+
+.app-data-table.table > tbody > tr:nth-child(even) > td {
+    background-color: #f8fbff;
+}
+
+.app-data-table thead th:last-child {
+    border-right: 0;
+}
+
+.app-data-table.table > thead > tr > th:last-child {
+    border-right: 0;
+}
+
+.app-data-table thead th.sorting,
+.app-data-table thead th.sorting_asc,
+.app-data-table thead th.sorting_desc {
+    cursor: pointer;
+}
+
+.app-data-table thead th.sorting:hover,
+.app-data-table thead th.sorting_asc:hover,
+.app-data-table thead th.sorting_desc:hover {
+    background: rgba(120, 169, 255, 0.14);
+}
+
 .app-data-table tbody td {
-    padding: 0.92rem 1rem;
-    border-color: rgba(var(--bs-secondary-rgb), 0.1);
-    color: var(--bs-body-color);
+    padding: 0.86rem 1rem;
+    border-color: #e7eef7;
+    color: #24344d;
     font-size: 0.9rem;
     line-height: 1.35;
     vertical-align: middle;
+}
+
+.app-data-table tbody tr:nth-child(even) > * {
+    background: #f8fbff;
 }
 
 .app-data-table tbody tr {
@@ -169,7 +268,12 @@
 }
 
 .app-data-table tbody tr:hover > * {
-    background: rgba(var(--bs-primary-rgb), 0.035);
+    background: rgba(37, 99, 235, 0.07);
+}
+
+.app-data-table tbody tr:focus-within > * {
+    background: rgba(37, 99, 235, 0.09);
+    box-shadow: inset 0 1px 0 rgba(37, 99, 235, 0.22), inset 0 -1px 0 rgba(37, 99, 235, 0.22);
 }
 
 .app-data-table tbody tr.app-table-row-warning > td {
@@ -345,6 +449,10 @@
     .app-table-filter {
         flex: 1 1 10rem;
         min-width: 0;
+    }
+
+    .app-table-filter-with-date-range {
+        flex-basis: 100%;
     }
 
     .app-table-toolbar-actions {
