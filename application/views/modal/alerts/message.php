@@ -17,8 +17,12 @@ $this->load->view('components/modal/header', array(
 
 <div class="app-modal-body">
     <div class="app-modal-message-card app-modal-message-card-<?php echo html_escape($alert_variant); ?>">
-        <div class="min-w-0">
-            <div class="fw-semibold mb-1"><?php echo html_escape($alert_title); ?></div>
+        <div class="app-modal-message-card-icon app-modal-message-card-icon-<?php echo html_escape($alert_variant); ?>" aria-hidden="true">
+            <i class="bi <?php echo html_escape($alert_icon); ?>"></i>
+        </div>
+        <div class="app-modal-message-card-copy min-w-0">
+            <div class="app-modal-message-card-kicker">Message details</div>
+            <div class="app-modal-message-card-title"><?php echo html_escape($alert_title); ?></div>
             <p class="mb-0"><?php echo html_escape($alert_message); ?></p>
         </div>
     </div>

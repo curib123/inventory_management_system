@@ -1434,6 +1434,15 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     });
 
+                    card.querySelectorAll('[data-table-date-filter]').forEach(function (input) {
+                        var name = input.getAttribute('data-table-date-filter');
+                        var value = input.value;
+
+                        if (name && value !== '') {
+                            filters[name] = value;
+                        }
+                    });
+
                     payload.table_filters = filters;
                 },
                 error: function (xhr) {
@@ -1491,6 +1500,52 @@ document.addEventListener('DOMContentLoaded', function () {
         var filterCount = card.querySelector('[data-table-filter-count]');
         var searchTimer = null;
 
+        function syncCustomDateRange() {
+            var periodSelect = card.querySelector('[data-table-filter="period"]');
+            var customRange = card.querySelector('[data-table-custom-range]');
+            var dateInputs = card.querySelectorAll('[data-table-date-filter]');
+            var dateError = card.querySelector('[data-table-date-range-error]');
+
+            if (!periodSelect || !customRange) {
+                return true;
+            }
+
+            var isCustom = periodSelect.value === 'custom';
+            customRange.classList.toggle('d-none', !isCustom);
+            customRange.setAttribute('aria-hidden', String(!isCustom));
+
+            dateInputs.forEach(function (input) {
+                input.disabled = !isCustom;
+            });
+
+            if (!isCustom) {
+                if (dateError) {
+                    dateError.textContent = '';
+                    dateError.classList.add('d-none');
+                }
+                return true;
+            }
+
+            var fromInput = card.querySelector('[data-table-date-filter="date_from"]');
+            var toInput = card.querySelector('[data-table-date-filter="date_to"]');
+            var from = fromInput ? fromInput.value : '';
+            var to = toInput ? toInput.value : '';
+            var message = '';
+
+            if ((from && !to) || (!from && to)) {
+                message = 'Choose both a start and end date.';
+            } else if (from && to && from > to) {
+                message = 'The end date must be on or after the start date.';
+            }
+
+            if (dateError) {
+                dateError.textContent = message;
+                dateError.classList.toggle('d-none', message === '');
+            }
+
+            return message === '' && (!from || !to ? false : true);
+        }
+
         // Frontend helper ni para update toolbar state; caller naa ra sa assets/js/app.js ug gi-trigger sa data-* hooks gikan application/views/.
         function updateToolbarState() {
             var activeFilters = 0;
@@ -1539,10 +1594,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
         card.querySelectorAll('[data-table-filter]').forEach(function (select) {
             select.addEventListener('change', function () {
+                if (select.getAttribute('data-table-filter') === 'period') {
+                    var validDateRange = syncCustomDateRange();
+                    updateToolbarState();
+
+                    if (select.value === 'custom') {
+                        return;
+                    }
+
+                    if (!validDateRange) {
+                        return;
+                    }
+                }
+
                 updateToolbarState();
                 dataTable.ajax.reload(null, true);
             });
         });
+
+        card.querySelectorAll('[data-table-date-filter]').forEach(function (input) {
+            input.addEventListener('input', function () {
+                var validDateRange = syncCustomDateRange();
+                updateToolbarState();
+
+                if (validDateRange) {
+                    dataTable.ajax.reload(null, true);
+                }
+            });
+        });
+
         if (resetButton) {
             resetButton.addEventListener('click', function () {
                 card.querySelectorAll('[data-table-filter]').forEach(function (select) {
@@ -1553,11 +1633,14 @@ document.addEventListener('DOMContentLoaded', function () {
                     searchInput.value = '';
                 }
 
+                syncCustomDateRange();
+
                 updateToolbarState();
                 dataTable.search('').draw();
             });
         }
 
+        syncCustomDateRange();
         updateToolbarState();
     });
 
@@ -1767,21 +1850,30 @@ document.addEventListener('DOMContentLoaded', function () {
                         '<i class="bi ' + escapeHtml(icon) + '"></i>' +
                     '</span>' +
                     '<div class="app-modal-heading-copy">' +
+                        '<div class="app-modal-eyebrow">Confirmation</div>' +
                         '<h2 class="app-modal-title" id="action-modal-title">' + escapeHtml(title) + '</h2>' +
                     '</div>' +
                 '</div>' +
                 '<button type="button" class="btn-close app-modal-close" data-confirm-cancel aria-label="Cancel"></button>' +
             '</div>' +
             '<div class="app-modal-body">' +
-                (message
-                    ? '<p class="app-confirmation-review-message mb-0">' + escapeHtml(message) + '</p>'
-                    : '') +
-                (impact
-                    ? '<p class="small text-body-secondary mt-2 mb-0">' + escapeHtml(impact) + '</p>'
-                    : '') +
-                (assist
-                    ? '<p class="small text-body-secondary mt-2 mb-0">' + escapeHtml(assist) + '</p>'
-                    : '') +
+                '<div class="app-confirmation-review app-confirmation-review-' + escapeHtml(variant) + '">' +
+                    '<div class="app-confirmation-review-icon app-confirmation-review-icon-' + escapeHtml(variant) + '" aria-hidden="true">' +
+                        '<i class="bi ' + escapeHtml(icon) + '"></i>' +
+                    '</div>' +
+                    '<div class="min-w-0">' +
+                        '<div class="app-confirmation-review-title">Please review this action</div>' +
+                        (message
+                            ? '<p class="app-confirmation-review-message mb-0">' + escapeHtml(message) + '</p>'
+                            : '') +
+                        (impact
+                            ? '<div class="app-confirmation-impact"><div class="app-confirmation-impact-label">What happens next</div>' + escapeHtml(impact) + '</div>'
+                            : '') +
+                        (assist
+                            ? '<div class="app-confirmation-assist"><i class="bi bi-info-circle me-2" aria-hidden="true"></i><span>' + escapeHtml(assist) + '</span></div>'
+                            : '') +
+                    '</div>' +
+                '</div>' +
             '</div>' +
             '<div class="app-modal-footer">' +
                 '<div class="app-modal-footer-actions">' +
@@ -1962,9 +2054,44 @@ document.addEventListener('DOMContentLoaded', function () {
             url.searchParams.set('search', search);
         }
 
+        var periodSelect = card.querySelector('[data-table-filter="period"]');
+        var dateError = card.querySelector('[data-table-date-range-error]');
+
+        if (periodSelect && periodSelect.value === 'custom') {
+            var dateFrom = card.querySelector('[data-table-date-filter="date_from"]');
+            var dateTo = card.querySelector('[data-table-date-filter="date_to"]');
+            var fromValue = dateFrom ? dateFrom.value : '';
+            var toValue = dateTo ? dateTo.value : '';
+            var dateMessage = '';
+
+            if (!fromValue || !toValue) {
+                dateMessage = 'Choose both a start and end date.';
+            } else if (fromValue > toValue) {
+                dateMessage = 'The end date must be on or after the start date.';
+            }
+
+            if (dateError) {
+                dateError.textContent = dateMessage;
+                dateError.classList.toggle('d-none', dateMessage === '');
+            }
+
+            if (dateMessage !== '') {
+                return '';
+            }
+        }
+
         card.querySelectorAll('[data-table-filter]').forEach(function (select) {
             var name = select.getAttribute('data-table-filter');
             var value = select.value;
+
+            if (name && value !== '') {
+                url.searchParams.set('table_filters[' + name + ']', value);
+            }
+        });
+
+        card.querySelectorAll('[data-table-date-filter]').forEach(function (input) {
+            var name = input.getAttribute('data-table-date-filter');
+            var value = input.value;
 
             if (name && value !== '') {
                 url.searchParams.set('table_filters[' + name + ']', value);

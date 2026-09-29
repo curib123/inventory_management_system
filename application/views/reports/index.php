@@ -101,19 +101,21 @@ if ($report_key === 'inventory' || $report_key === 'valuation') {
             )
         );
     }
-
-    $table_filters[] = array(
-        'name' => 'period',
-        'label' => 'Period',
-        'icon' => 'bi-calendar3',
-        'options' => array(
-            '' => 'All dates',
-            'today' => 'Today',
-            '7_days' => 'Last 7 days',
-            '30_days' => 'Last 30 days'
-        )
-    );
 }
+
+$table_filters[] = array(
+    'name' => 'period',
+    'label' => 'Date range',
+    'icon' => 'bi-calendar3',
+    'custom_range' => TRUE,
+    'options' => array(
+        '' => 'All dates',
+        'today' => 'Today',
+        '7_days' => 'Last 7 days',
+        '30_days' => 'Last 30 days',
+        'custom' => 'Custom range'
+    )
+);
 
 foreach ($columns as $field => $label) {
     $table_columns[] = in_array($field, $numeric_fields, TRUE)

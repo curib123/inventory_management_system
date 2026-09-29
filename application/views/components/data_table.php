@@ -49,12 +49,13 @@ $search_placeholder = isset($search_placeholder) && trim((string) $search_placeh
                         $filter_icon = isset($filter['icon'])
                             ? preg_replace('/[^a-zA-Z0-9_\-]/', '', (string) $filter['icon'])
                             : 'bi-funnel';
+                        $custom_range = !empty($filter['custom_range']);
                         $filter_options = isset($filter['options']) && is_array($filter['options'])
                             ? $filter['options']
                             : array();
                         ?>
                         <?php if ($filter_name !== ''): ?>
-                            <div class="app-table-filter">
+                            <div class="app-table-filter<?php echo $custom_range ? ' app-table-filter-with-date-range' : ''; ?>">
                                 <label for="<?php echo html_escape($table_id . '-filter-' . $filter_name); ?>">
                                     <i class="bi <?php echo html_escape($filter_icon); ?>" aria-hidden="true"></i>
                                     <?php echo html_escape($filter_label); ?>
@@ -70,6 +71,43 @@ $search_placeholder = isset($search_placeholder) && trim((string) $search_placeh
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
+
+                                <?php if ($custom_range): ?>
+                                    <div
+                                        class="app-table-custom-range d-none"
+                                        data-table-custom-range
+                                        aria-hidden="true"
+                                    >
+                                        <div class="app-table-date-field">
+                                            <label for="<?php echo html_escape($table_id . '-date-from'); ?>">From</label>
+                                            <input
+                                                id="<?php echo html_escape($table_id . '-date-from'); ?>"
+                                                type="date"
+                                                class="form-control form-control-sm"
+                                                data-table-date-filter="date_from"
+                                                disabled
+                                                aria-describedby="<?php echo html_escape($table_id . '-date-error'); ?>"
+                                            >
+                                        </div>
+                                        <div class="app-table-date-field">
+                                            <label for="<?php echo html_escape($table_id . '-date-to'); ?>">To</label>
+                                            <input
+                                                id="<?php echo html_escape($table_id . '-date-to'); ?>"
+                                                type="date"
+                                                class="form-control form-control-sm"
+                                                data-table-date-filter="date_to"
+                                                disabled
+                                                aria-describedby="<?php echo html_escape($table_id . '-date-error'); ?>"
+                                            >
+                                        </div>
+                                        <div
+                                            id="<?php echo html_escape($table_id . '-date-error'); ?>"
+                                            class="app-table-date-range-error d-none"
+                                            data-table-date-range-error
+                                            role="alert"
+                                        ></div>
+                                    </div>
+                                <?php endif; ?>
                             </div>
                         <?php endif; ?>
                     <?php endforeach; ?>
@@ -123,6 +161,7 @@ $search_placeholder = isset($search_placeholder) && trim((string) $search_placeh
                             }
                             ?>
                             <th
+                                scope="col"
                                 <?php echo $orderable ? '' : 'data-orderable="false"'; ?>
                                 <?php echo $visible ? '' : 'data-visible="false"'; ?>
                                 <?php if ($column_class !== ''): ?>

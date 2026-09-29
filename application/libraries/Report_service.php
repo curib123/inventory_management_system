@@ -156,10 +156,47 @@ class Report_service {
                 'report_title' => $definition['title'],
                 'generated_at' => date('F j, Y g:i A'),
                 'prepared_by' => (string) $prepared_by,
+                'date_range' => $this->date_range_label($filters),
                 'record_count' => count($rows),
                 'summary' => $this->summary($report, $rows)
             )
         );
+    }
+
+    // Business presentation helper ni para show the active report range in CSV/XLSX/PDF metadata.
+    private function date_range_label($filters) {
+        $period = isset($filters['period']) ? strtolower(trim((string) $filters['period'])) : '';
+
+        if ($period === 'today') {
+            return 'Today';
+        }
+
+        if ($period === '7_days') {
+            return 'Last 7 days';
+        }
+
+        if ($period === '30_days') {
+            return 'Last 30 days';
+        }
+
+        if ($period === 'custom') {
+            $from = isset($filters['date_from']) ? trim((string) $filters['date_from']) : '';
+            $to = isset($filters['date_to']) ? trim((string) $filters['date_to']) : '';
+            $from_date = DateTime::createFromFormat('!Y-m-d', $from);
+            $to_date = DateTime::createFromFormat('!Y-m-d', $to);
+
+            if (
+                $from_date !== FALSE &&
+                $to_date !== FALSE &&
+                $from_date->format('Y-m-d') === $from &&
+                $to_date->format('Y-m-d') === $to &&
+                $from <= $to
+            ) {
+                return $from_date->format('M j, Y') . ' - ' . $to_date->format('M j, Y');
+            }
+        }
+
+        return 'All dates';
     }
 
     // Internal helper ni para report summary; tawagon ra sulod Report_service para totals ug movement values dili na i-compute sa controller.
