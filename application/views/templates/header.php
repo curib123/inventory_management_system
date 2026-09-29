@@ -207,17 +207,15 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
                     <i class="bi bi-key" aria-hidden="true"></i>
                 </button>
 
-                <div class="app-user-profile" title="Signed in as <?php echo html_escape($current_display_name); ?>">
+                <div class="app-user-profile " title="Signed in as <?php echo html_escape($current_display_name); ?>">
                     <div class="app-user-avatar" aria-hidden="true">
                         <?php echo html_escape($current_avatar_initials); ?>
                     </div>
 
                     <div class="app-user-profile-copy d-none d-sm-flex">
-                        <span class="app-user-profile-name"><?php echo html_escape($current_display_name); ?></span>
                         <span class="app-user-profile-meta">
-                            @<?php echo html_escape($current_username); ?>
-                            <span aria-hidden="true">•</span>
-                            <?php echo html_escape($current_role_label); ?>
+                            <?php echo html_escape($current_username); ?>
+                          
                         </span>
                     </div>
                 </div>

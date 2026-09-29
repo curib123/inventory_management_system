@@ -16,42 +16,6 @@ $this->load->view('components/modal/header', array(
 ?>
 
 <div class="app-modal-body">
-    <div class="app-movement-product">
-        <div class="app-movement-product-main">
-            <div class="app-movement-product-code"><?php echo html_escape($product->product_code); ?></div>
-            <div class="app-movement-product-name"><?php echo html_escape($product->product_name); ?></div>
-            <div class="app-movement-product-meta">
-                <?php echo html_escape($product->category_name ?: 'Uncategorized'); ?>
-                <span aria-hidden="true">•</span>
-                <?php echo html_escape($product->supplier_name ?: 'Unassigned Products'); ?>
-            </div>
-        </div>
-
-        <div class="app-movement-stock">
-            <span>Current stock</span>
-            <strong><?php echo number_format((int) $product->stock); ?></strong>
-            <small><?php echo html_escape($product->unit ?: 'unit'); ?></small>
-        </div>
-    </div>
-
-    <div class="app-movement-stats" aria-label="Movement summary">
-        <div class="app-movement-stat">
-            <span>Total movements</span>
-            <strong><?php echo number_format((int) $summary['total']); ?></strong>
-        </div>
-        <div class="app-movement-stat app-movement-stat-in">
-            <span>Stock In</span>
-            <strong><?php echo number_format((int) $summary['stock_in']); ?></strong>
-        </div>
-        <div class="app-movement-stat app-movement-stat-out">
-            <span>Stock Out</span>
-            <strong><?php echo number_format((int) $summary['stock_out']); ?></strong>
-        </div>
-        <div class="app-movement-stat app-movement-stat-adjust">
-            <span>Adjustments</span>
-            <strong><?php echo number_format((int) $summary['adjustment']); ?></strong>
-        </div>
-    </div>
 
     <div class="app-movement-toolbar">
         <div>

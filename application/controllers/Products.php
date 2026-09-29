@@ -176,7 +176,7 @@ class Products extends CI_Controller {
             $id = (int) $product->id;
             $action_items = array(
                 array(
-                    'label' => 'View Product',
+                    'label' => 'View',
                     'url' => site_url('products/view/' . $id),
                     'variant' => 'secondary',
                     'icon' => 'bi-eye'
@@ -187,14 +187,14 @@ class Products extends CI_Controller {
                 $action_items[] = array(
                     'label' => 'Product Movement',
                     'url' => site_url('products/movement/' . $id),
-                    'variant' => 'info',
+                    'variant' => 'success',
                     'icon' => 'bi-clock-history'
                 );
             }
 
             if ($can_edit) {
                 $action_items[] = array(
-                    'label' => 'Edit Product',
+                    'label' => 'Edit ',
                     'url' => site_url('products/edit/' . $id),
                     'variant' => 'primary',
                     'icon' => 'bi-pencil'
@@ -203,7 +203,7 @@ class Products extends CI_Controller {
 
             if ($can_delete) {
                 $action_items[] = array(
-                    'label' => 'Delete Product',
+                    'label' => 'Delete ',
                     'url' => site_url('products/delete/' . $id),
                     'variant' => 'danger',
                     'icon' => 'bi-trash'

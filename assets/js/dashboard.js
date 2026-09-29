@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     var sharedTooltip = {
         backgroundColor: '#0f172a',
-        titleColor: '#ffffff',
+        titleColor: '#000000',
         bodyColor: '#e2e8f0',
         padding: 12,
         cornerRadius: 9,
