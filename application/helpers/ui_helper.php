@@ -20,7 +20,7 @@ if (!function_exists('ui_modal_action_group')) {
             $variant = preg_replace('/[^a-z0-9-]/i', '', $variant);
             $icon = preg_replace('/[^a-z0-9-]/i', '', $icon);
 
-            $html .= '<button type="button" class="btn btn-sm btn-outline-' . $variant . '" data-modal-url="' . html_escape($url) . '">';
+            $html .= '<button type="button" class="btn btn-sm btn-' . $variant . '" data-modal-url="' . html_escape($url) . '">';
 
             if ($icon !== '') {
                 $html .= '<i class="bi ' . $icon . ' me-1"></i>';
@@ -81,28 +81,3 @@ if (!function_exists('ui_modal_form_attributes')) {
         return $attributes;
     }
 }
-
-if (!function_exists('ui_style_enabled_for')) {
-    // Shared UI helper ni para ui style enabled for; main caller/integration pangitaa sa application/views/ ug application/controllers/ nga nag-build sa shared UI, so didto tan-awa if mangita ka asa ni gigamit.
-    function ui_style_enabled_for($rules, $controller, $method = '', $default = TRUE) {
-        $rules = is_array($rules) ? $rules : array();
-        $controller = strtolower(trim((string) $controller));
-        $method = strtolower(trim((string) $method));
-        $route_key = $controller . ($method !== '' ? '/' . $method : '');
-
-        if ($route_key !== '' && array_key_exists($route_key, $rules)) {
-            return (bool) $rules[$route_key];
-        }
-
-        if ($controller !== '' && array_key_exists($controller, $rules)) {
-            return (bool) $rules[$controller];
-        }
-
-        if (array_key_exists('*', $rules)) {
-            return (bool) $rules['*'];
-        }
-
-        return (bool) $default;
-    }
-}
-

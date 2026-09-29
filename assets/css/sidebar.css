@@ -4,7 +4,7 @@ body {
 }
 
 .sidebar {
-    width: 300px;
+    width: 320px;
     height: 100vh;
     position: fixed;
     top: 0;
@@ -136,7 +136,7 @@ body {
 }
 
 .main-content {
-    margin-left: 300px;
+    margin-left: 320px;
     min-height: 100vh;
     min-width: 0;
 }

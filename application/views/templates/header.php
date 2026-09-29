@@ -57,7 +57,7 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-brand">
             <i class="bi bi-box-seam"></i>
-            <span>Inventory System</span>
+            <span>Inventory Management System</span>
         </div>
 
         <div class="sidebar-heading">Main Menu</div>
