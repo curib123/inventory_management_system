@@ -16,6 +16,11 @@
     <link rel="stylesheet" href="<?php echo base_url('assets/css/modal.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/plain-mode.css'); ?>">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 
     <title><?php echo html_escape(isset($page_title) ? $page_title : 'Inventory Management System'); ?></title>
 </head>
