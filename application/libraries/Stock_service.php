@@ -194,7 +194,7 @@ class Stock_service {
         $transaction_id = $this->CI->Stock_model->insert_transaction(array(
             'transaction_no' => $transaction_no,
             'type' => 'adjustment',
-            'supplier_id' => NULL,
+            'supplier_id' => $supplier_scope,
             'remarks' => $reason,
             'created_by' => (int) $user_id
         ));
