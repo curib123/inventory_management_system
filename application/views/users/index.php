@@ -29,7 +29,20 @@ $this->load->view('components/data_table', array(
                 'active' => 'Active',
                 'inactive' => 'Inactive'
             )
-        )
+        ),
+        array(
+            'name' => 'role',
+            'label' => 'Roles',
+            'icon' => 'bi-shop',
+            'options' => array('' => 'All Roles') + array_reduce(
+                isset($roles) && is_array($roles) ? $roles : array(),
+                function ($options, $role) {
+                    $options[(string) $role->id] = $role->role_name;
+                    return $options;
+                },
+                array()
+            )
+        ),
     ),
     'columns' => array(
         'First Name',

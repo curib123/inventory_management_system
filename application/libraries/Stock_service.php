@@ -57,6 +57,8 @@ class Stock_service {
         }
 
         $this->CI->db->trans_begin();
+
+        //mao ni pattern para mo create ug transaction number ex. ( type +   date (ymdhis) + subtring lenght )  
         $transaction_no = strtoupper($type) . '-' . date('YmdHis') . '-' . strtoupper(substr(uniqid(), -6));
         $transaction_id = $this->CI->Stock_model->insert_transaction(array(
             'transaction_no' => $transaction_no,

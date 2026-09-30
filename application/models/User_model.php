@@ -240,34 +240,45 @@ class User_model extends CI_Model {
     }
 
     // Data helper ni para build datatable query; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
-    private function build_datatable_query($search, $filters = array()) {
-        $this->db->from('users u');
-        $this->db->join('roles r', 'r.id = u.role_id', 'left');
+  private function build_datatable_query($search, $filters = array()) {
+    $this->db->from('users u');
+    $this->db->join('roles r', 'r.id = u.role_id', 'left');
 
-        $status = isset($filters['status']) ? strtolower((string) $filters['status']) : '';
-        if ($status === 'active') {
-            $this->db->where('u.status', 1);
-        } elseif ($status === 'inactive') {
-            $this->db->where('u.status', 0);
-        }
-
-        if ($search !== '') {
-            $this->db->group_start();
-            $this->db->like('u.first_name', $search);
-            $this->db->or_like('u.middle_name', $search);
-            $this->db->or_like('u.last_name', $search);
-            $this->db->or_like('u.username', $search);
-            $this->db->or_like('r.role_name', $search);
-            $this->db->or_like('u.created_at', $search);
-            $this->db->or_like('u.updated_at', $search);
-
-            if (strcasecmp($search, 'active') === 0) {
-                $this->db->or_where('u.status', 1);
-            } elseif (strcasecmp($search, 'inactive') === 0) {
-                $this->db->or_where('u.status', 0);
-            }
-
-            $this->db->group_end();
-        }
+    // Role filter
+    $role_id = isset($filters['role']) ? (int) $filters['role'] : 0;
+    if ($role_id > 0) {
+        $this->db->where('u.role_id', $role_id);
     }
+
+    // Status filter
+    $status = isset($filters['status'])
+        ? strtolower((string) $filters['status'])
+        : '';
+
+    if ($status === 'active') {
+        $this->db->where('u.status', 1);
+    } elseif ($status === 'inactive') {
+        $this->db->where('u.status', 0);
+    }
+
+    // Search
+    if ($search !== '') {
+        $this->db->group_start();
+        $this->db->like('u.first_name', $search);
+        $this->db->or_like('u.middle_name', $search);
+        $this->db->or_like('u.last_name', $search);
+        $this->db->or_like('u.username', $search);
+        $this->db->or_like('r.role_name', $search);
+        $this->db->or_like('u.created_at', $search);
+        $this->db->or_like('u.updated_at', $search);
+
+        if (strcasecmp($search, 'active') === 0) {
+            $this->db->or_where('u.status', 1);
+        } elseif (strcasecmp($search, 'inactive') === 0) {
+            $this->db->or_where('u.status', 0);
+        }
+
+        $this->db->group_end();
+    }
+}
 }

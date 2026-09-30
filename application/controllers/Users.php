@@ -16,6 +16,7 @@ class Users extends CI_Controller {
         }
 
         $this->load->model('User_model');
+        $this->load->model('Role_model');
     }
 
     // Mao ni ang index flow sa Users; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
@@ -23,6 +24,7 @@ class Users extends CI_Controller {
         $this->require_permission('users.view');
 
         $data['page_title'] = 'User Management';
+        $data['roles'] = $this->Role_model->get_all();
         $this->load->view('templates/header', $data);
         $this->load->view('users/index', $data);
         $this->load->view('templates/footer');

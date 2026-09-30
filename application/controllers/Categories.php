@@ -118,7 +118,7 @@ class Categories extends CI_Controller {
             $id = (int) $category->id;
             $action_items = array(
                 array(
-                    'label' => 'View Category',
+                    'label' => 'Category Details',
                     'url' => site_url('categories/view/' . $id),
                     'variant' => 'secondary',
                     'icon' => 'bi-eye'
@@ -127,7 +127,7 @@ class Categories extends CI_Controller {
 
             if ($can_edit) {
                 $action_items[] = array(
-                    'label' => 'Edit Category',
+                    'label' => 'Update Category',
                     'url' => site_url('categories/edit/' . $id),
                     'variant' => 'primary',
                     'icon' => 'bi-pencil'

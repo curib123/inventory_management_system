@@ -132,26 +132,26 @@ class Product_service {
             );
         }
 
-        foreach ($this->CI->Stock_model->get_product_adjustment_movements($id) as $row) {
-            $difference = isset($row['difference']) ? (int) $row['difference'] : 0;
+        // foreach ($this->CI->Stock_model->get_product_adjustment_movements($id) as $row) {
+        //     $difference = isset($row['difference']) ? (int) $row['difference'] : 0;
 
-            $movements[] = array(
-                'source_id' => isset($row['source_id']) ? (int) $row['source_id'] : 0,
-                'type' => 'adjustment',
-                'type_label' => 'Adjustment',
-                'transaction_no' => 'ADJ-' . str_pad((string) (isset($row['source_id']) ? (int) $row['source_id'] : 0), 6, '0', STR_PAD_LEFT),
-                'quantity' => abs($difference),
-                'signed_quantity' => $difference,
-                'cost_price' => NULL,
-                'supplier_name' => '',
-                'username' => isset($row['username']) ? (string) $row['username'] : '',
-                'remarks' => isset($row['reason']) ? trim((string) $row['reason']) : '',
-                'system_stock' => isset($row['system_stock']) ? (int) $row['system_stock'] : 0,
-                'actual_stock' => isset($row['actual_stock']) ? (int) $row['actual_stock'] : 0,
-                'difference' => $difference,
-                'created_at' => isset($row['created_at']) ? (string) $row['created_at'] : ''
-            );
-        }
+        //     $movements[] = array(
+        //         'source_id' => isset($row['source_id']) ? (int) $row['source_id'] : 0,
+        //         'type' => 'adjustment',
+        //         'type_label' => 'Adjustment',
+        //         'transaction_no' => isset($row['transaction_no']) ? (string) $row['transaction_no'] : '',
+        //         'quantity' => abs($difference),
+        //         'signed_quantity' => $difference,
+        //         'cost_price' => NULL,
+        //         'supplier_name' => '',
+        //         'username' => isset($row['username']) ? (string) $row['username'] : '',
+        //         'remarks' => isset($row['reason']) ? trim((string) $row['reason']) : '',
+        //         'system_stock' => isset($row['system_stock']) ? (int) $row['system_stock'] : 0,
+        //         'actual_stock' => isset($row['actual_stock']) ? (int) $row['actual_stock'] : 0,
+        //         'difference' => $difference,
+        //         'created_at' => isset($row['created_at']) ? (string) $row['created_at'] : ''
+        //     );
+        // }
 
         $sort = strtolower((string) $sort) === 'asc' ? 'asc' : 'desc';
 
