@@ -16,6 +16,7 @@ class Reports extends CI_Controller {
         }
         $this->require_permission('reports.view');
         $this->load->model('Category_model');
+        $this->load->model('Supplier_model');
     }
 
     // Mao ni ang index flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
@@ -133,6 +134,7 @@ class Reports extends CI_Controller {
 
     if (in_array($report, array('inventory', 'valuation'), TRUE)) {
         $data['categories'] = $this->Category_model->get_all();
+       $data['suppliers'] = $this->Supplier_model->get_all();
     }
 
     $data = array_merge($data, $extra_data);

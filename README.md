@@ -131,6 +131,5 @@ Build an Inventory Management System using CodeIgniter 3. The Focus is not only 
 
 # New Add
 
-- add date range in filter in each table and priority in report
-- fix the issues in sidebar not overflow scroll if not space vertically not horizontally
--
+- issue in report filtration each tab .
+- fix the issue in stock dont hover in product table

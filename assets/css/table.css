@@ -268,12 +268,29 @@
 }
 
 .app-data-table tbody tr:hover > * {
-    background: rgba(37, 99, 235, 0.07);
+    background: rgba(1, 77, 243, 0.07);
 }
 
 .app-data-table tbody tr:focus-within > * {
-    background: rgba(37, 99, 235, 0.09);
+    background: rgba(37, 99, 235, 1);
     box-shadow: inset 0 1px 0 rgba(37, 99, 235, 0.22), inset 0 -1px 0 rgba(37, 99, 235, 0.22);
+}
+
+.app-data-table tbody tr.app-table-row-healthy > td {
+    background: rgba(var(--bs-primary-rgb), 0.08);
+}
+
+.app-data-table tbody tr.app-table-row-healthy > td:first-child {
+    box-shadow: inset 3px 0 0 var(--bs-primary);
+
+}
+
+.app-data-table tbody tr.app-table-row-healthy:hover > td {
+    background: rgba(var(--bs-primary-rgb), 0.9);
+    color: #d7e2f0;
+    font-size: 15px;
+    font-weight: 900;
+   
 }
 
 .app-data-table tbody tr.app-table-row-warning > td {
@@ -285,7 +302,10 @@
 }
 
 .app-data-table tbody tr.app-table-row-warning:hover > td {
-    background: rgba(var(--bs-warning-rgb), 0.5);
+    background: rgba(var(--bs-warning-rgb), 0.9);
+    color: #0b1220;
+    font-size: 15px;
+    font-weight: 900;
 }
 
 .app-data-table tbody tr.app-table-row-danger > td {
@@ -297,7 +317,10 @@
 }
 
 .app-data-table tbody tr.app-table-row-danger:hover > td {
-    background: rgba(var(--bs-danger-rgb), 0.7);
+    background: rgba(var(--bs-danger-rgb), 0.9);
+    color: #d7e2f0;
+    font-size: 15px;
+    font-weight: 900;
 }
 
 .app-data-table tbody tr:last-child td {

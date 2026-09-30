@@ -1303,14 +1303,14 @@ document.addEventListener('DOMContentLoaded', function () {
             var reorderRaw = stockParts.length > 1 && stockParts[1] !== '' ? stockParts[1] : '0';
             var productStock = Number(productStockRaw);
             var reorderLevel = Number(reorderRaw);
-            var productStockClass = 'app-table-badge-info';
+            var productStockClass = '';
             var productStockTitle = 'Healthy stock';
 
             if (productStock <= 0) {
-                productStockClass = 'app-table-badge-danger';
+                
                 productStockTitle = 'Out of stock — reorder level ' + reorderRaw;
             } else if (productStock <= reorderLevel) {
-                productStockClass = 'app-table-badge-warning';
+                productStockClass = '';
                 productStockTitle = 'Low stock — reorder level ' + reorderRaw;
             }
 
@@ -1320,26 +1320,7 @@ document.addEventListener('DOMContentLoaded', function () {
             '</span>';
         }
 
-        if (renderType === 'stock_alert') {
-            var stock = Number(raw);
-            var stockClass = stock <= 0 ? 'app-table-badge-danger' : 'app-table-badge-warning';
-            return '<span class="app-table-number-badge ' + stockClass + '">' +
-                escapeHtml(raw === '' ? '0' : raw) +
-            '</span>';
-        }
-
-        if (renderType === 'difference') {
-            var displayDifference = raw === '' ? '0' : raw;
-            var difference = Number(displayDifference);
-            var differenceClass = difference > 0
-                ? 'app-table-badge-success'
-                : (difference < 0 ? 'app-table-badge-danger' : 'app-table-badge-secondary');
-            var prefix = difference > 0 ? '+' : '';
-
-            return '<span class="badge rounded-pill app-table-badge ' + differenceClass + '">' +
-                escapeHtml(prefix + displayDifference) +
-            '</span>';
-        }
+      
 
         return raw;
     }
@@ -1404,6 +1385,11 @@ document.addEventListener('DOMContentLoaded', function () {
                                     'app-table-row-warning',
                                     stockValue > 0 && stockValue <= reorderValue
                                 );
+                                 row.classList.toggle(
+                                    'app-table-row-healthy',
+                                    stockValue > 0 && stockValue > reorderValue
+                                );
+
                             }
                         }
                     };

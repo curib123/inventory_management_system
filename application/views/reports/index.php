@@ -92,6 +92,21 @@ if ($report_key === 'inventory' || $report_key === 'valuation') {
             )
 
     );
+
+    $table_filters[] = array(
+        'name' => 'supplier',
+        'label' => 'Supplier',
+        'icon' => 'bi-box-seam',
+       'options' => array('' => 'All Supplier') + array_reduce(
+                isset($suppliers) && is_array($suppliers) ? $suppliers : array(),
+                function ($options, $supplier) {
+                    $options[(string) $supplier->id] = $supplier->supplier_name;
+                    return $options;
+                },
+                array()
+            )
+
+    );
 } elseif ($report_key === 'low-stock') {
     $table_filters[] = array(
         'name' => 'severity',
