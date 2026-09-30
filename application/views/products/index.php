@@ -22,6 +22,19 @@ $this->load->view('components/data_table', array(
     'search_placeholder' => 'Search product code, name, category, or supplier...',
     'filters' => array(
         array(
+            'name' => 'category',
+            'label' => 'Category',
+            'icon' => 'bi-tags',
+            'options' => array('' => 'All categories') + array_reduce(
+                isset($categories) && is_array($categories) ? $categories : array(),
+                function ($options, $category) {
+                    $options[(string) $category->id] = $category->category_name;
+                    return $options;
+                },
+                array()
+            )
+        ),
+        array(
             'name' => 'status',
             'label' => 'Status',
             'icon' => 'bi-toggle-on',
