@@ -286,12 +286,7 @@
 }
 
 .app-data-table tbody tr.app-table-row-healthy:hover > td {
-    background: rgba(var(--bs-primary-rgb), 0.9);
-    color: #d7e2f0;
-    font-size: 15px;
-    font-weight: 900;
-    transition: all 0.3s ease;
-   
+    background: rgba(var(--bs-primary-rgb), 0.12);
 }
 
 .app-data-table tbody tr.app-table-row-warning > td {
@@ -303,11 +298,7 @@
 }
 
 .app-data-table tbody tr.app-table-row-warning:hover > td {
-    background: rgba(var(--bs-warning-rgb), 0.9);
-    color: #0b1220;
-    font-size: 15px;
-    font-weight: 900;
-    transition: all 0.3s ease;
+    background: rgba(var(--bs-warning-rgb), 0.14);
 }
 
 .app-data-table tbody tr.app-table-row-danger > td {
@@ -319,11 +310,7 @@
 }
 
 .app-data-table tbody tr.app-table-row-danger:hover > td {
-    background: rgba(var(--bs-danger-rgb), 0.9);
-    color: #d7e2f0;
-    font-size: 15px;
-    font-weight: 900;
-    transition: all 0.5s ease-in-out;
+    background: rgba(var(--bs-danger-rgb), 0.12);
 }
 
 .app-data-table tbody tr:last-child td {
@@ -394,6 +381,21 @@
     text-align: center;
     font-size: 0.78rem;
     font-weight: 800;
+}
+
+.app-table-stock-healthy {
+    color: var(--bs-primary-text-emphasis);
+    background: var(--bs-primary-bg-subtle);
+}
+
+.app-table-stock-warning {
+    color: var(--bs-warning-text-emphasis);
+    background: var(--bs-warning-bg-subtle);
+}
+
+.app-table-stock-danger {
+    color: var(--bs-danger-text-emphasis);
+    background: var(--bs-danger-bg-subtle);
 }
 
 .app-table-card .dt-container .dt-layout-row {
