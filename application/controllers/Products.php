@@ -26,6 +26,8 @@ class Products extends CI_Controller {
         $this->require_permission('products.view');
 
         $data['page_title'] = 'Products';
+        // Category filter options for the product list; include inactive categories too because existing products may still belong to them.
+        $data['categories'] = $this->Category_model->get_all();
         $this->load->view('templates/header', $data);
         $this->load->view('products/index', $data);
         $this->load->view('templates/footer');
