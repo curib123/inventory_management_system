@@ -44,9 +44,17 @@ class Categories extends CI_Controller {
             show_404();
         }
 
+        $products = $this->Category_model->get_products($id);
+        $current_user_id = (int) $this->session->userdata('user_id');
+
         $this->load->view('modal/categories/details', array(
             'category' => $category,
-            'product_count' => $this->Category_model->count_products($id)
+            'products' => $products,
+            'product_count' => count($products),
+            'can_view_products' => $this->authorization_service->has_permission(
+                $current_user_id,
+                'products.view'
+            )
         ));
     }
 
