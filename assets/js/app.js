@@ -1304,18 +1304,16 @@ document.addEventListener('DOMContentLoaded', function () {
             var productStock = Number(productStockRaw);
             var reorderLevel = Number(reorderRaw);
             var productStockClass = '';
-            var productStockTitle = 'Healthy stock';
 
             if (productStock <= 0) {
-                
-                productStockTitle = 'Out of stock — reorder level ' + reorderRaw;
+                productStockClass = 'app-table-stock-danger';
             } else if (productStock <= reorderLevel) {
-                productStockClass = '';
-                productStockTitle = 'Low stock — reorder level ' + reorderRaw;
+                productStockClass = 'app-table-stock-warning';
+            } else {
+                productStockClass = 'app-table-stock-healthy';
             }
 
-            return '<span class="app-table-number-badge ' + productStockClass + '" title="' +
-                escapeHtml(productStockTitle) + '">' +
+            return '<span class="app-table-number-badge ' + productStockClass + '">' +
                 escapeHtml(productStockRaw) +
             '</span>';
         }
@@ -1424,7 +1422,7 @@ document.addEventListener('DOMContentLoaded', function () {
                         var name = input.getAttribute('data-table-date-filter');
                         var value = input.value;
 
-                        if (name && value !== '') {
+                        if (name && value !== '' && !input.disabled) {
                             filters[name] = value;
                         }
                     });
@@ -1613,6 +1611,10 @@ document.addEventListener('DOMContentLoaded', function () {
             resetButton.addEventListener('click', function () {
                 card.querySelectorAll('[data-table-filter]').forEach(function (select) {
                     select.value = '';
+                });
+
+                card.querySelectorAll('[data-table-date-filter]').forEach(function (input) {
+                    input.value = '';
                 });
 
                 if (searchInput) {
@@ -2070,7 +2072,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var name = select.getAttribute('data-table-filter');
             var value = select.value;
 
-            if (name && value !== '') {
+            if (name && value !== '' && !input.disabled) {
                 url.searchParams.set('table_filters[' + name + ']', value);
             }
         });
