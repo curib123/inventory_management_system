@@ -206,6 +206,11 @@ class Product_model extends CI_Model {
         $this->db->join('categories c', 'c.id = p.category_id', 'left');
         $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
 
+        $category_id = isset($filters['category']) ? (int) $filters['category'] : 0;
+        if ($category_id > 0) {
+            $this->db->where('p.category_id', $category_id);
+        }
+
         $status = isset($filters['status']) ? strtolower((string) $filters['status']) : '';
         if ($status === 'active') {
             $this->db->where('p.status', 1);
