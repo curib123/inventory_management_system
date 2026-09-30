@@ -83,6 +83,8 @@ class AuthServiceTest extends TestCase {
     public function testSessionDataContainsRoleInformation() {
         $user = (object) array(
             'id' => 12,
+            'first_name' => 'John Paul',
+            'last_name' => 'Curib',
             'username' => 'staff-user',
             'role_id' => 2,
             'role_name' => 'staff'
@@ -92,6 +94,8 @@ class AuthServiceTest extends TestCase {
 
         $this->assertSame(array(
             'user_id' => 12,
+            'first_name' => 'John Paul',
+            'last_name' => 'Curib',
             'username' => 'staff-user',
             'role_id' => 2,
             'role_name' => 'staff',
