@@ -62,50 +62,16 @@ $table_filters = array();
 $numeric_fields = array('stock', 'quantity', 'reorder_level', 'shortage', 'cost_price', 'inventory_value');
 
 if ($report_key === 'inventory' || $report_key === 'valuation') {
-
     $table_filters[] = array(
         'name' => 'stock',
         'label' => 'Stock level',
         'icon' => 'bi-box-seam',
-        'options' => 
-        
-        array(
+        'options' => array(
             '' => 'All stock levels',
             'healthy' => 'Healthy stock',
             'low' => 'Low stock',
             'out' => 'Out of stock'
-        ),
-
-    );
-
-    $table_filters[] = array(
-        'name' => 'category',
-        'label' => 'Category',
-        'icon' => 'bi-box-seam',
-       'options' => array('' => 'All categories') + array_reduce(
-                isset($categories) && is_array($categories) ? $categories : array(),
-                function ($options, $category) {
-                    $options[(string) $category->id] = $category->category_name;
-                    return $options;
-                },
-                array()
-            )
-
-    );
-
-    $table_filters[] = array(
-        'name' => 'supplier',
-        'label' => 'Supplier',
-        'icon' => 'bi-box-seam',
-       'options' => array('' => 'All Supplier') + array_reduce(
-                isset($suppliers) && is_array($suppliers) ? $suppliers : array(),
-                function ($options, $supplier) {
-                    $options[(string) $supplier->id] = $supplier->supplier_name;
-                    return $options;
-                },
-                array()
-            )
-
+        )
     );
 } elseif ($report_key === 'low-stock') {
     $table_filters[] = array(
@@ -118,21 +84,48 @@ if ($report_key === 'inventory' || $report_key === 'valuation') {
             'low' => 'Low but available'
         )
     );
-} elseif (in_array($report_key, array('stock-in', 'stock-out', 'movement'), TRUE)) {
-    if ($report_key === 'movement') {
-        $table_filters[] = array(
-            'name' => 'type',
-            'label' => 'Movement type',
-            'icon' => 'bi-arrow-left-right',
-            'options' => array(
-                '' => 'All movements',
-                'stock_in' => 'Stock In',
-                'stock_out' => 'Stock Out',
-                'adjustment' => 'Adjustment'
-            )
-        );
-    }
+} elseif ($report_key === 'movement') {
+    $table_filters[] = array(
+        'name' => 'type',
+        'label' => 'Movement type',
+        'icon' => 'bi-arrow-left-right',
+        'options' => array(
+            '' => 'All movements',
+            'stock_in' => 'Stock In',
+            'stock_out' => 'Stock Out',
+            'adjustment' => 'Adjustment'
+        )
+    );
 }
+
+// Category and supplier filters apply to every report because every row resolves to a product.
+$table_filters[] = array(
+    'name' => 'category',
+    'label' => 'Category',
+    'icon' => 'bi-tags',
+    'options' => array('' => 'All categories') + array_reduce(
+        isset($categories) && is_array($categories) ? $categories : array(),
+        function ($options, $category) {
+            $options[(string) $category->id] = $category->category_name;
+            return $options;
+        },
+        array()
+    )
+);
+
+$table_filters[] = array(
+    'name' => 'supplier',
+    'label' => 'Supplier',
+    'icon' => 'bi-truck',
+    'options' => array('' => 'All suppliers', 'unassigned' => 'Unassigned Products') + array_reduce(
+        isset($suppliers) && is_array($suppliers) ? $suppliers : array(),
+        function ($options, $supplier) {
+            $options[(string) $supplier->id] = $supplier->supplier_name;
+            return $options;
+        },
+        array()
+    )
+);
 
 $table_filters[] = array(
     'name' => 'period',
