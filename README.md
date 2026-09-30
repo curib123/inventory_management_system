@@ -131,6 +131,6 @@ Build an Inventory Management System using CodeIgniter 3. The Focus is not only 
 
 # New Add
 
-- issue in report filtration each tab .
-- fix the issue in stock dont hover in product table
-- add activity logs in ui/ux for audit purposes
+- [x] Fixed report filtration on every report tab, including category, supplier, stock/severity/type, date presets, custom date ranges, reset behavior, and matching export filters.
+- [x] Fixed Product table stock hover behavior so stock-state rows keep stable typography and use only subtle highlighting.
+- [x] Added an Activity Logs audit UI with server-side pagination, search, user/action/date filters, and administration access control.
