@@ -132,10 +132,9 @@ class Reports extends CI_Controller {
         'page_title'   => $definition['title']
     );
 
-    if (in_array($report, array('inventory', 'valuation'), TRUE)) {
-        $data['categories'] = $this->Category_model->get_all();
-       $data['suppliers'] = $this->Supplier_model->get_all();
-    }
+    // Shared report filters need the same reference data on every tab.
+    $data['categories'] = $this->Category_model->get_all();
+    $data['suppliers'] = $this->Supplier_model->get_all();
 
     $data = array_merge($data, $extra_data);
 
