@@ -65,6 +65,7 @@ class Authorization_service {
             'stock.view' => 'stock/low-stock',
             'reports.view' => 'reports',
             'users.view' => 'users',
+            'activity_logs.view' => 'activity-logs',
             'roles.view' => 'roles'
         );
 
