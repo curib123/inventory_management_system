@@ -107,6 +107,7 @@ class Report_model extends CI_Model {
             $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
 
             $this->apply_report_date_filter('p.created_at', $filters);
+            $this->apply_product_reference_filters('p', 'p.supplier_id', $filters);
 
             $stock = isset($filters['stock']) ? strtolower((string) $filters['stock']) : '';
             if ($stock === 'out') {
@@ -138,10 +139,12 @@ class Report_model extends CI_Model {
         if ($report === 'low-stock') {
             $this->db->from('products p');
             $this->db->join('categories c', 'c.id = p.category_id', 'left');
+            $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
             $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
             $this->db->where('p.status', 1);
 
             $this->apply_report_date_filter('p.created_at', $filters);
+            $this->apply_product_reference_filters('p', 'p.supplier_id', $filters);
 
             $severity = isset($filters['severity']) ? strtolower((string) $filters['severity']) : '';
             if ($severity === 'out') {
@@ -180,6 +183,7 @@ class Report_model extends CI_Model {
         }
 
         $this->apply_report_date_filter('t.created_at', $filters);
+        $this->apply_product_reference_filters('p', 't.supplier_id', $filters);
 
         if ($search !== '') {
             $this->db->group_start();
@@ -197,6 +201,25 @@ class Report_model extends CI_Model {
             $this->db->or_like('t.remarks', $search);
             $this->db->or_like('t.created_at', $search);
             $this->db->group_end();
+        }
+    }
+
+    // Query helper ni para shared category/supplier filters across snapshot and transaction reports.
+    private function apply_product_reference_filters($product_alias, $supplier_column, $filters) {
+        $category_id = isset($filters['category']) ? (int) $filters['category'] : 0;
+
+        if ($category_id > 0) {
+            $this->db->where($product_alias . '.category_id', $category_id);
+        }
+
+        $supplier = isset($filters['supplier'])
+            ? strtolower(trim((string) $filters['supplier']))
+            : '';
+
+        if ($supplier === 'unassigned') {
+            $this->db->where($supplier_column . ' IS NULL', NULL, FALSE);
+        } elseif ($supplier !== '' && ctype_digit($supplier) && (int) $supplier > 0) {
+            $this->db->where($supplier_column, (int) $supplier);
         }
     }
 
