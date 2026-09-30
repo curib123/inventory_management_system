@@ -99,7 +99,7 @@
 
         .summary-table {
             width: 100%;
-            margin: 0 0 12px;
+            margin: 10px 0 12px;
             border-collapse: separate;
             border-spacing: 6px 0;
             table-layout: fixed;
@@ -275,19 +275,7 @@
             </div>
         </div>
 
-        <?php if (!empty($report_meta['summary'])): ?>
-            <table class="summary-table" aria-label="Report summary">
-                <tr>
-                    <?php foreach ($report_meta['summary'] as $label => $value): ?>
-                        <td class="summary-card">
-                            <div class="summary-label"><?php echo html_escape($label); ?></div>
-                            <div class="summary-value"><?php echo html_escape($value); ?></div>
-                        </td>
-                    <?php endforeach; ?>
-                </tr>
-            </table>
-        <?php endif; ?>
-
+    
         <table class="data-table" aria-label="<?php echo html_escape($report_title); ?> data">
         <thead>
             <tr>
@@ -319,6 +307,7 @@
                         <?php endforeach; ?>
                     </tr>
                 <?php endforeach; ?>
+                
             <?php else: ?>
                 <tr>
                     <td class="empty-row" colspan="<?php echo max(1, count($columns)); ?>">
@@ -328,12 +317,22 @@
             <?php endif; ?>
         </tbody>
     </table>
-        <table class="meta-table" aria-label="Report metadata">
-                    <tr>
-                        <td class="meta-cell">
-                            <div class="meta-label">Generated</div>
-                            <div class="meta-value"><?php echo html_escape($report_meta['generated_at']); ?></div>
+       
+                 <?php if (!empty($report_meta['summary'])): ?>
+            <table class="summary-table" aria-label="Report summary">
+                <tr>
+                    <?php foreach ($report_meta['summary'] as $label => $value): ?>
+                        <td class="summary-card">
+                            <div class="summary-label"><?php echo html_escape($label); ?></div>
+                            <div class="summary-value"><?php echo html_escape($value); ?></div>
                         </td>
+                    <?php endforeach; ?>
+                </tr>
+            </table>
+
+             <table class="meta-table" aria-label="Report metadata">
+                    <tr>
+                    
                         <td class="meta-cell">
                             <div class="meta-label">Date range</div>
                             <div class="meta-value"><?php echo html_escape($report_meta['date_range']); ?></div>
@@ -348,16 +347,20 @@
                         </td>
                     </tr>
                 </table>
+        <?php endif; ?>
 
     </div>
 
     <div class="footer">
         <span class="footer-left">
             <?php echo html_escape($report_meta['system_name']); ?> &mdash; <?php echo html_escape($report_title); ?>
+             
         </span>
         <span class="footer-right">
-            Internal business report
+            <?php echo html_escape($report_meta['generated_at']); ?>
         </span>
+
+      
     </div>
 </body>
 </html>
