@@ -327,14 +327,7 @@
     letter-spacing: 0;
 }
 
-.app-table-badge::before {
-    width: 0.42rem;
-    height: 0.42rem;
-    border-radius: 50%;
-    background: currentColor;
-    content: "";
-    opacity: 1;
-}
+
 
 .app-table-badge-success {
     color: #fff;
@@ -349,15 +342,15 @@
 }
 
 .app-table-badge-warning {
-    color: #000;
-    background-color: #ffc107;
-    border-color: #ffc107;
+    color: #fff;
+    background-color: #745700;
+    border-color: #745700;
 }
 
 .app-table-badge-info {
-    color: #000;
-    background-color: #0dcaf0;
-    border-color: #0dcaf0;
+    color: #fff;
+    background-color: #0631cb;
+    border-color: #0631cb;
 }
 
 .app-table-badge-secondary {

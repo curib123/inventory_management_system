@@ -20,6 +20,7 @@
 
 body {
     background: var(--app-bg);
+    font-family: 'Poppins', sans-serif;
 }
 
 .app-page-header {
