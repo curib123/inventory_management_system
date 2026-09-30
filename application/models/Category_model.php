@@ -79,6 +79,20 @@ class Category_model extends CI_Model {
         return $this->db->delete('categories');
     }
 
+    // Data helper ni para products under one category; used by the category details modal for quick product drill-down.
+    public function get_products($category_id) {
+        $this->db->select(
+            'p.id, p.product_code, p.product_name, p.stock, p.reorder_level, p.status'
+        );
+        $this->db->from('products p');
+        $this->db->where('p.category_id', (int) $category_id);
+        $this->db->order_by('p.status', 'DESC');
+        $this->db->order_by('(p.stock <= p.reorder_level)', 'DESC', FALSE);
+        $this->db->order_by('p.product_name', 'ASC');
+
+        return $this->db->get()->result();
+    }
+
     // Data helper ni para count products; main caller/integration pangitaa sa application/controllers/Categories.php ug application/controllers/Products.php, so didto tan-awa ang business flow if mag-trace ka.
     public function count_products($category_id) {
         $this->db->where('category_id', (int) $category_id);
