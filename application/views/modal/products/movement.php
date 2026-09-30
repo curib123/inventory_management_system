@@ -85,8 +85,7 @@ $this->load->view('components/modal/header', array(
                             <i class="bi <?php echo html_escape($icon); ?>"></i>
                         </span>
                     </div>
-
-                    <div class="app-movement-card">
+                          <div class="app-movement-card">
                         <div class="app-movement-card-head">
                             <div>
                                 <div class="app-movement-type-row">

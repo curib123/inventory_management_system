@@ -22,6 +22,7 @@
     transition: opacity 0.18s ease, visibility 0.18s ease;
 }
 
+
 #action-modal.is-open {
     visibility: visible;
 }
@@ -1041,8 +1042,8 @@ body.app-modal-open {
     padding: 0.28rem 0.6rem;
     border: 1px solid var(--app-modal-soft-border);
     border-radius: 999px;
-    background: var(--bs-body-bg);
-    color: var(--bs-secondary-color);
+    background: var(--bs-primary);
+    color: #ffff;
     font-size: 0.69rem;
     font-weight: 800;
     letter-spacing: 0.02em;
