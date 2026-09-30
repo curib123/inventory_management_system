@@ -290,6 +290,7 @@
     color: #d7e2f0;
     font-size: 15px;
     font-weight: 900;
+    transition: all 0.3s ease;
    
 }
 
@@ -306,6 +307,7 @@
     color: #0b1220;
     font-size: 15px;
     font-weight: 900;
+    transition: all 0.3s ease;
 }
 
 .app-data-table tbody tr.app-table-row-danger > td {
@@ -321,6 +323,7 @@
     color: #d7e2f0;
     font-size: 15px;
     font-weight: 900;
+    transition: all 0.5s ease-in-out;
 }
 
 .app-data-table tbody tr:last-child td {
