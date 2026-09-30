@@ -201,50 +201,61 @@ class Product_model extends CI_Model {
     }
 
     // Data helper ni para build datatable query; main caller/integration pangitaa sa application/controllers/Products.php, application/controllers/Stock.php, ug application/controllers/Dashboard.php, so didto tan-awa ang business flow if mag-trace ka.
-    private function build_datatable_query($search, $filters = array()) {
-        $this->db->from('products p');
-        $this->db->join('categories c', 'c.id = p.category_id', 'left');
-        $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
+   private function build_datatable_query($search, $filters = array()) {
+    $this->db->from('products p');
+    $this->db->join('categories c', 'c.id = p.category_id', 'left');
+    $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
 
-        $category_id = isset($filters['category']) ? (int) $filters['category'] : 0;
-        if ($category_id > 0) {
-            $this->db->where('p.category_id', $category_id);
-        }
-
-        $status = isset($filters['status']) ? strtolower((string) $filters['status']) : '';
-        if ($status === 'active') {
-            $this->db->where('p.status', 1);
-        } elseif ($status === 'inactive') {
-            $this->db->where('p.status', 0);
-        }
-
-        $stock = isset($filters['stock']) ? strtolower((string) $filters['stock']) : '';
-        if ($stock === 'out') {
-            $this->db->where('p.stock <=', 0);
-        } elseif ($stock === 'low') {
-            $this->db->where('p.stock >', 0);
-            $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
-        } elseif ($stock === 'healthy') {
-            $this->db->where('p.stock > p.reorder_level', NULL, FALSE);
-        }
-
-        if ($search === '') {
-            return;
-        }
-
-        $this->db->group_start();
-        $this->db->like('p.product_code', $search);
-        $this->db->or_like('p.product_name', $search);
-        $this->db->or_like('c.category_name', $search);
-        $this->db->or_like('s.supplier_name', $search);
-        $this->db->or_like('p.unit', $search);
-
-        if (strcasecmp($search, 'active') === 0) {
-            $this->db->or_where('p.status', 1);
-        } elseif (strcasecmp($search, 'inactive') === 0) {
-            $this->db->or_where('p.status', 0);
-        }
-
-        $this->db->group_end();
+    $category_id = isset($filters['category']) ? (int) $filters['category'] : 0;
+    if ($category_id > 0) {
+        $this->db->where('p.category_id', $category_id);
     }
+
+    $supplier_id = isset($filters['supplier']) ? (int) $filters['supplier'] : 0;
+    if ($supplier_id > 0) {
+        $this->db->where('p.supplier_id', $supplier_id);
+    }
+
+    $status = isset($filters['status'])
+        ? strtolower((string) $filters['status'])
+        : '';
+
+    if ($status === 'active') {
+        $this->db->where('p.status', 1);
+    } elseif ($status === 'inactive') {
+        $this->db->where('p.status', 0);
+    }
+
+    $stock = isset($filters['stock'])
+        ? strtolower((string) $filters['stock'])
+        : '';
+
+    if ($stock === 'out') {
+        $this->db->where('p.stock <=', 0);
+    } elseif ($stock === 'low') {
+        $this->db->where('p.stock >', 0);
+        $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
+    } elseif ($stock === 'healthy') {
+        $this->db->where('p.stock > p.reorder_level', NULL, FALSE);
+    }
+
+    if ($search === '') {
+        return;
+    }
+
+    $this->db->group_start();
+    $this->db->like('p.product_code', $search);
+    $this->db->or_like('p.product_name', $search);
+    $this->db->or_like('c.category_name', $search);
+    $this->db->or_like('s.supplier_name', $search);
+    $this->db->or_like('p.unit', $search);
+
+    if (strcasecmp($search, 'active') === 0) {
+        $this->db->or_where('p.status', 1);
+    } elseif (strcasecmp($search, 'inactive') === 0) {
+        $this->db->or_where('p.status', 0);
+    }
+
+    $this->db->group_end();
+}
 }

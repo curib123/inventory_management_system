@@ -117,7 +117,7 @@ class Suppliers extends CI_Controller {
             $id = (int) $supplier->id;
             $action_items = array(
                 array(
-                    'label' => 'View Supplier',
+                    'label' => 'Supplier Details',
                     'url' => site_url('suppliers/view/' . $id),
                     'variant' => 'secondary',
                     'icon' => 'bi-eye'
@@ -126,7 +126,7 @@ class Suppliers extends CI_Controller {
 
             if ($can_edit) {
                 $action_items[] = array(
-                    'label' => 'Edit Supplier',
+                    'label' => 'Update Supplier',
                     'url' => site_url('suppliers/edit/' . $id),
                     'variant' => 'primary',
                     'icon' => 'bi-pencil'
