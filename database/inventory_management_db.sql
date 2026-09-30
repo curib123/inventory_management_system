@@ -332,6 +332,7 @@ VALUES
 ('Stock',      'stock',      'Inventory stock management', 1, 50),
 ('Reports',    'reports',    'Inventory reports', 1, 60),
 ('Users',      'users',      'User management', 1, 70),
+('Activity Logs', 'activity_logs', 'Audit and activity history', 1, 75),
 ('Roles',      'roles',      'Role and permission management', 1, 80)
 ON DUPLICATE KEY UPDATE
     description = VALUES(description),
@@ -540,6 +541,17 @@ INSERT INTO permissions
 SELECT id, 'Delete Users', 'users.delete', 'delete',
        'Delete system users', 1
 FROM modules WHERE module_key = 'users'
+ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
+
+
+-- -------------------------------------------------------------------
+-- Activity Log permissions
+-- -------------------------------------------------------------------
+INSERT INTO permissions
+(module_id, permission_name, permission_key, action, description, status)
+SELECT id, 'View Activity Logs', 'activity_logs.view', 'view',
+       'View system activity and audit logs', 1
+FROM modules WHERE module_key = 'activity_logs'
 ON DUPLICATE KEY UPDATE description = VALUES(description), status = VALUES(status);
 
 
