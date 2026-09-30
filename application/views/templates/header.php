@@ -193,7 +193,7 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
 
             <button
                 type="button"
-                class="btn app-logout-button w-100"
+                class="btn btn-danger w-100"
                 data-modal-url="<?php echo site_url('logout/confirm'); ?>"
             >
                 <i class="bi bi-box-arrow-right" aria-hidden="true"></i>

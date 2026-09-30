@@ -337,34 +337,35 @@
 }
 
 .app-table-badge-success {
-    color: var(--bs-success-text-emphasis);
-    background: var(--bs-success-bg-subtle);
-    border-color: rgba(var(--bs-success-rgb), 0.18);
+    color: #fff;
+    background-color: #198754;
+    border-color: #198754;
 }
 
 .app-table-badge-danger {
-    color: var(--bs-danger-text-emphasis);
-    background: var(--bs-danger-bg-subtle);
-    border-color: rgba(var(--bs-danger-rgb), 0.18);
+    color: #fff;
+    background-color: #dc3545;
+    border-color: #dc3545;
 }
 
 .app-table-badge-warning {
-    color: var(--bs-warning-text-emphasis);
-    background: var(--bs-warning-bg-subtle);
-    border-color: rgba(var(--bs-warning-rgb), 0.22);
+    color: #000;
+    background-color: #ffc107;
+    border-color: #ffc107;
 }
 
 .app-table-badge-info {
-    color: var(--bs-info-text-emphasis);
-    background: var(--bs-info-bg-subtle);
-    border-color: rgba(var(--bs-info-rgb), 0.2);
+    color: #000;
+    background-color: #0dcaf0;
+    border-color: #0dcaf0;
 }
 
 .app-table-badge-secondary {
-    color: var(--bs-secondary-text-emphasis);
-    background: var(--bs-secondary-bg);
-    border-color: rgba(var(--bs-secondary-rgb), 0.15);
+    color: #fff;
+    background-color: #6c757d;
+    border-color: #6c757d;
 }
+
 
 .app-table-number-badge {
     display: inline-block;
