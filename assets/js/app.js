@@ -1297,6 +1297,25 @@ document.addEventListener('DOMContentLoaded', function () {
             '</span>';
         }
 
+        if (renderType === 'activity_action') {
+            var activityClass = 'app-table-badge-secondary';
+            var activityLabel = raw.replace(/_/g, ' ');
+
+            if (/stock_in|created|login|success/i.test(normalized)) {
+                activityClass = 'app-table-badge-success';
+            } else if (/stock_out|deleted|logout|failed|error/i.test(normalized)) {
+                activityClass = 'app-table-badge-danger';
+            } else if (/adjust|updated|edit|change/i.test(normalized)) {
+                activityClass = 'app-table-badge-warning';
+            } else if (/report|export|view/i.test(normalized)) {
+                activityClass = 'app-table-badge-info';
+            }
+
+            return '<span class="badge rounded-pill app-table-badge ' + activityClass + '">' +
+                escapeHtml(activityLabel) +
+            '</span>';
+        }
+
         if (renderType === 'product_stock') {
             var stockParts = raw.split('|');
             var productStockRaw = stockParts[0] === '' ? '0' : stockParts[0];
