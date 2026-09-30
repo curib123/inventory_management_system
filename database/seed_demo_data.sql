@@ -26,6 +26,7 @@ INSERT INTO modules (module_name, module_key, description, status, sort_order, c
 ('Stock', 'stock', 'Inventory stock management', 1, 50, '2025-11-01 08:10:00', '2025-11-01 08:10:00'),
 ('Reports', 'reports', 'Inventory reports', 1, 60, '2025-11-01 08:10:00', '2025-11-01 08:10:00'),
 ('Users', 'users', 'User management', 1, 70, '2025-11-01 08:10:00', '2025-11-01 08:10:00'),
+('Activity Logs', 'activity_logs', 'Audit and activity history', 1, 75, '2025-11-01 08:10:00', '2025-11-01 08:10:00'),
 ('Roles', 'roles', 'Role and permission management', 1, 80, '2025-11-01 08:10:00', '2025-11-01 08:10:00')
 ON DUPLICATE KEY UPDATE
     description = VALUES(description),
@@ -61,6 +62,7 @@ JOIN (
     UNION ALL SELECT 'users', 'Create Users', 'users.create', 'create', 'Create system users'
     UNION ALL SELECT 'users', 'Edit Users', 'users.edit', 'edit', 'Edit system users'
     UNION ALL SELECT 'users', 'Delete Users', 'users.delete', 'delete', 'Delete system users'
+    UNION ALL SELECT 'activity_logs', 'View Activity Logs', 'activity_logs.view', 'view', 'View system activity and audit logs'
     UNION ALL SELECT 'roles', 'View Roles', 'roles.view', 'view', 'View roles and assigned permissions'
     UNION ALL SELECT 'roles', 'Create Roles', 'roles.create', 'create', 'Create system roles'
     UNION ALL SELECT 'roles', 'Edit Roles', 'roles.edit', 'edit', 'Edit role information'
