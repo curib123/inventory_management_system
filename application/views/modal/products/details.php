@@ -8,7 +8,7 @@ $this->load->view('components/modal/header', array(
 
 <div class="app-modal-body">
     <dl class="row app-detail-list mb-0">
-        <dt class="col-sm-4">Code</dt><dd class="col-sm-8"><?php echo html_escape($product->product_code); ?></dd>
+        <dt class="col-sm-4">Code</dt><dd class="col-sm-8"><?php echo html_escape($product->product_code); ?> <span class="badge  mx-3 <?php echo $product->status ? 'text-bg-success' : 'text-bg-secondary'; ?>"><?php echo $product->status ? 'Active' : 'Inactive'; ?></span></dd>
         <dt class="col-sm-4">Name</dt><dd class="col-sm-8"><?php echo html_escape($product->product_name); ?></dd>
         <dt class="col-sm-4">Category</dt><dd class="col-sm-8"><?php echo html_escape($product->category_name ?: 'N/A'); ?></dd>
         <dt class="col-sm-4">Supplier</dt><dd class="col-sm-8"><?php echo html_escape($product->supplier_name ?: 'N/A'); ?></dd>
@@ -17,7 +17,6 @@ $this->load->view('components/modal/header', array(
         <dt class="col-sm-4">Cost Price</dt><dd class="col-sm-8"><?php echo number_format((float) $product->cost_price, 2); ?></dd>
         <dt class="col-sm-4">Selling Price</dt><dd class="col-sm-8"><?php echo number_format((float) $product->selling_price, 2); ?></dd>
         <dt class="col-sm-4">Reorder Level</dt><dd class="col-sm-8"><?php echo (int) $product->reorder_level; ?></dd>
-        <dt class="col-sm-4">Status</dt><dd class="col-sm-8"><span class="badge <?php echo $product->status ? 'text-bg-success' : 'text-bg-secondary'; ?>"><?php echo $product->status ? 'Active' : 'Inactive'; ?></span></dd>
     </dl>
 </div>
 

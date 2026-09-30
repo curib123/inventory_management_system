@@ -1,19 +1,19 @@
 :root {
-    --app-bg: #f5f7fb;
+    --app-bg: #ffffff;
     --app-color-primary: #023ee3;
     --app-text-light-primary: #ffffff;
     --app-surface: #ffffff;
-    --app-border: #e5e7eb;
+    --app-border: #d7d7d7;
     --app-muted: #6b7280;
-    --app-radius: 0.9rem;
+    --app-radius: 1rem;
     --app-radius-sm: 0.65rem;
     --app-shadow: 0 0.5rem 1.5rem rgba(15, 23, 42, 0.08);
     --app-modal-shadow: 0 1rem 3rem rgba(15, 23, 42, 0.2);
 
-    --app-sidebar-bg: #000000;
+    --app-sidebar-bg: #070853;
     --app-sidebar-text: #cbd5e1;
     --app-sidebar-heading: #6b7280;
-    --app-sidebar-hover: #070932;
+    --app-sidebar-hover: #061e57;
     --app-sidebar-accent: #445886;
    
 }
@@ -100,7 +100,7 @@ body {
     color: var(--bs-body-color);
     cursor: pointer;
     transition:
-        background-color 0.15s ease,
+        background-color 0.20s ease,
         border-color 0.15s ease,
         color 0.15s ease,
         transform 0.15s ease,
@@ -120,7 +120,7 @@ body {
     color: var( --app-text-light-primary);
     cursor: pointer;
     transition:
-        background-color 0.15s ease,
+        background-color 0.20s ease,
         border-color 0.15s ease,
         color 0.15s ease,
         transform 0.15s ease,
@@ -665,7 +665,7 @@ body {
 .app-dashboard-eyebrow {
     margin-bottom: 0.2rem;
     color: var(--bs-primary);
-    font-size: 0.72rem;
+    font-size: 0.80rem;
     font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;

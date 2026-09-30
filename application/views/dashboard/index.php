@@ -43,7 +43,7 @@ $dashboard_greeting = $dashboard_hour < 12
 <div class="app-dashboard">
     <section class="app-dashboard-hero mb-4">
         <div class="app-dashboard-hero-copy">
-            <div class="app-dashboard-eyebrow">Inventory command center</div>
+            <div class="app-dashboard-eyebrow">Inventory Controll Panel</div>
             <h1 class="app-dashboard-title">
                 <?php echo html_escape($dashboard_greeting); ?>,
                 <?php echo html_escape($dashboard_user_name); ?>

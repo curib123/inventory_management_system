@@ -50,6 +50,7 @@ $this->load->view('components/data_table', array(
         'Category',
         'Supplier',
         array('label' => 'Stock', 'class' => 'text-end text-nowrap', 'render' => 'product_stock'),
+         array('label' => 'Reorder Level', 'class' => 'text-end text-nowrap'),
         array('label' => 'Selling Price', 'class' => 'text-end text-nowrap'),
         array('label' => 'Status', 'class' => 'text-center text-nowrap', 'render' => 'status'),
         array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')

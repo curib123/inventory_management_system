@@ -151,6 +151,7 @@ class Products extends CI_Controller {
             'c.category_name',
             's.supplier_name',
             'p.stock',
+            'p.reorder_level',
             'p.selling_price',
             'p.status',
             NULL
@@ -175,23 +176,15 @@ class Products extends CI_Controller {
         foreach ($products as $product) {
             $id = (int) $product->id;
             $action_items = array(
-                array(
-                    'label' => 'View',
-                    'url' => site_url('products/view/' . $id),
-                    'variant' => 'secondary',
-                    'icon' => 'bi-eye'
-                )
+                // array(
+                //     'label' => 'View',
+                //     'url' => site_url('products/view/' . $id),
+                //     'variant' => 'secondary',
+                //     'icon' => 'bi-eye'
+                // )
             );
 
-            if ($can_view_movement) {
-                $action_items[] = array(
-                    'label' => 'Product Movement',
-                    'url' => site_url('products/movement/' . $id),
-                    'variant' => 'success',
-                    'icon' => 'bi-clock-history'
-                );
-            }
-
+    
             if ($can_edit) {
                 $action_items[] = array(
                     'label' => 'Edit ',
@@ -210,6 +203,15 @@ class Products extends CI_Controller {
                 );
             }
 
+              if ($can_view_movement) {
+                $action_items[] = array(
+                    'label' => 'History',
+                    'url' => site_url('products/movement/' . $id),
+                    'variant' => 'secondary',
+                    'icon' => 'bi-clock-history'
+                );
+            }
+
             $actions = ui_modal_action_group($action_items);
             $rows[] = array(
                 $id,
@@ -218,6 +220,7 @@ class Products extends CI_Controller {
                 html_escape($product->category_name ?: 'N/A'),
                 html_escape($product->supplier_name ?: 'N/A'),
                 ((int) $product->stock) . '|' . ((int) $product->reorder_level),
+                 ((int) $product->reorder_level),
                 number_format((float) $product->selling_price, 2),
                 $product->status ? 'Active' : 'Inactive',
                 $actions
