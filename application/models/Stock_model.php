@@ -101,7 +101,7 @@ class Stock_model extends CI_Model {
         $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
         $this->db->join('users u', 'u.id = t.created_by');
         $this->db->where('i.product_id', (int) $product_id);
-        $this->db->where_in('t.type', array('stock_in', 'stock_out'));
+        $this->db->where_in('t.type', array('stock_in', 'stock_out', 'adjustment'));
         $this->db->order_by('t.created_at', 'DESC');
         $this->db->order_by('t.id', 'DESC');
 
@@ -109,19 +109,19 @@ class Stock_model extends CI_Model {
     }
 
     // Data helper ni para product adjustment movements; Product_service ang caller para apil ang physical-count corrections sa timeline.
-    public function get_product_adjustment_movements($product_id) {
-        $this->db->select(
-            'a.id AS source_id, a.system_stock, a.actual_stock, a.difference, ' .
-            'a.reason, a.created_at, u.username'
-        );
-        $this->db->from('stock_adjustments a');
-        $this->db->join('users u', 'u.id = a.created_by');
-        $this->db->where('a.product_id', (int) $product_id);
-        $this->db->order_by('a.created_at', 'DESC');
-        $this->db->order_by('a.id', 'DESC');
+    // public function get_product_adjustment_movements($product_id) {
+    //     $this->db->select(
+    //         'a.id AS source_id, a.system_stock, a.actual_stock, a.difference, ' .
+    //         'a.reason, a.created_at, u.username'
+    //     );
+    //     $this->db->from('stock_adjustments a');
+    //     $this->db->join('users u', 'u.id = a.created_by');
+    //     $this->db->where('a.product_id', (int) $product_id);
+    //     $this->db->order_by('a.created_at', 'DESC');
+    //     $this->db->order_by('a.id', 'DESC');
 
-        return $this->db->get()->result_array();
-    }
+    //     return $this->db->get()->result_array();
+    // }
 
     // Data helper ni para get adjustments; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_adjustments($limit = NULL, $offset = 0) {
