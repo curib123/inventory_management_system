@@ -75,6 +75,7 @@ $sidebar_active = array(
     'categories' => $current_controller === 'categories',
     'reports' => $current_controller === 'reports',
     'users' => $current_controller === 'users',
+    'activity_logs' => $current_controller === 'activity_logs',
     'roles' => $current_controller === 'roles'
 );
 
@@ -169,6 +170,11 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
                         <a class="<?php echo $sidebar_link_class('users'); ?>" href="<?php echo site_url('users'); ?>"<?php echo $sidebar_aria_current('users'); ?>>
                             <i class="bi bi-people" aria-hidden="true"></i>
                             <span class="nav-link-label">Users</span>
+                        </a>
+
+                        <a class="<?php echo $sidebar_link_class('activity_logs'); ?>" href="<?php echo site_url('activity-logs'); ?>"<?php echo $sidebar_aria_current('activity_logs'); ?>>
+                            <i class="bi bi-journal-text" aria-hidden="true"></i>
+                            <span class="nav-link-label">Activity logs</span>
                         </a>
                     <?php endif; ?>
 
