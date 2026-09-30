@@ -51,6 +51,10 @@ $route['users/view/(:num)'] = 'users/view/$1';
 $route['users/edit/(:num)'] = 'users/edit/$1';
 $route['users/delete/(:num)'] = 'users/delete/$1';
 
+// activity logs
+$route['activity-logs'] = 'activity_logs';
+$route['activity-logs/datatable'] = 'activity_logs/datatable';
+
 
 //roles and permission
 $route['roles'] = 'roles';
