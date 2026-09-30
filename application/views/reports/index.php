@@ -51,10 +51,7 @@ $this->load->view('components/page_header', array(
         </div>
 
         <?php if ($this->authorization_service->has_permission($this->session->userdata('user_id'), 'reports.export')): ?>
-            <div class="app-report-export-note mt-3">
-                <i class="bi bi-printer me-1"></i>
-                CSV, Excel, and Print PDF use the current report search and filters. CSV exports clean structured data, Excel provides the styled spreadsheet layout, and Print PDF uses text and tables only.
-            </div>
+            
         <?php endif; ?>
     </div>
 </div>
@@ -65,16 +62,35 @@ $table_filters = array();
 $numeric_fields = array('stock', 'quantity', 'reorder_level', 'shortage', 'cost_price', 'inventory_value');
 
 if ($report_key === 'inventory' || $report_key === 'valuation') {
+
     $table_filters[] = array(
         'name' => 'stock',
         'label' => 'Stock level',
         'icon' => 'bi-box-seam',
-        'options' => array(
+        'options' => 
+        
+        array(
             '' => 'All stock levels',
             'healthy' => 'Healthy stock',
             'low' => 'Low stock',
             'out' => 'Out of stock'
-        )
+        ),
+
+    );
+
+    $table_filters[] = array(
+        'name' => 'category',
+        'label' => 'Category',
+        'icon' => 'bi-box-seam',
+       'options' => array('' => 'All categories') + array_reduce(
+                isset($categories) && is_array($categories) ? $categories : array(),
+                function ($options, $category) {
+                    $options[(string) $category->id] = $category->category_name;
+                    return $options;
+                },
+                array()
+            )
+
     );
 } elseif ($report_key === 'low-stock') {
     $table_filters[] = array(

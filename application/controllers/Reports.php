@@ -15,6 +15,7 @@ class Reports extends CI_Controller {
             redirect('login');
         }
         $this->require_permission('reports.view');
+        $this->load->model('Category_model');
     }
 
     // Mao ni ang index flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
@@ -120,17 +121,26 @@ class Reports extends CI_Controller {
     }
 
     // Internal helper ni para show report; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
-    private function show_report($report) {
-        $definition = $this->get_definition($report);
-        $data['report_title'] = $definition['title'];
-        $data['report_key'] = $report;
-        $data['columns'] = $this->report_service->columns($report);
-        $data['page_title'] = $definition['title'];
+  private function show_report($report, $extra_data = array()) {
+    $definition = $this->get_definition($report);
 
-        $this->load->view('templates/header', $data);
-        $this->load->view('reports/index', $data);
-        $this->load->view('templates/footer');
+    $data = array(
+        'report_title' => $definition['title'],
+        'report_key'   => $report,
+        'columns'      => $this->report_service->columns($report),
+        'page_title'   => $definition['title']
+    );
+
+    if (in_array($report, array('inventory', 'valuation'), TRUE)) {
+        $data['categories'] = $this->Category_model->get_all();
     }
+
+    $data = array_merge($data, $extra_data);
+
+    $this->load->view('templates/header', $data);
+    $this->load->view('reports/index', $data);
+    $this->load->view('templates/footer');
+}
 
     // Internal helper ni para get definition; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
     private function get_definition($report) {
