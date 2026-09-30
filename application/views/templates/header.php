@@ -162,7 +162,7 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
                 </div>
             <?php endif; ?>
 
-            <?php if ($this->authorization_service->has_any_permission($current_user_id, array('users.view', 'roles.view'))): ?>
+            <?php if ($this->authorization_service->has_any_permission($current_user_id, array('users.view', 'activity_logs.view', 'roles.view'))): ?>
                 <div class="sidebar-section">
                     <div class="sidebar-heading">Administration</div>
 
@@ -171,7 +171,9 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
                             <i class="bi bi-people" aria-hidden="true"></i>
                             <span class="nav-link-label">Users</span>
                         </a>
+                    <?php endif; ?>
 
+                    <?php if ($this->authorization_service->has_permission($current_user_id, 'activity_logs.view')): ?>
                         <a class="<?php echo $sidebar_link_class('activity_logs'); ?>" href="<?php echo site_url('activity-logs'); ?>"<?php echo $sidebar_aria_current('activity_logs'); ?>>
                             <i class="bi bi-journal-text" aria-hidden="true"></i>
                             <span class="nav-link-label">Activity logs</span>
