@@ -2091,7 +2091,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var name = select.getAttribute('data-table-filter');
             var value = select.value;
 
-            if (name && value !== '' && !input.disabled) {
+            if (name && value !== '') {
                 url.searchParams.set('table_filters[' + name + ']', value);
             }
         });
@@ -2100,7 +2100,7 @@ document.addEventListener('DOMContentLoaded', function () {
             var name = input.getAttribute('data-table-date-filter');
             var value = input.value;
 
-            if (name && value !== '') {
+            if (name && value !== '' && !input.disabled) {
                 url.searchParams.set('table_filters[' + name + ']', value);
             }
         });
