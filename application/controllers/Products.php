@@ -27,6 +27,7 @@ class Products extends CI_Controller {
 
         $data['page_title'] = 'Products';
         // Category filter options for the product list; include inactive categories too because existing products may still belong to them.
+        $data['suppliers'] = $this->Supplier_model->get_all();
         $data['categories'] = $this->Category_model->get_all();
         $this->load->view('templates/header', $data);
         $this->load->view('products/index', $data);
@@ -189,7 +190,7 @@ class Products extends CI_Controller {
     
             if ($can_edit) {
                 $action_items[] = array(
-                    'label' => 'Edit ',
+                    'label' => 'Update ',
                     'url' => site_url('products/edit/' . $id),
                     'variant' => 'primary',
                     'icon' => 'bi-pencil'

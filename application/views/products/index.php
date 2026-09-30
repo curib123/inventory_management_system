@@ -34,6 +34,19 @@ $this->load->view('components/data_table', array(
                 array()
             )
         ),
+         array(
+            'name' => 'supplier',
+            'label' => 'Supplier',
+            'icon' => 'bi-shop',
+            'options' => array('' => 'All Supplier') + array_reduce(
+                isset($suppliers) && is_array($suppliers) ? $suppliers : array(),
+                function ($options, $supplier) {
+                    $options[(string) $supplier->id] = $supplier->supplier_name;
+                    return $options;
+                },
+                array()
+            )
+        ),
         array(
             'name' => 'status',
             'label' => 'Status',
@@ -63,7 +76,7 @@ $this->load->view('components/data_table', array(
         'Category',
         'Supplier',
         array('label' => 'Stock', 'class' => 'text-end text-nowrap', 'render' => 'product_stock'),
-         array('label' => 'Reorder Level', 'class' => 'text-end text-nowrap'),
+        array('label' => 'Reorder Level', 'class' => 'text-end text-nowrap'),
         array('label' => 'Selling Price', 'class' => 'text-end text-nowrap'),
         array('label' => 'Status', 'class' => 'text-center text-nowrap', 'render' => 'status'),
         array('label' => 'Actions', 'orderable' => false, 'class' => 'text-end text-nowrap')

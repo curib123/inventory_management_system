@@ -21,7 +21,7 @@ $this->load->view('components/page_header', array(
                 <div class="d-flex flex-wrap gap-2" aria-label="Export report">
                     <button
                         type="button"
-                        class="btn btn-sm btn-outline-secondary"
+                        class="btn btn-sm btn-secondary"
                         data-report-export
                         data-export-url="<?php echo site_url('reports/export/' . $report_key . '/csv'); ?>"
                     >
@@ -30,7 +30,7 @@ $this->load->view('components/page_header', array(
 
                     <button
                         type="button"
-                        class="btn btn-sm btn-outline-success"
+                        class="btn btn-sm btn-success"
                         data-report-export
                         data-export-url="<?php echo site_url('reports/export/' . $report_key . '/xlsx'); ?>"
                     >
@@ -38,7 +38,7 @@ $this->load->view('components/page_header', array(
                     </button>
 
                     <a
-                        class="btn btn-sm btn-outline-danger"
+                        class="btn btn-sm btn-danger"
                         href="<?php echo site_url('reports/export/' . $report_key . '/pdf'); ?>"
                         target="_blank"
                         rel="noopener"
