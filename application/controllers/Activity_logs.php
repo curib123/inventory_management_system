@@ -4,7 +4,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Activity_logs extends CI_Controller {
 
-    // Setup ni sa Activity Logs controller; users.view protects audit history with the existing administration permission.
+    // Setup ni sa Activity Logs controller; activity_logs.view protects audit history with the existing administration permission.
     public function __construct() {
         parent::__construct();
         $this->load->library(array('session', 'Datatable_service'));
@@ -19,7 +19,7 @@ class Activity_logs extends CI_Controller {
 
     // Audit workspace page with filter metadata for the shared server-side table component.
     public function index() {
-        $this->require_permission('users.view');
+        $this->require_permission('activity_logs.view');
 
         $data['page_title'] = 'Activity Logs';
         $data['audit_users'] = $this->Activity_log_model->get_filter_users();
@@ -32,7 +32,7 @@ class Activity_logs extends CI_Controller {
 
     // Server-side Activity Logs DataTable endpoint.
     public function datatable() {
-        $this->require_permission('users.view');
+        $this->require_permission('activity_logs.view');
 
         $columns = array(
             'l.created_at',
