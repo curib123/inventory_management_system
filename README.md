@@ -133,3 +133,4 @@ Build an Inventory Management System using CodeIgniter 3. The Focus is not only 
 
 - issue in report filtration each tab .
 - fix the issue in stock dont hover in product table
+- add activity logs in ui/ux for audit purposes
