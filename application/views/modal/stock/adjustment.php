@@ -24,7 +24,6 @@ $variance = ($system_stock !== NULL && $actual_value !== '' && is_numeric($actua
 <?php
 $this->load->view('components/modal/header', array(
     'modal_title' => $page_title,
-    'modal_subtitle' => 'Select the supplier first, choose one of that supplier\'s products, compare system stock with the physical count, then document the variance.',
     'modal_icon' => 'bi-sliders',
     'modal_variant' => 'warning',
     'modal_eyebrow' => 'Inventory reconciliation'
@@ -46,7 +45,7 @@ $this->load->view('components/modal/header', array(
                 <span class="app-adjustment-step">1</span>
                 <div>
                     <h3>Find the product</h3>
-                    <p>Select the supplier first. Product search will then be limited to that supplier's active products.</p>
+                 
                 </div>
             </div>
 
@@ -82,7 +81,7 @@ $this->load->view('components/modal/header', array(
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <div class="form-text">Choose the supplier that owns the product. Use Unassigned Products only for products without a supplier.</div>
+            
                 </div>
 
                 <div class="col-12 col-md-7">
@@ -122,19 +121,12 @@ $this->load->view('components/modal/header', array(
                             </option>
                         <?php endforeach; ?>
                     </select>
-                    <div class="form-text">After selecting a supplier, only that supplier's active products are available. Search runs on the server for large catalogs.</div>
+                   
                 </div>
             </div>
         </section>
 
         <section class="app-adjustment-section">
-            <div class="app-adjustment-section-heading">
-                <span class="app-adjustment-step">2</span>
-                <div>
-                    <h3>Reconcile the count</h3>
-                    <p>Enter the verified physical quantity. The system calculates the variance automatically.</p>
-                </div>
-            </div>
 
             <div
                 class="app-adjustment-snapshot <?php echo $selected_product_record ? '' : 'is-empty'; ?>"
@@ -212,18 +204,14 @@ $this->load->view('components/modal/header', array(
                 </div>
             </div>
 
-            <div class="form-text mt-2">
-                Example: system stock 10 and physical count 8 gives a variance of -2. Saving sets the product stock to 8.
-            </div>
+           
         </section>
 
         <section class="app-adjustment-section">
             <div class="app-adjustment-section-heading">
                 <span class="app-adjustment-step">3</span>
-                <div>
-                    <h3>Document the reason</h3>
-                    <p>Every adjustment needs an audit-friendly explanation.</p>
-                </div>
+                    <h3>Document the reason</h3>                  
+               
             </div>
 
             <label for="reason" class="form-label">Reason</label>

@@ -285,7 +285,7 @@
 }
 
 .app-data-table tbody tr.app-table-row-warning:hover > td {
-    background: rgba(var(--bs-warning-rgb), 0.13);
+    background: rgba(var(--bs-warning-rgb), 0.5);
 }
 
 .app-data-table tbody tr.app-table-row-danger > td {
@@ -297,7 +297,7 @@
 }
 
 .app-data-table tbody tr.app-table-row-danger:hover > td {
-    background: rgba(var(--bs-danger-rgb), 0.12);
+    background: rgba(var(--bs-danger-rgb), 0.7);
 }
 
 .app-data-table tbody tr:last-child td {
@@ -333,7 +333,7 @@
     border-radius: 50%;
     background: currentColor;
     content: "";
-    opacity: 0.78;
+    opacity: 1;
 }
 
 .app-table-badge-success {
