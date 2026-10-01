@@ -59,7 +59,7 @@ $this->load->view('components/page_header', array(
 <?php
 $table_columns = array();
 $table_filters = array();
-$numeric_fields = array('stock', 'quantity', 'reorder_level', 'shortage', 'cost_price', 'inventory_value');
+$numeric_fields = array('stock', 'quantity', 'reorder_level', 'shortage', 'cost_price', 'inventory_value', 'system_stock', 'actual_stock', 'difference');
 
 if ($report_key === 'inventory' || $report_key === 'valuation') {
     $table_filters[] = array(

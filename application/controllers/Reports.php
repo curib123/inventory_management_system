@@ -104,12 +104,6 @@ class Reports extends CI_Controller {
             $columns = $payload['columns'];
             $meta = $payload['meta'];
 
-            $this->Activity_log_model->insert_activity_log(array(
-                'user_id' => $this->session->userdata('user_id'),
-                'action' => $format !== 'pdf' ? 'export_created' : 'print_created',
-                'description' => $format !== 'pdf' ? 'Exported ' . $format  : 'Print PDF',
-                'ip_address' => $this->input->ip_address()
-            ));
             if ($format === 'csv') {
                 $this->export_csv($definition['title'], $columns, $rows, $meta);
                 return;
@@ -184,6 +178,7 @@ private function export_csv($title, $columns, $rows, $meta)
         $this->write_csv_metadata($handle, $title, $meta, $columns);
         $this->write_csv_header($handle, $columns);
         $this->write_csv_data($handle, $columns, $rows);
+        $this->log_successful_export('csv');
     } finally {
         fclose($handle);
     }
@@ -679,6 +674,7 @@ private function csv_safe_value($value)
             header('Cache-Control: no-store, no-cache, must-revalidate');
             header('X-Content-Type-Options: nosniff');
 
+            $this->log_successful_export('xlsx');
             readfile($temp_file);
         } finally {
             if (is_file($temp_file)) {
@@ -835,6 +831,7 @@ private function csv_safe_value($value)
         );
 
         $this->prepare_download_output();
+        $this->log_successful_export('pdf');
         $dompdf->stream(
             $this->report_filename($title, 'pdf'),
             array('Attachment' => FALSE)
@@ -923,6 +920,23 @@ private function csv_safe_value($value)
         }
 
         require_once $autoload;
+    }
+
+    // Internal helper ni para log successful export after the actual output is generated.
+    private function log_successful_export($format) {
+        if (!isset($this->Activity_log_model) || !method_exists($this->Activity_log_model, 'insert_activity_log')) {
+            return;
+        }
+
+        $action = $format !== 'pdf' ? 'export_created' : 'print_created';
+        $description = $format !== 'pdf' ? 'Exported ' . $format : 'Print PDF';
+
+        $this->Activity_log_model->insert_activity_log(array(
+            'user_id' => $this->session->userdata('user_id'),
+            'action' => $action,
+            'description' => $description,
+            'ip_address' => $this->input->ip_address()
+        ));
     }
 
     // Internal helper ni para handle export failure; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.

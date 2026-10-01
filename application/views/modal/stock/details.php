@@ -25,6 +25,11 @@ $this->load->view('components/modal/header', array(
                     <th>Quantity</th>
                     <th>Unit</th>
                     <th>Cost Price</th>
+                    <?php if ($transaction->type === 'adjustment'): ?>
+                        <th>System Stock</th>
+                        <th>Actual Stock</th>
+                        <th>Difference</th>
+                    <?php endif; ?>
                 </tr>
             </thead>
             <tbody>
@@ -35,9 +40,14 @@ $this->load->view('components/modal/header', array(
                         <td><?php echo (int) $item->quantity; ?></td>
                         <td><?php echo html_escape($item->unit); ?></td>
                         <td><?php echo number_format((float) $item->cost_price, 2); ?></td>
+                        <?php if ($transaction->type === 'adjustment'): ?>
+                            <td><?php echo $item->system_stock !== NULL ? (int) $item->system_stock : 'N/A'; ?></td>
+                            <td><?php echo $item->actual_stock !== NULL ? (int) $item->actual_stock : 'N/A'; ?></td>
+                            <td><?php echo $item->adjustment_difference !== NULL ? (int) $item->adjustment_difference : 'N/A'; ?></td>
+                        <?php endif; ?>
                     </tr>
                 <?php endforeach; else: ?>
-                    <tr><td colspan="5" class="text-center text-body-secondary py-4">No transaction items found.</td></tr>
+                    <tr><td colspan="<?php echo $transaction->type === 'adjustment' ? 8 : 5; ?>" class="text-center text-body-secondary py-4">No transaction items found.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>

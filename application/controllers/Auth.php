@@ -168,6 +168,8 @@ class Auth extends CI_Controller {
             show_error('Invalid request method.', 405, 'Method Not Allowed');
         }
 
+        $user_id = (int) $this->session->userdata('user_id');
+        $this->auth_service->logout($user_id);
         $this->session->sess_destroy();
         redirect('login');
     }

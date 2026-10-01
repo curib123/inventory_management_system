@@ -20,10 +20,11 @@ class Report_model extends CI_Model {
     }
     // Data helper ni para get stock movement report; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_stock_movement_report($type = NULL) {
-        $this->db->select("t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at", FALSE);
+        $this->db->select("t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at, a.system_stock, a.actual_stock, a.difference", FALSE);
         $this->db->from('stock_transactions t');
         $this->db->join('stock_transaction_items i', 'i.transaction_id = t.id');
         $this->db->join('products p', 'p.id = i.product_id');
+        $this->db->join('stock_adjustments a', 'a.transaction_id = t.id AND a.product_id = i.product_id', 'left');
         $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
         $this->db->join('users u', 'u.id = t.created_by');
         if ($type) {
@@ -96,7 +97,11 @@ class Report_model extends CI_Model {
             return;
         }
 
-        $this->db->select("t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at", FALSE);
+        $columns = "t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at";
+        if ($report === 'movement') {
+            $columns .= ', a.system_stock, a.actual_stock, a.difference';
+        }
+        $this->db->select($columns, FALSE);
     }
 
     // Data helper ni para build datatable query; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
@@ -106,7 +111,6 @@ class Report_model extends CI_Model {
             $this->db->join('categories c', 'c.id = p.category_id', 'left');
             $this->db->join('suppliers s', 's.id = p.supplier_id', 'left');
 
-            $this->apply_report_date_filter('p.created_at', $filters);
             $this->apply_product_reference_filters('p', 'p.supplier_id', $filters);
 
             $stock = isset($filters['stock']) ? strtolower((string) $filters['stock']) : '';
@@ -143,7 +147,6 @@ class Report_model extends CI_Model {
             $this->db->where('p.stock <= p.reorder_level', NULL, FALSE);
             $this->db->where('p.status', 1);
 
-            $this->apply_report_date_filter('p.created_at', $filters);
             $this->apply_product_reference_filters('p', 'p.supplier_id', $filters);
 
             $severity = isset($filters['severity']) ? strtolower((string) $filters['severity']) : '';
@@ -167,6 +170,7 @@ class Report_model extends CI_Model {
         $this->db->from('stock_transactions t');
         $this->db->join('stock_transaction_items i', 'i.transaction_id = t.id');
         $this->db->join('products p', 'p.id = i.product_id');
+        $this->db->join('stock_adjustments a', 'a.transaction_id = t.id AND a.product_id = i.product_id', 'left');
         $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
         $this->db->join('users u', 'u.id = t.created_by');
 

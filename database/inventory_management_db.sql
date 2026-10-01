@@ -262,6 +262,7 @@ CREATE TABLE stock_transaction_items (
 -- -------------------------------------------------------------------
 CREATE TABLE stock_adjustments (
     id INT NOT NULL AUTO_INCREMENT,
+    transaction_id INT DEFAULT NULL,
     product_id INT NOT NULL,
     system_stock INT NOT NULL,
     actual_stock INT NOT NULL,
@@ -271,6 +272,7 @@ CREATE TABLE stock_adjustments (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
+    UNIQUE KEY uq_stock_adjustments_transaction (transaction_id),
     KEY idx_adjustments_product (product_id),
     KEY idx_adjustments_user (created_by),
     CONSTRAINT fk_stock_adjustments_product
@@ -279,6 +281,10 @@ CREATE TABLE stock_adjustments (
         ON DELETE RESTRICT,
     CONSTRAINT fk_stock_adjustments_user
         FOREIGN KEY (created_by) REFERENCES users(id)
+        ON UPDATE CASCADE
+        ON DELETE RESTRICT,
+    CONSTRAINT fk_stock_adjustments_transaction
+        FOREIGN KEY (transaction_id) REFERENCES stock_transactions(id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -301,6 +307,23 @@ CREATE TABLE activity_logs (
         FOREIGN KEY (user_id) REFERENCES users(id)
         ON UPDATE CASCADE
         ON DELETE RESTRICT
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- -------------------------------------------------------------------
+-- Login attempts ni — per-account ug per-IP brute-force throttling state.
+-- -------------------------------------------------------------------
+CREATE TABLE login_attempts (
+    id INT NOT NULL AUTO_INCREMENT,
+    scope_type ENUM('username', 'ip') NOT NULL,
+    identifier_hash CHAR(64) NOT NULL,
+    attempt_count INT UNSIGNED NOT NULL DEFAULT 0,
+    window_started_at DATETIME NOT NULL,
+    locked_until DATETIME DEFAULT NULL,
+    updated_at DATETIME NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_login_attempt_scope (scope_type, identifier_hash),
+    KEY idx_login_attempts_locked_until (locked_until),
+    KEY idx_login_attempts_updated_at (updated_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------

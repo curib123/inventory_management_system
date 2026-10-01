@@ -250,7 +250,7 @@ class Stock extends CI_Controller {
     public function adjustments_datatable() {
         $this->require_permission('stock.adjust');
 
-        $columns = array('p.product_name', 'a.system_stock', 'a.actual_stock', 'a.difference', 'a.reason', 'u.username', 'a.created_at');
+        $columns = array('p.product_name', 'a.system_stock', 'a.actual_stock', 'a.difference', 'a.reason', 'u.username', 'a.created_at', 't.transaction_no');
         $request = $this->datatable_service->request($this->input, $columns, 'a.created_at', 'desc');
         $adjustments = $this->Stock_model->get_adjustments_datatable(
             $request['start'],
@@ -270,7 +270,8 @@ class Stock extends CI_Controller {
                 (int) $adjustment->difference,
                 html_escape($adjustment->reason),
                 html_escape($adjustment->username),
-                html_escape($adjustment->created_at)
+                html_escape($adjustment->created_at),
+                html_escape($adjustment->transaction_no ?: 'N/A')
             );
         }
 

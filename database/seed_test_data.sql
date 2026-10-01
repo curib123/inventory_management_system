@@ -784,8 +784,63 @@ WHERE t.transaction_no = 'SOUT-2026-0001'
 -- 7. STOCK ADJUSTMENT
 -- ------------------------------------------------------------
 
+INSERT INTO stock_transactions
+(
+        transaction_no,
+        type,
+        supplier_id,
+        remarks,
+        created_by
+)
+SELECT
+        'ADJUSTMENT-SEED-ELEC-003',
+        'adjustment',
+        p.supplier_id,
+        'Damaged item discovered during physical inventory',
+        u.id
+FROM products p
+JOIN users u
+WHERE p.product_code = 'ELEC-003'
+    AND u.username = 'admin'
+ON DUPLICATE KEY UPDATE
+        remarks = VALUES(remarks);
+
+INSERT INTO stock_transaction_items
+(
+        transaction_id,
+        product_id,
+        quantity,
+        cost_price
+)
+SELECT
+        t.id,
+        p.id,
+        1,
+        p.cost_price
+FROM stock_transactions t
+JOIN products p
+WHERE t.transaction_no = 'ADJUSTMENT-SEED-ELEC-003'
+    AND p.product_code = 'ELEC-003'
+    AND NOT EXISTS (
+            SELECT 1
+            FROM stock_transaction_items sti
+            WHERE sti.transaction_id = t.id
+                AND sti.product_id = p.id
+    );
+
+UPDATE stock_adjustments a
+JOIN products p ON p.id = a.product_id
+JOIN stock_transactions t ON t.transaction_no = 'ADJUSTMENT-SEED-ELEC-003'
+JOIN stock_transaction_items i ON i.transaction_id = t.id AND i.product_id = p.id
+SET a.transaction_id = t.id
+WHERE a.transaction_id IS NULL
+    AND p.product_code = 'ELEC-003'
+    AND a.reason = t.remarks
+    AND a.created_by = t.created_by;
+
 INSERT INTO stock_adjustments
 (
+        transaction_id,
     product_id,
     system_stock,
     actual_stock,
@@ -794,6 +849,7 @@ INSERT INTO stock_adjustments
     created_by
 )
 SELECT
+    t.id,
     p.id,
     18,
     17,
@@ -802,8 +858,10 @@ SELECT
     u.id
 FROM products p
 JOIN users u
+JOIN stock_transactions t ON t.transaction_no = 'ADJUSTMENT-SEED-ELEC-003'
 WHERE p.product_code = 'ELEC-003'
   AND u.username = 'admin'
+    AND t.created_by = u.id
   AND NOT EXISTS (
       SELECT 1
       FROM stock_adjustments sa

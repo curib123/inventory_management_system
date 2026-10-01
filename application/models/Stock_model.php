@@ -48,10 +48,11 @@ class Stock_model extends CI_Model {
 // Data helper ni para get adjustment history sa usa ka product; Product_service ang caller para one product ra ang adjustment audit trail.
 public function get_product_adjustments($product_id) {
     $this->db->select(
-        'a.id, a.system_stock, a.actual_stock, a.difference, a.reason, a.created_at, u.username'
+        'a.id, a.system_stock, a.actual_stock, a.difference, a.reason, a.created_at, u.username, t.transaction_no'
     );
     $this->db->from('stock_adjustments a');
     $this->db->join('users u', 'u.id = a.created_by');
+    $this->db->join('stock_transactions t', 't.id = a.transaction_id', 'left');
     $this->db->where('a.product_id', (int) $product_id);
     $this->db->order_by('a.created_at', 'DESC');
     $this->db->order_by('a.id', 'DESC');
@@ -91,9 +92,10 @@ public function get_product_adjustments($product_id) {
 
     // Data helper ni para get transaction items; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_transaction_items($transaction_id) {
-        $this->db->select('i.*, p.product_code, p.product_name, p.unit');
+        $this->db->select('i.*, p.product_code, p.product_name, p.unit, a.system_stock, a.actual_stock, a.difference AS adjustment_difference');
         $this->db->from('stock_transaction_items i');
         $this->db->join('products p', 'p.id = i.product_id');
+        $this->db->join('stock_adjustments a', 'a.transaction_id = i.transaction_id AND a.product_id = i.product_id', 'left');
         $this->db->where('i.transaction_id', (int) $transaction_id);
         return $this->db->get()->result();
     }
@@ -236,7 +238,7 @@ public function get_product_transaction_movements($product_id) {
     // Data helper ni para get adjustments datatable; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_adjustments_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
         $this->build_adjustments_datatable_query($search, $filters);
-        $this->db->select('a.id, a.system_stock, a.actual_stock, a.difference, a.reason, a.created_at, p.product_code, p.product_name, u.username');
+        $this->db->select('a.id, a.system_stock, a.actual_stock, a.difference, a.reason, a.created_at, p.product_code, p.product_name, u.username, t.transaction_no');
         if ($order_column) {
             $this->db->order_by($order_column, $order_dir);
         }
@@ -303,6 +305,7 @@ public function get_product_transaction_movements($product_id) {
         $this->db->from('stock_adjustments a');
         $this->db->join('products p', 'p.id = a.product_id');
         $this->db->join('users u', 'u.id = a.created_by');
+        $this->db->join('stock_transactions t', 't.id = a.transaction_id', 'left');
 
         $difference = isset($filters['difference']) ? strtolower((string) $filters['difference']) : '';
         if ($difference === 'increase') {
@@ -319,6 +322,7 @@ public function get_product_transaction_movements($product_id) {
             $this->db->or_like('p.product_name', $search);
             $this->db->or_like('a.reason', $search);
             $this->db->or_like('u.username', $search);
+            $this->db->or_like('t.transaction_no', $search);
             $this->db->or_like('a.created_at', $search);
             $this->db->group_end();
         }

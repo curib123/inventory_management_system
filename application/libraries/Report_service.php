@@ -50,7 +50,7 @@ class Report_service {
             );
         }
 
-        return array(
+        $columns = array(
             'transaction_no' => 'Transaction No.',
             'type' => 'Type',
             'product_code' => 'Product Code',
@@ -62,6 +62,14 @@ class Report_service {
             'remarks' => 'Remarks',
             'created_at' => 'Date'
         );
+
+        if ($report === 'movement') {
+            $columns['system_stock'] = 'System Stock';
+            $columns['actual_stock'] = 'Actual Stock';
+            $columns['difference'] = 'Difference';
+        }
+
+        return $columns;
     }
 
     // Business ordering map ni para report table; application/controllers/Reports.php ang caller, keeping browser column indexes mapped to safe DB columns.
@@ -91,7 +99,7 @@ class Report_service {
             );
         }
 
-        return array(
+        $columns = array(
             't.transaction_no',
             't.type',
             'p.product_code',
@@ -103,6 +111,14 @@ class Report_service {
             't.remarks',
             't.created_at'
         );
+
+        if ($report === 'movement') {
+            $columns[] = 'a.system_stock';
+            $columns[] = 'a.actual_stock';
+            $columns[] = 'a.difference';
+        }
+
+        return $columns;
     }
 
     // Business default order ni para report; application/controllers/Reports.php ang caller para consistent default sorting across table/export UX.

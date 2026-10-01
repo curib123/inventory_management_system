@@ -203,6 +203,7 @@ class Stock_service {
         }
 
         $this->CI->Stock_model->insert_adjustment(array(
+            'transaction_id' => $transaction_id,
             'product_id' => $product_id,
             'system_stock' => $locked_product->stock,
             'actual_stock' => $actual_stock,

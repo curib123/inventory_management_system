@@ -16,9 +16,20 @@ class Role_service {
     // Business flow ni para save role ug permissions; application/controllers/Roles.php ang caller, then transaction/dependency rules diri gi-centralize.
     public function save($id, $role_data, $permission_ids, $can_edit_role, $can_manage_permissions) {
         $id = $id === NULL ? NULL : (int) $id;
+        $role_name = '';
 
         if (!$can_edit_role && !$can_manage_permissions) {
             return array('success' => FALSE, 'message' => 'You do not have permission to modify this role.');
+        }
+
+        if ($id !== NULL) {
+            $current_role = $this->CI->Role_model->get_by_id($id);
+
+            if (!$current_role) {
+                return array('success' => FALSE, 'message' => 'Role not found.');
+            }
+
+            $role_name = trim((string) $current_role->role_name);
         }
 
         if ($can_edit_role) {

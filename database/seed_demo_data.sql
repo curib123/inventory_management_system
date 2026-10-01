@@ -337,15 +337,30 @@ WHERE NOT EXISTS (
 -- -----------------------------------------------------------------------------
 -- 5. Physical stock adjustments, including both directions
 -- -----------------------------------------------------------------------------
+UPDATE stock_adjustments a
+JOIN products p ON p.id = a.product_id
+JOIN (
+    SELECT 'ADJUSTMENT-2026-0920-0001' transaction_no, 'OFF-002' product_code, 'Physical count found one extra stapler' reason, '2026-09-20 10:00:00' created_at
+    UNION ALL SELECT 'ADJUSTMENT-2026-0927-0001', 'ELEC-003', 'Damaged HDMI cable found during count', '2026-09-27 10:00:00'
+) x ON x.product_code = p.product_code AND x.reason = a.reason AND x.created_at = a.created_at
+JOIN stock_transactions t ON t.transaction_no = x.transaction_no AND t.type = 'adjustment'
+JOIN stock_transaction_items i ON i.transaction_id = t.id AND i.product_id = p.id
+SET a.transaction_id = t.id
+WHERE a.transaction_id IS NULL
+  AND a.created_by = t.created_by
+  AND t.remarks = a.reason;
+
 INSERT INTO stock_adjustments
-(product_id, system_stock, actual_stock, difference, reason, created_by, created_at, updated_at)
-SELECT p.id, x.system_stock, x.actual_stock, x.difference, x.reason, u.id, x.created_at, x.created_at
+(transaction_id, product_id, system_stock, actual_stock, difference, reason, created_by, created_at, updated_at)
+SELECT t.id, p.id, x.system_stock, x.actual_stock, x.difference, x.reason, u.id, x.created_at, x.created_at
 FROM (
-    SELECT 'OFF-002' product_code, 3 system_stock, 4 actual_stock, 1 difference, 'Physical count found one extra stapler' reason, 'admin' username, '2026-09-20 10:00:00' created_at
-    UNION ALL SELECT 'ELEC-003', 18, 17, -1, 'Damaged HDMI cable found during count', 'admin', '2026-09-27 10:00:00'
+    SELECT 'ADJUSTMENT-2026-0920-0001' transaction_no, 'OFF-002' product_code, 3 system_stock, 4 actual_stock, 1 difference, 'Physical count found one extra stapler' reason, 'admin' username, '2026-09-20 10:00:00' created_at
+    UNION ALL SELECT 'ADJUSTMENT-2026-0927-0001', 'ELEC-003', 18, 17, -1, 'Damaged HDMI cable found during count', 'admin', '2026-09-27 10:00:00'
 ) x
 JOIN products p ON p.product_code = x.product_code
 JOIN users u ON u.username = x.username
+JOIN stock_transactions t ON t.transaction_no = x.transaction_no AND t.type = 'adjustment' AND t.created_by = u.id
+JOIN stock_transaction_items i ON i.transaction_id = t.id AND i.product_id = p.id
 WHERE NOT EXISTS (
     SELECT 1 FROM stock_adjustments a
     WHERE a.product_id = p.id AND a.reason = x.reason AND a.created_at = x.created_at

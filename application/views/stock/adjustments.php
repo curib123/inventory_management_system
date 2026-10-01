@@ -48,5 +48,6 @@ $this->load->view('components/data_table', [
         'Reason',
         'Processed By',
         ['label' => 'Date', 'class' => 'text-nowrap'],
+        ['label' => 'Transaction No.', 'class' => 'text-nowrap'],
     ],
 ]);

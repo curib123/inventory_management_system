@@ -46,6 +46,25 @@ CREATE TABLE `activity_logs` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `login_attempts`
+--
+
+DROP TABLE IF EXISTS `login_attempts`;
+CREATE TABLE `login_attempts` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `scope_type` enum('username','ip') NOT NULL,
+  `identifier_hash` char(64) NOT NULL,
+  `attempt_count` int(10) unsigned NOT NULL DEFAULT 0,
+  `window_started_at` datetime NOT NULL,
+  `locked_until` datetime DEFAULT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_login_attempt_scope` (`scope_type`,`identifier_hash`),
+  KEY `idx_login_attempts_locked_until` (`locked_until`),
+  KEY `idx_login_attempts_updated_at` (`updated_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
 -- Dumping data for table `activity_logs`
 --
 
@@ -261,6 +280,7 @@ DROP TABLE IF EXISTS `stock_adjustments`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `stock_adjustments` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
+  `transaction_id` int(11) DEFAULT NULL,
   `product_id` int(11) NOT NULL,
   `system_stock` int(11) NOT NULL,
   `actual_stock` int(11) NOT NULL,
@@ -270,6 +290,7 @@ CREATE TABLE `stock_adjustments` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_stock_adjustments_transaction` (`transaction_id`),
   KEY `idx_adjustments_product` (`product_id`),
   KEY `idx_adjustments_user` (`created_by`),
   CONSTRAINT `fk_stock_adjustments_product` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON UPDATE CASCADE,
@@ -283,7 +304,7 @@ CREATE TABLE `stock_adjustments` (
 
 LOCK TABLES `stock_adjustments` WRITE;
 /*!40000 ALTER TABLE `stock_adjustments` DISABLE KEYS */;
-INSERT INTO `stock_adjustments` VALUES (1,9,3,4,1,'Physical count found one extra stapler',1,'2026-09-20 02:00:00','2026-09-20 02:00:00'),(2,6,18,17,-1,'Damaged HDMI cable found during count',1,'2026-09-27 02:00:00','2026-09-27 02:00:00');
+INSERT INTO `stock_adjustments` VALUES (1,NULL,9,3,4,1,'Physical count found one extra stapler',1,'2026-09-20 02:00:00','2026-09-20 02:00:00'),(2,NULL,6,18,17,-1,'Damaged HDMI cable found during count',1,'2026-09-27 02:00:00','2026-09-27 02:00:00');
 /*!40000 ALTER TABLE `stock_adjustments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -345,6 +366,11 @@ CREATE TABLE `stock_transactions` (
   CONSTRAINT `fk_stock_transactions_user` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=32 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+ALTER TABLE `stock_adjustments`
+  ADD CONSTRAINT `fk_stock_adjustments_transaction`
+  FOREIGN KEY (`transaction_id`) REFERENCES `stock_transactions` (`id`)
+  ON UPDATE CASCADE ON DELETE RESTRICT;
 
 --
 -- Dumping data for table `stock_transactions`
@@ -426,6 +452,21 @@ UNLOCK TABLES;
 --
 -- Dumping routines for database 'inventory_management_db'
 --
+UPDATE stock_adjustments a
+JOIN stock_transactions t
+  ON t.transaction_no = CASE a.reason
+      WHEN 'Physical count found one extra stapler' THEN 'ADJUSTMENT-2026-0920-0001'
+      WHEN 'Damaged HDMI cable found during count' THEN 'ADJUSTMENT-2026-0927-0001'
+      ELSE ''
+  END
+JOIN stock_transaction_items i
+  ON i.transaction_id = t.id AND i.product_id = a.product_id
+SET a.transaction_id = t.id
+WHERE a.transaction_id IS NULL
+  AND t.type = 'adjustment'
+  AND t.created_by = a.created_by
+  AND t.remarks = a.reason;
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

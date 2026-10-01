@@ -31,22 +31,21 @@ class Category_service {
             'status' => (int) $status === 0 ? 0 : 1
         ), $id);
 
+        if (!$saved) {
+            return array('success' => FALSE, 'message' => 'The category could not be saved.');
+        }
+
         $action = $id !== null ? 'category_updated' : 'category_created';
-
-       $description = $id !== NULL ? 'Updated category: ' . $name : 'Created category: ' . $name;
-
-       
+        $description = $id !== NULL ? 'Updated category: ' . $name : 'Created category: ' . $name;
 
         $this->CI->Activity_log_model->insert_activity_log(array(
             'user_id' => $this->CI->session->userdata('user_id'),
-            'action' =>  $action,
+            'action' => $action,
             'description' => $description,
-            'ip_address'  => $this->CI->input->ip_address()
+            'ip_address' => $this->CI->input->ip_address()
         ));
 
-        return $saved
-            ? array('success' => TRUE)
-            : array('success' => FALSE, 'message' => 'The category could not be saved.');
+        return array('success' => TRUE);
     }
 
     // Business flow ni para delete category; application/controllers/Categories.php ang caller, then dependency count gikan Category_model.

@@ -14,6 +14,24 @@ class AuthUserModelStub {
     }
 }
 
+class AuthActivityLogModelStub {
+    public function insert_activity_log($data) {
+    }
+}
+
+class AuthLoginAttemptModelStub {
+    public function is_locked($username, $ip_address) {
+        return FALSE;
+    }
+
+    public function record_failure($username, $ip_address) {
+        return FALSE;
+    }
+
+    public function clear_attempts($username, $ip_address) {
+    }
+}
+
 class AuthServiceTest extends TestCase {
 
     // QA ni para valid login; sakto nga credentials should return complete session data from Auth_service.
@@ -32,7 +50,33 @@ class AuthServiceTest extends TestCase {
             ->with('admin')
             ->willReturn($user);
 
-        $service = new Auth_service(array('user_model' => $user_model));
+        $activity_log_model = $this->createMock(
+            AuthActivityLogModelStub::class
+        );
+        $activity_log_model->expects($this->once())
+            ->method('insert_activity_log')
+            ->with($this->callback(function ($data) {
+                return $data['user_id'] === 7
+                    && $data['action'] === 'login_created'
+                    && $data['description'] === 'Login Session';
+            }));
+        $login_attempt_model = $this->createMock(AuthLoginAttemptModelStub::class);
+        $login_attempt_model->expects($this->once())
+            ->method('is_locked')
+            ->with('admin', '127.0.0.1')
+            ->willReturn(FALSE);
+        $login_attempt_model->expects($this->once())
+            ->method('clear_attempts')
+            ->with('admin', '127.0.0.1');
+        $login_attempt_model->expects($this->never())
+            ->method('record_failure');
+
+        $service = new Auth_service(array(
+            'user_model' => $user_model,
+            'activity_log_model' => $activity_log_model,
+            'login_attempt_model' => $login_attempt_model,
+            'ip_address' => '127.0.0.1'
+        ));
         $session_data = $service->authenticate('admin', 'StrongPass123!');
 
         $this->assertSame($user->id, $session_data['user_id']);
@@ -74,9 +118,80 @@ class AuthServiceTest extends TestCase {
             ->with('admin')
             ->willReturn($user);
 
-        $service = new Auth_service(array('user_model' => $user_model));
+        $login_attempt_model = $this->createMock(AuthLoginAttemptModelStub::class);
+        $login_attempt_model->expects($this->once())
+            ->method('is_locked')
+            ->with('admin', '127.0.0.1')
+            ->willReturn(FALSE);
+        $login_attempt_model->expects($this->once())
+            ->method('record_failure')
+            ->with('admin', '127.0.0.1')
+            ->willReturn(FALSE);
+        $login_attempt_model->expects($this->never())
+            ->method('clear_attempts');
+
+        $service = new Auth_service(array(
+            'user_model' => $user_model,
+            'login_attempt_model' => $login_attempt_model,
+            'ip_address' => '127.0.0.1'
+        ));
 
         $this->assertFalse($service->authenticate('admin', 'wrong-password'));
+    }
+
+    public function testLockedLoginIsRejectedBeforeUserLookup() {
+        $user_model = $this->createMock(AuthUserModelStub::class);
+        $user_model->expects($this->never())
+            ->method('find_active_by_username');
+
+        $login_attempt_model = $this->createMock(AuthLoginAttemptModelStub::class);
+        $login_attempt_model->expects($this->once())
+            ->method('is_locked')
+            ->with('admin', '192.0.2.10')
+            ->willReturn(TRUE);
+        $login_attempt_model->expects($this->never())
+            ->method('record_failure');
+
+        $service = new Auth_service(array(
+            'user_model' => $user_model,
+            'login_attempt_model' => $login_attempt_model,
+            'ip_address' => '192.0.2.10'
+        ));
+
+        $this->assertFalse($service->authenticate(' Admin ', 'not-logged'));
+    }
+
+    public function testLogoutWritesOneAuditRecordForAuthenticatedUser() {
+        $activity_log_model = $this->createMock(AuthActivityLogModelStub::class);
+        $activity_log_model->expects($this->once())
+            ->method('insert_activity_log')
+            ->with(array(
+                'user_id' => 7,
+                'action' => 'user_logout',
+                'description' => 'Logout Session',
+                'ip_address' => '127.0.0.1'
+            ))
+            ->willReturn(TRUE);
+
+        $service = new Auth_service(array(
+            'activity_log_model' => $activity_log_model,
+            'ip_address' => '127.0.0.1'
+        ));
+
+        $this->assertTrue($service->logout(7));
+    }
+
+    public function testLogoutDoesNotWriteAuditRecordForAnonymousUser() {
+        $activity_log_model = $this->createMock(AuthActivityLogModelStub::class);
+        $activity_log_model->expects($this->never())
+            ->method('insert_activity_log');
+
+        $service = new Auth_service(array(
+            'activity_log_model' => $activity_log_model,
+            'ip_address' => '127.0.0.1'
+        ));
+
+        $this->assertFalse($service->logout(0));
     }
 
     // QA ni para role session data; role ID/name should survive authentication payload building.
