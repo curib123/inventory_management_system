@@ -49,9 +49,11 @@ class RoleServiceTest extends TestCase {
                 $this->db = new class {
                     public $transaction_status = TRUE;
                     public $inserted = array();
+                    public $rollbacks = 0;
+                    public $commits = 0;
                     public function trans_begin() {}
-                    public function trans_rollback() {}
-                    public function trans_commit() {}
+                    public function trans_rollback() { $this->rollbacks++; }
+                    public function trans_commit() { $this->commits++; }
                     public function trans_status() {
                         return $this->transaction_status;
                     }
@@ -59,6 +61,8 @@ class RoleServiceTest extends TestCase {
 
                 $this->Role_model = new class {
                     public $last_permission_ids;
+                    public $capable_users = 1;
+                    public $invariant_locks = 0;
 
                     public function get_by_id($id) {
                         return (object) array('id' => (int) $id, 'role_name' => 'warehouse_staff');
@@ -83,6 +87,14 @@ class RoleServiceTest extends TestCase {
                     public function replace_permissions($role_id, $permission_ids) {
                         $this->last_permission_ids = $permission_ids;
                         return TRUE;
+                    }
+
+                    public function lock_admin_invariant() {
+                        $this->invariant_locks++;
+                    }
+
+                    public function count_admin_capable_users() {
+                        return $this->capable_users;
                     }
                 };
 
@@ -111,5 +123,31 @@ class RoleServiceTest extends TestCase {
         $this->assertTrue($result['success']);
         $this->assertSame('Role permissions updated successfully.', $result['message']);
         $this->assertStringContainsString('warehouse_staff', $GLOBALS['ci_role_service_test']->Activity_log_model->last_activity['description']);
+    }
+
+    public function testRemovingLastRoleCapableAdminIsRejectedAndRolledBack() {
+        $ci = $GLOBALS['ci_role_service_test'];
+        $ci->Role_model->capable_users = 0;
+        $service = new Role_service();
+
+        $result = $service->save(7, NULL, array(), FALSE, TRUE);
+
+        $this->assertFalse($result['success']);
+        $this->assertStringContainsString('at least one active administrator', $result['message']);
+        $this->assertSame(1, $ci->db->rollbacks);
+        $this->assertSame(0, $ci->db->commits);
+        $this->assertSame(1, $ci->Role_model->invariant_locks);
+    }
+
+    public function testRoleChangeIsAllowedWhenAnotherRoleCapableAdminRemains() {
+        $ci = $GLOBALS['ci_role_service_test'];
+        $ci->Role_model->capable_users = 1;
+        $service = new Role_service();
+
+        $result = $service->save(7, NULL, array(), FALSE, TRUE);
+
+        $this->assertTrue($result['success']);
+        $this->assertSame(0, $ci->db->rollbacks);
+        $this->assertSame(1, $ci->db->commits);
     }
 }

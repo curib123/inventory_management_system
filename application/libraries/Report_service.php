@@ -57,7 +57,7 @@ class Report_service {
             'product_name' => 'Product Name',
             'category_name' => 'Category',
             'unit' => 'Unit',
-            'quantity' => 'Quantity',
+            'quantity' => $report === 'movement' ? 'Net Quantity' : 'Quantity',
             'cost_price' => 'Cost Price',
             'supplier_name' => 'Supplier',
             'username' => 'Processed By',
@@ -117,6 +117,7 @@ class Report_service {
         );
 
         if ($report === 'movement') {
+            $columns[6] = 'quantity';
             $columns[] = 'a.system_stock';
             $columns[] = 'a.actual_stock';
             $columns[] = 'a.difference';
@@ -183,6 +184,103 @@ class Report_service {
         );
     }
 
+    public function export_metadata($report, $search, $filters, $prepared_by, $chunk_size = 500) {
+        $definition = $this->definition($report);
+        $row_count = $this->CI->Report_model->count_export_rows($report, $search, $filters);
+        $summary = array('Records' => number_format($row_count));
+
+        if ($report === 'inventory' || $report === 'valuation') {
+            $summary['Total Stock'] = 0;
+            $summary['Inventory Value'] = 0.0;
+        } elseif ($report === 'low-stock') {
+            $summary['Total Shortage'] = 0;
+        } else {
+            $summary['Total Quantity'] = 0;
+            $summary['Movement Value'] = 0.0;
+        }
+
+        $cursor = NULL;
+
+        do {
+            $rows = $this->export_rows_chunk($report, $search, $filters, $cursor, $chunk_size);
+
+            foreach ($rows as $row) {
+                if ($report === 'inventory' || $report === 'valuation') {
+                    $summary['Total Stock'] += isset($row['stock']) ? (int) $row['stock'] : 0;
+                    $summary['Inventory Value'] += isset($row['inventory_value']) ? (float) $row['inventory_value'] : 0.0;
+                } elseif ($report === 'low-stock') {
+                    $summary['Total Shortage'] += isset($row['shortage']) ? (int) $row['shortage'] : 0;
+                } else {
+                    $quantity = isset($row['quantity']) ? (int) $row['quantity'] : 0;
+                    $cost_price = isset($row['cost_price']) ? (float) $row['cost_price'] : 0.0;
+                    $summary['Total Quantity'] += $quantity;
+                    $summary['Movement Value'] += $quantity * $cost_price;
+                }
+
+                $cursor = $this->next_export_cursor($report, $row);
+            }
+        } while (count($rows) === max(1, min(1000, (int) $chunk_size)));
+
+        if ($report === 'inventory' || $report === 'valuation') {
+            $summary['Total Stock'] = number_format($summary['Total Stock']);
+            $summary['Inventory Value'] = '₱' . number_format($summary['Inventory Value'], 2);
+        } elseif ($report === 'low-stock') {
+            $summary['Total Shortage'] = number_format($summary['Total Shortage']);
+        } else {
+            $summary['Total Quantity'] = number_format($summary['Total Quantity']);
+            $summary['Movement Value'] = '₱' . number_format($summary['Movement Value'], 2);
+        }
+
+        return array(
+            'definition' => $definition,
+            'columns' => $this->columns($report),
+            'meta' => array(
+                'system_name' => 'Inventory Management System',
+                'report_key' => $report,
+                'report_title' => $definition['title'],
+                'generated_at' => date('F j, Y g:i A'),
+                'prepared_by' => (string) $prepared_by,
+                'date_range' => $this->date_range_label($filters),
+                'record_count' => $row_count,
+                'summary' => $summary
+            )
+        );
+    }
+
+    public function export_rows_chunk($report, $search, $filters, $cursor, $limit = 500) {
+        return $this->CI->Report_model->get_export_rows_chunk(
+            $report,
+            $search,
+            $filters,
+            $cursor,
+            max(1, min(1000, (int) $limit))
+        );
+    }
+
+    public function export_row_count($report, $search, $filters) {
+        return $this->CI->Report_model->count_export_rows($report, $search, $filters);
+    }
+
+    public function next_export_cursor($report, $row) {
+        if ($report === 'inventory' || $report === 'valuation') {
+            return array('name' => (string) $row['__export_name'], 'id' => (int) $row['__export_cursor_id']);
+        }
+
+        if ($report === 'low-stock') {
+            return array(
+                'stock' => (int) $row['__export_stock'],
+                'name' => (string) $row['__export_name'],
+                'id' => (int) $row['__export_cursor_id']
+            );
+        }
+
+        return array(
+            'created_at' => (string) $row['__export_created_at'],
+            'transaction_id' => (int) $row['__export_transaction_id'],
+            'item_id' => (int) $row['__export_item_id']
+        );
+    }
+
     // Business presentation helper ni para show the active report range in CSV/XLSX/PDF metadata.
     private function date_range_label($filters) {
         $period = isset($filters['period']) ? strtolower(trim((string) $filters['period'])) : '';
@@ -245,6 +343,22 @@ class Report_service {
             }
 
             $summary['Total Shortage'] = number_format($shortage);
+            return $summary;
+        }
+
+        if ($report === 'movement') {
+            $net_quantity = 0;
+            $net_movement_value = 0.0;
+
+            foreach ($rows as $row) {
+                $quantity = isset($row['quantity']) ? (int) $row['quantity'] : 0;
+                $cost_price = isset($row['cost_price']) ? (float) $row['cost_price'] : 0.0;
+                $net_quantity += $quantity;
+                $net_movement_value += $quantity * $cost_price;
+            }
+
+            $summary['Net Stock Change'] = number_format($net_quantity);
+            $summary['Net Movement Value'] = '₱' . number_format($net_movement_value, 2);
             return $summary;
         }
 

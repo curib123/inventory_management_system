@@ -146,6 +146,27 @@ class Role_model extends CI_Model {
             ->count_all_results('users');
     }
 
+    public function lock_admin_invariant() {
+        $this->db->query('SELECT id FROM users ORDER BY id FOR UPDATE');
+    }
+
+    public function count_admin_capable_users() {
+        $row = $this->db->query(
+            'SELECT COUNT(*) AS capable_count FROM (' .
+            'SELECT u.id FROM users u ' .
+            'JOIN roles r ON r.id = u.role_id ' .
+            'JOIN role_permissions rp ON rp.role_id = r.id ' .
+            'JOIN permissions p ON p.id = rp.permission_id ' .
+            'JOIN modules m ON m.id = p.module_id ' .
+            'WHERE u.status = 1 AND r.status = 1 AND p.status = 1 AND m.status = 1 ' .
+            "AND p.permission_key IN ('roles.view', 'roles.permissions') " .
+            'GROUP BY u.id HAVING COUNT(DISTINCT p.permission_key) = 2' .
+            ') capable'
+        )->row();
+
+        return $row ? (int) $row->capable_count : 0;
+    }
+
     // Data helper ni para count all; main caller/integration pangitaa sa application/controllers/Roles.php ug application/controllers/Users.php, so didto tan-awa ang business flow if mag-trace ka.
     public function count_all() {
         return $this->db->count_all('roles');

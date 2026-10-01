@@ -9,7 +9,7 @@ class User_service {
     // Setup ni sa User_service; gi-load ni sa application/controllers/Users.php ug Auth.php para account business rules naa ra diri.
     public function __construct() {
         $this->CI =& get_instance();
-        $this->CI->load->model(array('User_model','Activity_log_model'));
+        $this->CI->load->model(array('User_model', 'Role_model', 'Activity_log_model'));
 
 
     }
@@ -112,11 +112,42 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
     }
 
     // Save user
+    $guard_admin_capability = $is_new_user ||
+        !$current_user ||
+        (int) $current_user->role_id !== $role_id ||
+        (int) $current_user->status !== $requested_status;
+
+    if ($guard_admin_capability) {
+        $this->CI->db->trans_begin();
+        $this->CI->Role_model->lock_admin_invariant();
+    }
+
     if (!$this->CI->User_model->save($data, $id)) {
+        if ($guard_admin_capability) {
+            $this->CI->db->trans_rollback();
+        }
+
         return array(
             'success' => FALSE,
             'message' => 'The user could not be saved.'
         );
+    }
+
+    if ($guard_admin_capability) {
+        if ($this->CI->Role_model->count_admin_capable_users() < 1) {
+            $this->CI->db->trans_rollback();
+            return array(
+                'success' => FALSE,
+                'message' => 'This change would leave no active administrator able to view and manage roles. Keep at least one active administrator with both role-management permissions.'
+            );
+        }
+
+        if ($this->CI->db->trans_status() === FALSE) {
+            $this->CI->db->trans_rollback();
+            return array('success' => FALSE, 'message' => 'The user could not be saved.');
+        }
+
+        $this->CI->db->trans_commit();
     }
 
 

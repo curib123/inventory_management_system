@@ -47,6 +47,11 @@ class FakeReportQueryBuilder {
         return $this;
     }
 
+    public function or_group_start() {
+        $this->groupStarts++;
+        return $this;
+    }
+
     public function group_end() {
         $this->groupEnds++;
         return $this;
@@ -138,6 +143,8 @@ class ReportModelDateFilterTest extends TestCase {
         $this->assertStringContainsString('i.category_name_snapshot AS category_name', $selected_columns);
         $this->assertContains(array('i.category_id_snapshot', 4, NULL), $model->db->wheres);
         $this->assertNotContains(array('products p', 'p.id = i.product_id', ''), $model->db->joins);
+        $this->assertStringContainsString("WHEN t.type = 'stock_out' THEN -i.quantity", $selected_columns);
+        $this->assertStringContainsString("WHEN t.type = 'adjustment' THEN COALESCE(a.difference, i.quantity)", $selected_columns);
     }
 
     public function testLegacyMovementReportUsesProductSnapshots() {
@@ -149,6 +156,24 @@ class ReportModelDateFilterTest extends TestCase {
         $this->assertStringContainsString('i.product_code_snapshot AS product_code', $selected_columns);
         $this->assertStringContainsString('i.category_name_snapshot AS category_name', $selected_columns);
         $this->assertNotContains(array('products p', 'p.id = i.product_id', ''), $model->db->joins);
+    }
+
+    public function testExportChunkQueryUsesBoundedLimitAndCompositeCursor() {
+        $model = new TestableReportModel();
+
+        $model->get_export_rows_chunk('movement', '', array(), array(
+            'created_at' => '2026-09-01 10:00:00',
+            'transaction_id' => 22,
+            'item_id' => 91
+        ), 500);
+
+        $this->assertSame(500, $model->db->limitValue);
+        $this->assertContains(array('t.created_at <', '2026-09-01 10:00:00', NULL), $model->db->wheres);
+        $this->assertContains(array('t.id <', 22, NULL), $model->db->wheres);
+        $this->assertContains(array('i.id >', 91, NULL), $model->db->wheres);
+        $this->assertSame(array('t.created_at', 'DESC'), $model->db->orders[0]);
+        $this->assertSame(array('t.id', 'DESC'), $model->db->orders[1]);
+        $this->assertSame(array('i.id', 'ASC'), $model->db->orders[2]);
     }
 
     private function containsDateFilter(array $clauses, $field) {

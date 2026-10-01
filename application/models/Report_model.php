@@ -20,7 +20,10 @@ class Report_model extends CI_Model {
     }
     // Data helper ni para get stock movement report; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_stock_movement_report($type = NULL) {
-        $this->db->select("t.transaction_no, t.type, i.product_code_snapshot AS product_code, i.product_name_snapshot AS product_name, i.category_name_snapshot AS category_name, i.unit_snapshot AS unit, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at, a.system_stock, a.actual_stock, a.difference", FALSE);
+        $quantity = $type === NULL
+            ? "CASE WHEN t.type = 'stock_in' THEN i.quantity WHEN t.type = 'stock_out' THEN -i.quantity WHEN t.type = 'adjustment' THEN COALESCE(a.difference, i.quantity) ELSE i.quantity END"
+            : 'i.quantity';
+        $this->db->select("t.transaction_no, t.type, i.product_code_snapshot AS product_code, i.product_name_snapshot AS product_name, i.category_name_snapshot AS category_name, i.unit_snapshot AS unit, " . $quantity . " AS quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at, a.system_stock, a.actual_stock, a.difference", FALSE);
         $this->db->from('stock_transactions t');
         $this->db->join('stock_transaction_items i', 'i.transaction_id = t.id');
         $this->db->join('stock_adjustments a', 'a.transaction_id = t.id AND a.product_id = i.product_id', 'left');
@@ -72,6 +75,76 @@ class Report_model extends CI_Model {
         return $this->db->get()->result_array();
     }
 
+    public function count_export_rows($report, $search = '', $filters = array()) {
+        $this->build_datatable_query($report, trim((string) $search), (array) $filters);
+        return (int) $this->db->count_all_results();
+    }
+
+    public function get_export_rows_chunk($report, $search, $filters, $cursor, $limit) {
+        $this->build_datatable_query($report, trim((string) $search), (array) $filters);
+
+        if ($report === 'inventory' || $report === 'valuation') {
+            if (is_array($cursor)) {
+                $this->db->group_start();
+                $this->db->where('p.product_name >', $cursor['name']);
+                $this->db->or_group_start();
+                $this->db->where('p.product_name', $cursor['name']);
+                $this->db->where('p.id >', (int) $cursor['id']);
+                $this->db->group_end();
+                $this->db->group_end();
+            }
+        } elseif ($report === 'low-stock') {
+            if (is_array($cursor)) {
+                $this->db->group_start();
+                $this->db->where('p.stock >', (int) $cursor['stock']);
+                $this->db->or_group_start();
+                $this->db->where('p.stock', (int) $cursor['stock']);
+                $this->db->where('p.product_name >', $cursor['name']);
+                $this->db->group_end();
+                $this->db->or_group_start();
+                $this->db->where('p.stock', (int) $cursor['stock']);
+                $this->db->where('p.product_name', $cursor['name']);
+                $this->db->where('p.id >', (int) $cursor['id']);
+                $this->db->group_end();
+                $this->db->group_end();
+            }
+        } elseif (is_array($cursor)) {
+            $this->db->group_start();
+            $this->db->where('t.created_at <', $cursor['created_at']);
+            $this->db->or_group_start();
+            $this->db->where('t.created_at', $cursor['created_at']);
+            $this->db->where('t.id <', (int) $cursor['transaction_id']);
+            $this->db->group_end();
+            $this->db->or_group_start();
+            $this->db->where('t.created_at', $cursor['created_at']);
+            $this->db->where('t.id', (int) $cursor['transaction_id']);
+            $this->db->where('i.id >', (int) $cursor['item_id']);
+            $this->db->group_end();
+            $this->db->group_end();
+        }
+
+        $this->select_report_columns($report);
+        if ($report === 'inventory' || $report === 'valuation') {
+            $this->db->select('p.product_name AS __export_name, p.id AS __export_cursor_id', FALSE);
+            $this->db->order_by('p.product_name', 'ASC');
+            $this->db->order_by('p.id', 'ASC');
+        } elseif ($report === 'low-stock') {
+            $this->db->select('p.stock AS __export_stock, p.product_name AS __export_name, p.id AS __export_cursor_id', FALSE);
+            $this->db->order_by('p.stock', 'ASC');
+            $this->db->order_by('p.product_name', 'ASC');
+            $this->db->order_by('p.id', 'ASC');
+        } else {
+            $this->db->select('t.created_at AS __export_created_at, t.id AS __export_transaction_id, i.id AS __export_item_id', FALSE);
+            $this->db->order_by('t.created_at', 'DESC');
+            $this->db->order_by('t.id', 'DESC');
+            $this->db->order_by('i.id', 'ASC');
+        }
+
+        $this->db->limit(max(1, min(1000, (int) $limit)));
+
+        return $this->db->get()->result_array();
+    }
+
     // Data helper ni para count datatable total; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function count_datatable_total($report) {
         $this->build_datatable_query($report, '');
@@ -96,7 +169,10 @@ class Report_model extends CI_Model {
             return;
         }
 
-        $columns = "t.transaction_no, t.type, i.product_code_snapshot AS product_code, i.product_name_snapshot AS product_name, i.category_name_snapshot AS category_name, i.unit_snapshot AS unit, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at";
+        $quantity = $report === 'movement'
+            ? "CASE WHEN t.type = 'stock_in' THEN i.quantity WHEN t.type = 'stock_out' THEN -i.quantity WHEN t.type = 'adjustment' THEN COALESCE(a.difference, i.quantity) ELSE i.quantity END"
+            : 'i.quantity';
+        $columns = "t.transaction_no, t.type, i.product_code_snapshot AS product_code, i.product_name_snapshot AS product_name, i.category_name_snapshot AS category_name, i.unit_snapshot AS unit, " . $quantity . " AS quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at";
         if ($report === 'movement') {
             $columns .= ', a.system_stock, a.actual_stock, a.difference';
         }

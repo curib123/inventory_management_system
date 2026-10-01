@@ -56,6 +56,7 @@ class Role_service {
         }
 
         $this->CI->db->trans_begin();
+        $this->CI->Role_model->lock_admin_invariant();
         $role_id = $id;
 
         if ($can_edit_role) {
@@ -79,6 +80,14 @@ class Role_service {
             return array(
                 'success' => FALSE,
                 'message' => 'The role and permissions could not be saved. No changes were committed.'
+            );
+        }
+
+        if ($this->CI->Role_model->count_admin_capable_users() < 1) {
+            $this->CI->db->trans_rollback();
+            return array(
+                'success' => FALSE,
+                'message' => 'This change would leave no active administrator able to view and manage roles. Keep at least one active administrator with both role-management permissions.'
             );
         }
 

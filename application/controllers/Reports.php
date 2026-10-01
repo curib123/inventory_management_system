@@ -4,6 +4,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Reports extends CI_Controller {
 
+    private const CSV_EXPORT_CHUNK_SIZE = 500;
+    private const XLSX_EXPORT_MAX_ROWS = 5000;
+    private const PDF_EXPORT_MAX_ROWS = 1000;
+
     // Setup ni sa Reports controller; CodeIgniter mo-run ani automatically, while route mapping makita sa application/config/routes.php.
     public function __construct() {
         parent::__construct();
@@ -94,6 +98,45 @@ class Reports extends CI_Controller {
             $filters = $this->input->get('table_filters', TRUE);
             $filters = is_array($filters) ? $filters : array();
 
+            if ($format === 'csv') {
+                $payload = $this->report_service->export_metadata(
+                    $report,
+                    $search,
+                    $filters,
+                    $this->session->userdata('username'),
+                    self::CSV_EXPORT_CHUNK_SIZE
+                );
+                $this->export_csv(
+                    $definition['title'],
+                    $payload['columns'],
+                    $payload['meta'],
+                    $report,
+                    $search,
+                    $filters
+                );
+                return;
+            }
+
+            $row_count = $this->report_service->export_row_count($report, $search, $filters);
+
+            if ($format === 'xlsx' && $row_count > self::XLSX_EXPORT_MAX_ROWS) {
+                show_error(
+                    'This Excel export contains ' . number_format($row_count) . ' rows. Excel exports are limited to ' . number_format(self::XLSX_EXPORT_MAX_ROWS) . ' rows; use CSV for the full filtered report.',
+                    413,
+                    'Excel Export Too Large'
+                );
+                return;
+            }
+
+            if ($format === 'pdf' && $row_count > self::PDF_EXPORT_MAX_ROWS) {
+                show_error(
+                    'This PDF export contains ' . number_format($row_count) . ' rows. PDF exports are limited to ' . number_format(self::PDF_EXPORT_MAX_ROWS) . ' rows; use CSV or Excel for larger reports.',
+                    413,
+                    'PDF Export Too Large'
+                );
+                return;
+            }
+
             $payload = $this->report_service->export_payload(
                 $report,
                 $search,
@@ -103,11 +146,6 @@ class Reports extends CI_Controller {
             $rows = $payload['rows'];
             $columns = $payload['columns'];
             $meta = $payload['meta'];
-
-            if ($format === 'csv') {
-                $this->export_csv($definition['title'], $columns, $rows, $meta);
-                return;
-            }
 
             if ($format === 'xlsx') {
                 $this->export_xlsx($definition['title'], $columns, $rows, $meta);
@@ -153,7 +191,7 @@ class Reports extends CI_Controller {
     }
 
 // Internal helper ni para export csv; tawagon ra sulod application/controllers/Reports.php, so ari ra pud pangitaa ang caller if mag-trace ka.
-private function export_csv($title, $columns, $rows, $meta)
+private function export_csv($title, $columns, $meta, $report, $search, $filters)
 {
     $filename = $this->report_filename($title, 'csv');
 
@@ -177,7 +215,32 @@ private function export_csv($title, $columns, $rows, $meta)
 
         $this->write_csv_metadata($handle, $title, $meta, $columns);
         $this->write_csv_header($handle, $columns);
-        $this->write_csv_data($handle, $columns, $rows);
+
+        $cursor = NULL;
+        while (TRUE) {
+            $rows = $this->report_service->export_rows_chunk(
+                $report,
+                $search,
+                $filters,
+                $cursor,
+                self::CSV_EXPORT_CHUNK_SIZE
+            );
+
+            if (empty($rows)) {
+                break;
+            }
+
+            $next_cursor = $this->report_service->next_export_cursor($report, end($rows));
+
+            if ($next_cursor === $cursor) {
+                throw new RuntimeException('The CSV export could not advance to the next row batch.');
+            }
+
+            $this->write_csv_data($handle, $columns, $rows);
+            $cursor = $next_cursor;
+            unset($rows);
+        }
+
         $this->log_successful_export('csv');
     } finally {
         fclose($handle);

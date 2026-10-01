@@ -42,5 +42,24 @@ class ReportRulesTest extends TestCase {
         $this->assertContains('unit', array_keys($columns));
         $this->assertContains('i.category_name_snapshot', $order_columns);
         $this->assertContains('i.unit_snapshot', $order_columns);
+        $this->assertSame('Net Quantity', $columns['quantity']);
+        $this->assertSame('quantity', $order_columns[6]);
+    }
+
+    public function testMovementSummaryNetsStockInOutAndAdjustmentDirections() {
+        $service = (new ReflectionClass(Report_service::class))->newInstanceWithoutConstructor();
+        $summary_method = new ReflectionMethod(Report_service::class, 'summary');
+        $summary_method->setAccessible(TRUE);
+
+        $summary = $summary_method->invoke($service, 'movement', array(
+            array('quantity' => 10, 'cost_price' => 2.00),
+            array('quantity' => -3, 'cost_price' => 2.00),
+            array('quantity' => -2, 'cost_price' => 2.00),
+            array('quantity' => 5, 'cost_price' => 2.00)
+        ));
+
+        $this->assertSame('10', $summary['Net Stock Change']);
+        $this->assertSame('₱20.00', $summary['Net Movement Value']);
+        $this->assertArrayNotHasKey('Total Quantity', $summary);
     }
 }
