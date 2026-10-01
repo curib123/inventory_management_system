@@ -12,6 +12,7 @@ body {
 
     width: 292px;
     height: 100vh;
+    height: 100dvh;
     position: fixed;
     top: 0;
     left: 0;
@@ -28,6 +29,7 @@ body {
 }
 
 .sidebar-brand {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -208,6 +210,7 @@ body {
 }
 
 .sidebar-avatar {
+    position: relative;
     width: 30px;
     height: 30px;
     flex: 0 0 30px;
@@ -283,12 +286,13 @@ body {
 
 
 .main-content {
-    margin-left: 304px;
+    margin-left: 292px;
     min-height: 100vh;
     min-width: 0;
 }
 
 .topbar {
+    gap: 16px;
     height: 72px;
     padding: 0 28px;
     background:
@@ -302,6 +306,8 @@ body {
 }
 
 .topbar-context {
+    min-width: 0;
+    flex: 1 1 0;
     gap: 14px;
 }
 
@@ -310,6 +316,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 2px;
+    flex: 1 1 auto;
+    overflow: hidden;
 }
 
 .topbar-eyebrow {
@@ -331,6 +339,7 @@ body {
 }
 
 .mobile-toggle {
+    flex-shrink: 0;
     display: none;
     width: 40px;
     height: 40px;
