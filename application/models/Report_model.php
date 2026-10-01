@@ -20,10 +20,9 @@ class Report_model extends CI_Model {
     }
     // Data helper ni para get stock movement report; main caller/integration pangitaa sa application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_stock_movement_report($type = NULL) {
-        $this->db->select("t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at, a.system_stock, a.actual_stock, a.difference", FALSE);
+        $this->db->select("t.transaction_no, t.type, i.product_code_snapshot AS product_code, i.product_name_snapshot AS product_name, i.category_name_snapshot AS category_name, i.unit_snapshot AS unit, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at, a.system_stock, a.actual_stock, a.difference", FALSE);
         $this->db->from('stock_transactions t');
         $this->db->join('stock_transaction_items i', 'i.transaction_id = t.id');
-        $this->db->join('products p', 'p.id = i.product_id');
         $this->db->join('stock_adjustments a', 'a.transaction_id = t.id AND a.product_id = i.product_id', 'left');
         $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
         $this->db->join('users u', 'u.id = t.created_by');
@@ -97,7 +96,7 @@ class Report_model extends CI_Model {
             return;
         }
 
-        $columns = "t.transaction_no, t.type, p.product_code, p.product_name, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at";
+        $columns = "t.transaction_no, t.type, i.product_code_snapshot AS product_code, i.product_name_snapshot AS product_name, i.category_name_snapshot AS category_name, i.unit_snapshot AS unit, i.quantity, i.cost_price, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, u.username, t.remarks, t.created_at";
         if ($report === 'movement') {
             $columns .= ', a.system_stock, a.actual_stock, a.difference';
         }
@@ -169,7 +168,6 @@ class Report_model extends CI_Model {
 
         $this->db->from('stock_transactions t');
         $this->db->join('stock_transaction_items i', 'i.transaction_id = t.id');
-        $this->db->join('products p', 'p.id = i.product_id');
         $this->db->join('stock_adjustments a', 'a.transaction_id = t.id AND a.product_id = i.product_id', 'left');
         $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
         $this->db->join('users u', 'u.id = t.created_by');
@@ -187,14 +185,16 @@ class Report_model extends CI_Model {
         }
 
         $this->apply_report_date_filter('t.created_at', $filters);
-        $this->apply_product_reference_filters('p', 't.supplier_id', $filters);
+        $this->apply_product_reference_filters('i', 't.supplier_id', $filters, 'i.category_id_snapshot');
 
         if ($search !== '') {
             $this->db->group_start();
             $this->db->like('t.transaction_no', $search);
             $this->db->or_like('t.type', $search);
-            $this->db->or_like('p.product_code', $search);
-            $this->db->or_like('p.product_name', $search);
+            $this->db->or_like('i.product_code_snapshot', $search);
+            $this->db->or_like('i.product_name_snapshot', $search);
+            $this->db->or_like('i.category_name_snapshot', $search);
+            $this->db->or_like('i.unit_snapshot', $search);
             $this->db->or_like('s.supplier_name', $search);
 
             if (stripos('Unassigned Products', $search) !== FALSE) {
@@ -209,11 +209,11 @@ class Report_model extends CI_Model {
     }
 
     // Query helper ni para shared category/supplier filters across snapshot and transaction reports.
-    private function apply_product_reference_filters($product_alias, $supplier_column, $filters) {
+    private function apply_product_reference_filters($product_alias, $supplier_column, $filters, $category_column = NULL) {
         $category_id = isset($filters['category']) ? (int) $filters['category'] : 0;
 
         if ($category_id > 0) {
-            $this->db->where($product_alias . '.category_id', $category_id);
+            $this->db->where($category_column ?: $product_alias . '.category_id', $category_id);
         }
 
         $supplier = isset($filters['supplier'])

@@ -41,7 +41,12 @@ class Stock_model extends CI_Model {
     // Persistence helper ni para lock product row; application/libraries/Stock_service.php ang caller inside DB transaction para safe concurrent stock update.
     public function get_product_for_update($product_id) {
         return $this->db
-            ->query('SELECT * FROM products WHERE id = ? FOR UPDATE', array((int) $product_id))
+            ->query(
+                'SELECT p.*, c.category_name FROM products p ' .
+                'LEFT JOIN categories c ON c.id = p.category_id ' .
+                'WHERE p.id = ? FOR UPDATE',
+                array((int) $product_id)
+            )
             ->row();
     }
 
@@ -92,9 +97,8 @@ public function get_product_adjustments($product_id) {
 
     // Data helper ni para get transaction items; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_transaction_items($transaction_id) {
-        $this->db->select('i.*, p.product_code, p.product_name, p.unit, a.system_stock, a.actual_stock, a.difference AS adjustment_difference');
+        $this->db->select('i.*, i.product_code_snapshot AS product_code, i.product_name_snapshot AS product_name, i.category_name_snapshot AS category_name, i.unit_snapshot AS unit, a.system_stock, a.actual_stock, a.difference AS adjustment_difference');
         $this->db->from('stock_transaction_items i');
-        $this->db->join('products p', 'p.id = i.product_id');
         $this->db->join('stock_adjustments a', 'a.transaction_id = i.transaction_id AND a.product_id = i.product_id', 'left');
         $this->db->where('i.transaction_id', (int) $transaction_id);
         return $this->db->get()->result();

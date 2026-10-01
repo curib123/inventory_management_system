@@ -870,6 +870,17 @@ WHERE p.product_code = 'ELEC-003'
   );
 
 
+UPDATE stock_transaction_items i
+JOIN products p ON p.id = i.product_id
+JOIN categories c ON c.id = p.category_id
+SET i.product_code_snapshot = p.product_code,
+    i.product_name_snapshot = p.product_name,
+    i.category_id_snapshot = p.category_id,
+    i.category_name_snapshot = c.category_name,
+    i.unit_snapshot = p.unit,
+    i.metadata_snapshot_source = 'reconstructed'
+WHERE i.product_code_snapshot IS NULL;
+
 -- ------------------------------------------------------------
 -- 8. ACTIVITY LOGS
 -- ------------------------------------------------------------

@@ -111,7 +111,13 @@ class Stock_service {
                 'transaction_id' => $transaction_id,
                 'product_id' => $product_id,
                 'quantity' => $quantity,
-                'cost_price' => $product->cost_price
+                'cost_price' => $product->cost_price,
+                'product_code_snapshot' => $product->product_code,
+                'product_name_snapshot' => $product->product_name,
+                'category_id_snapshot' => (int) $product->category_id,
+                'category_name_snapshot' => $product->category_name,
+                'unit_snapshot' => $product->unit,
+                'metadata_snapshot_source' => 'transaction'
             ))) {
                 $this->CI->db->trans_rollback();
                 return array('success' => FALSE, 'message' => 'A stock transaction item could not be saved.');
@@ -216,7 +222,13 @@ class Stock_service {
             'transaction_id' => $transaction_id,
             'product_id' => $product_id,
             'quantity' => abs($difference),
-            'cost_price' => $locked_product->cost_price
+            'cost_price' => $locked_product->cost_price,
+            'product_code_snapshot' => $locked_product->product_code,
+            'product_name_snapshot' => $locked_product->product_name,
+            'category_id_snapshot' => (int) $locked_product->category_id,
+            'category_name_snapshot' => $locked_product->category_name,
+            'unit_snapshot' => $locked_product->unit,
+            'metadata_snapshot_source' => 'transaction'
         ));
 
         $this->CI->Stock_model->update_product_stock($product_id, $actual_stock);

@@ -2,6 +2,8 @@
 
 use PHPUnit\Framework\TestCase;
 
+require_once dirname(__DIR__) . '/application/libraries/Report_service.php';
+
 class ReportRulesTest extends TestCase {
 
     // QA ni para stock-in report mapping; definition should point to the correct transaction type and model method.
@@ -28,5 +30,17 @@ class ReportRulesTest extends TestCase {
         $this->assertTrue($rules->export_format_is_supported('xlsx'));
         $this->assertTrue($rules->export_format_is_supported('pdf'));
         $this->assertFalse($rules->export_format_is_supported('xml'));
+    }
+
+    public function testMovementReportSnapshotColumnsHaveMatchingOrderMappings() {
+        $service = (new ReflectionClass(Report_service::class))->newInstanceWithoutConstructor();
+        $columns = $service->columns('movement');
+        $order_columns = $service->order_columns('movement');
+
+        $this->assertSame(count($columns), count($order_columns));
+        $this->assertContains('category_name', array_keys($columns));
+        $this->assertContains('unit', array_keys($columns));
+        $this->assertContains('i.category_name_snapshot', $order_columns);
+        $this->assertContains('i.unit_snapshot', $order_columns);
     }
 }

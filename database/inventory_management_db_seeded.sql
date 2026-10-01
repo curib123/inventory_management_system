@@ -341,6 +341,25 @@ INSERT INTO `stock_transaction_items` VALUES (1,1,1,160,120.00,'2025-11-12 02:00
 /*!40000 ALTER TABLE `stock_transaction_items` ENABLE KEYS */;
 UNLOCK TABLES;
 
+ALTER TABLE stock_transaction_items
+  ADD COLUMN product_code_snapshot varchar(50) DEFAULT NULL,
+  ADD COLUMN product_name_snapshot varchar(150) DEFAULT NULL,
+  ADD COLUMN category_id_snapshot int(11) DEFAULT NULL,
+  ADD COLUMN category_name_snapshot varchar(100) DEFAULT NULL,
+  ADD COLUMN unit_snapshot varchar(50) DEFAULT NULL,
+  ADD COLUMN metadata_snapshot_source enum('transaction','reconstructed') NOT NULL DEFAULT 'reconstructed',
+  ADD KEY idx_items_category_snapshot (category_id_snapshot);
+
+UPDATE stock_transaction_items i
+JOIN products p ON p.id = i.product_id
+JOIN categories c ON c.id = p.category_id
+SET i.product_code_snapshot = p.product_code,
+    i.product_name_snapshot = p.product_name,
+    i.category_id_snapshot = p.category_id,
+    i.category_name_snapshot = c.category_name,
+    i.unit_snapshot = p.unit,
+    i.metadata_snapshot_source = 'reconstructed';
+
 --
 -- Table structure for table `stock_transactions`
 --
@@ -399,7 +418,7 @@ CREATE TABLE `suppliers` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
-  KEY `idx_suppliers_name` (`supplier_name`)
+  UNIQUE KEY `uq_suppliers_name` (`supplier_name`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

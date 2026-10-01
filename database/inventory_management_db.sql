@@ -172,7 +172,7 @@ CREATE TABLE suppliers (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
-    KEY idx_suppliers_name (supplier_name)
+    UNIQUE KEY uq_suppliers_name (supplier_name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- -------------------------------------------------------------------
@@ -243,11 +243,18 @@ CREATE TABLE stock_transaction_items (
     product_id INT NOT NULL,
     quantity INT NOT NULL,
     cost_price DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    product_code_snapshot VARCHAR(50) DEFAULT NULL,
+    product_name_snapshot VARCHAR(150) DEFAULT NULL,
+    category_id_snapshot INT DEFAULT NULL,
+    category_name_snapshot VARCHAR(100) DEFAULT NULL,
+    unit_snapshot VARCHAR(50) DEFAULT NULL,
+    metadata_snapshot_source ENUM('transaction', 'reconstructed') NOT NULL DEFAULT 'reconstructed',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     KEY idx_items_transaction (transaction_id),
     KEY idx_items_product (product_id),
+    KEY idx_items_category_snapshot (category_id_snapshot),
     CONSTRAINT fk_transaction_items_transaction
         FOREIGN KEY (transaction_id) REFERENCES stock_transactions(id)
         ON UPDATE CASCADE

@@ -127,6 +127,30 @@ class ReportModelDateFilterTest extends TestCase {
         $this->assertStringContainsString('a.system_stock, a.actual_stock, a.difference', implode(' ', $model->db->selects));
     }
 
+    public function testMovementReportUsesProductAndCategorySnapshots() {
+        $model = new TestableReportModel();
+
+        $model->get_export_rows('movement', '', array('category' => 4));
+
+        $selected_columns = implode(' ', $model->db->selects);
+        $this->assertStringContainsString('i.product_code_snapshot AS product_code', $selected_columns);
+        $this->assertStringContainsString('i.product_name_snapshot AS product_name', $selected_columns);
+        $this->assertStringContainsString('i.category_name_snapshot AS category_name', $selected_columns);
+        $this->assertContains(array('i.category_id_snapshot', 4, NULL), $model->db->wheres);
+        $this->assertNotContains(array('products p', 'p.id = i.product_id', ''), $model->db->joins);
+    }
+
+    public function testLegacyMovementReportUsesProductSnapshots() {
+        $model = new TestableReportModel();
+
+        $model->get_stock_movement_report();
+
+        $selected_columns = implode(' ', $model->db->selects);
+        $this->assertStringContainsString('i.product_code_snapshot AS product_code', $selected_columns);
+        $this->assertStringContainsString('i.category_name_snapshot AS category_name', $selected_columns);
+        $this->assertNotContains(array('products p', 'p.id = i.product_id', ''), $model->db->joins);
+    }
+
     private function containsDateFilter(array $clauses, $field) {
         foreach ($clauses as $clause) {
             if (is_array($clause) && isset($clause[0]) && strpos((string) $clause[0], $field) !== FALSE) {

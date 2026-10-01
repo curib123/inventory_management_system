@@ -37,7 +37,12 @@ class Issue009StockModelStub {
             'supplier_id' => 2,
             'status' => 1,
             'stock' => 10,
-            'cost_price' => 25.50
+            'cost_price' => 25.50,
+            'product_code' => 'OFF-002',
+            'product_name' => 'Stapler',
+            'category_id' => 3,
+            'category_name' => 'Office Supplies',
+            'unit' => 'piece'
         );
     }
 
@@ -75,6 +80,40 @@ class Issue009InputStub {
 class Issue009StockServiceDatabaseStub extends Issue009DatabaseStub {}
 
 class StockAdjustmentTransactionLinkTest extends TestCase {
+    public function testStockInTransactionItemStoresProductMetadataSnapshots() {
+        $stock_model = new Issue009StockModelStub();
+        $ci = (object) array(
+            'db' => new Issue009StockServiceDatabaseStub(),
+            'Product_model' => new Issue009ProductModelStub(),
+            'Supplier_model' => new Issue009SupplierModelStub(),
+            'Stock_model' => $stock_model,
+            'Activity_log_model' => new Issue009ActivityLogModelStub(),
+            'stock_rules' => new Stock_rules(),
+            'input' => new Issue009InputStub()
+        );
+
+        $service = (new ReflectionClass(Stock_service::class))->newInstanceWithoutConstructor();
+        $ci_property = new ReflectionProperty(Stock_service::class, 'CI');
+        $ci_property->setAccessible(TRUE);
+        $ci_property->setValue($service, $ci);
+
+        $result = $service->create_transaction(
+            'stock_in',
+            '2',
+            'Restock',
+            7,
+            array(array('product_id' => 9, 'quantity' => 3))
+        );
+
+        $this->assertTrue($result['success']);
+        $this->assertSame('OFF-002', $stock_model->transaction_item['product_code_snapshot']);
+        $this->assertSame('Stapler', $stock_model->transaction_item['product_name_snapshot']);
+        $this->assertSame(3, $stock_model->transaction_item['category_id_snapshot']);
+        $this->assertSame('Office Supplies', $stock_model->transaction_item['category_name_snapshot']);
+        $this->assertSame('piece', $stock_model->transaction_item['unit_snapshot']);
+        $this->assertSame('transaction', $stock_model->transaction_item['metadata_snapshot_source']);
+    }
+
     public function testAdjustmentAndTransactionItemUseTheCreatedTransactionId() {
         $stock_model = new Issue009StockModelStub();
         $ci = (object) array(
@@ -98,5 +137,11 @@ class StockAdjustmentTransactionLinkTest extends TestCase {
         $this->assertSame(314, $stock_model->adjustment['transaction_id']);
         $this->assertSame(314, $stock_model->transaction_item['transaction_id']);
         $this->assertSame(9, $stock_model->transaction_item['product_id']);
+        $this->assertSame('OFF-002', $stock_model->transaction_item['product_code_snapshot']);
+        $this->assertSame('Stapler', $stock_model->transaction_item['product_name_snapshot']);
+        $this->assertSame(3, $stock_model->transaction_item['category_id_snapshot']);
+        $this->assertSame('Office Supplies', $stock_model->transaction_item['category_name_snapshot']);
+        $this->assertSame('piece', $stock_model->transaction_item['unit_snapshot']);
+        $this->assertSame('transaction', $stock_model->transaction_item['metadata_snapshot_source']);
     }
 }

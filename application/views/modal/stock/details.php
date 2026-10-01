@@ -22,6 +22,7 @@ $this->load->view('components/modal/header', array(
                 <tr>
                     <th>Product Code</th>
                     <th>Product</th>
+                    <th>Category</th>
                     <th>Quantity</th>
                     <th>Unit</th>
                     <th>Cost Price</th>
@@ -37,6 +38,7 @@ $this->load->view('components/modal/header', array(
                     <tr>
                         <td><?php echo html_escape($item->product_code); ?></td>
                         <td><?php echo html_escape($item->product_name); ?></td>
+                        <td><?php echo html_escape($item->category_name); ?></td>
                         <td><?php echo (int) $item->quantity; ?></td>
                         <td><?php echo html_escape($item->unit); ?></td>
                         <td><?php echo number_format((float) $item->cost_price, 2); ?></td>
@@ -47,7 +49,7 @@ $this->load->view('components/modal/header', array(
                         <?php endif; ?>
                     </tr>
                 <?php endforeach; else: ?>
-                    <tr><td colspan="<?php echo $transaction->type === 'adjustment' ? 8 : 5; ?>" class="text-center text-body-secondary py-4">No transaction items found.</td></tr>
+                    <tr><td colspan="<?php echo $transaction->type === 'adjustment' ? 9 : 6; ?>" class="text-center text-body-secondary py-4">No transaction items found.</td></tr>
                 <?php endif; ?>
             </tbody>
         </table>
