@@ -45,7 +45,21 @@ class Stock_model extends CI_Model {
             ->row();
     }
 
-  
+// Data helper ni para get adjustment history sa usa ka product; Product_service ang caller para one product ra ang adjustment audit trail.
+public function get_product_adjustments($product_id) {
+    $this->db->select(
+        'a.id, a.system_stock, a.actual_stock, a.difference, a.reason, a.created_at, u.username'
+    );
+    $this->db->from('stock_adjustments a');
+    $this->db->join('users u', 'u.id = a.created_by');
+    $this->db->where('a.product_id', (int) $product_id);
+    $this->db->order_by('a.created_at', 'DESC');
+    $this->db->order_by('a.id', 'DESC');
+
+    return $this->db->get()->result();
+}
+
+
     // Data helper ni para get transactions; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_transactions($limit = NULL, $offset = 0) {
         $this->db->select("t.*, u.username, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name", FALSE);
@@ -84,25 +98,28 @@ class Stock_model extends CI_Model {
         return $this->db->get()->result();
     }
 
-    // Data helper ni para product transaction movements; Product_service ang caller para one product ra ang full Stock In/Out audit trail.
-    public function get_product_transaction_movements($product_id) {
-        $this->db->select(
-            "t.id AS source_id, t.transaction_no, t.type, i.quantity, i.cost_price, " .
-            "COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, " .
-            "u.username, t.remarks, t.created_at",
-            FALSE
-        );
-        $this->db->from('stock_transaction_items i');
-        $this->db->join('stock_transactions t', 't.id = i.transaction_id');
-        $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
-        $this->db->join('users u', 'u.id = t.created_by');
-        $this->db->where('i.product_id', (int) $product_id);
-        $this->db->where_in('t.type', array('stock_in', 'stock_out', 'adjustment'));
-        $this->db->order_by('t.created_at', 'DESC');
-        $this->db->order_by('t.id', 'DESC');
+   
+// Data helper ni para get product stock-in/out movements; Product_service ang caller para one product ra ang full Stock In/Out audit trail.
+public function get_product_transaction_movements($product_id) {
+    $this->db->select(
+        "t.id AS source_id, t.transaction_no, t.type, i.quantity, i.cost_price, " .
+        "COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name, " .
+        "u.username, t.remarks, t.created_at",
+        FALSE
+    );
+    $this->db->from('stock_transaction_items i');
+    $this->db->join('stock_transactions t', 't.id = i.transaction_id');
+    $this->db->join('suppliers s', 's.id = t.supplier_id', 'left');
+    $this->db->join('users u', 'u.id = t.created_by');
+    $this->db->where('i.product_id', (int) $product_id);
+    $this->db->where_in('t.type', array('stock_in', 'stock_out'));
+    $this->db->order_by('t.created_at', 'DESC');
+    $this->db->order_by('t.id', 'DESC');
 
-        return $this->db->get()->result_array();
-    }
+    return $this->db->get()->result_array();
+}
+
+
 
     // Data helper ni para get adjustments; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_adjustments($limit = NULL, $offset = 0) {

@@ -301,83 +301,179 @@ public function save($id, $input, $current_product = NULL) {
         return array('success' => TRUE, 'product' => $product);
     }
 
+
     // Business flow ni para product movement history; controller mohatag product ID ug sort, service mo-combine Stock In/Out + adjustments into one audit timeline.
-    public function movement_history($id, $sort = 'desc') {
-        $id = (int) $id;
-        $product = $this->CI->Product_model->get_by_id($id);
+      public function movement_history($id, $sort = 'desc') {
+    $id = (int) $id;
+    $product = $this->CI->Product_model->get_by_id($id);
 
-        if (!$product) {
-            return array(
-                'success' => FALSE,
-                'not_found' => TRUE,
-                'product' => NULL,
-                'movements' => array(),
-                'summary' => array()
-            );
-        }
-
-        $movements = array();
-
-        foreach ($this->CI->Stock_model->get_product_transaction_movements($id) as $row) {
-            $type = isset($row['type']) ? (string) $row['type'] : '';
-            $quantity = isset($row['quantity']) ? (int) $row['quantity'] : 0;
-
-            $movements[] = array(
-                'source_id' => isset($row['source_id']) ? (int) $row['source_id'] : 0,
-                'type' => $type,
-                'type_label' => $type === 'stock_in' ? 'Stock In' : 'Stock Out',
-                'transaction_no' => isset($row['transaction_no']) ? (string) $row['transaction_no'] : '',
-                'quantity' => $quantity,
-                'signed_quantity' => $type === 'stock_out' ? -$quantity : $quantity,
-                'cost_price' => isset($row['cost_price']) ? (float) $row['cost_price'] : 0.0,
-                'supplier_name' => isset($row['supplier_name']) ? (string) $row['supplier_name'] : 'Unassigned Products',
-                'username' => isset($row['username']) ? (string) $row['username'] : '',
-                'remarks' => isset($row['remarks']) ? trim((string) $row['remarks']) : '',
-                'system_stock' => NULL,
-                'actual_stock' => NULL,
-                'difference' => NULL,
-                'created_at' => isset($row['created_at']) ? (string) $row['created_at'] : ''
-            );
-        }
-
-        $sort = strtolower((string) $sort) === 'asc' ? 'asc' : 'desc';
-
-        usort($movements, function ($left, $right) use ($sort) {
-            $left_time = strtotime(isset($left['created_at']) ? $left['created_at'] : '') ?: 0;
-            $right_time = strtotime(isset($right['created_at']) ? $right['created_at'] : '') ?: 0;
-
-            if ($left_time === $right_time) {
-                $left_id = isset($left['source_id']) ? (int) $left['source_id'] : 0;
-                $right_id = isset($right['source_id']) ? (int) $right['source_id'] : 0;
-                $comparison = $left_id <=> $right_id;
-            } else {
-                $comparison = $left_time <=> $right_time;
-            }
-
-            return $sort === 'asc' ? $comparison : -$comparison;
-        });
-
-        $summary = array(
-            'total' => count($movements),
-            'stock_in' => 0,
-            'stock_out' => 0,
-            'adjustment' => 0
-        );
-
-        foreach ($movements as $movement) {
-            if (isset($summary[$movement['type']])) {
-                $summary[$movement['type']]++;
-            }
-        }
-
+    if (!$product) {
         return array(
-            'success' => TRUE,
-            'product' => $product,
-            'movements' => $movements,
-            'summary' => $summary,
-            'sort' => $sort
+            'success' => FALSE,
+            'not_found' => TRUE,
+            'product' => NULL,
+            'movements' => array(),
+            'summary' => array()
         );
     }
+
+    $movements = array();
+    $seen_keys = array();
+
+    $add_movement = function ($movement) use (&$movements, &$seen_keys) {
+        $type = isset($movement['type']) ? (string) $movement['type'] : '';
+        $source_id = isset($movement['source_id']) ? (int) $movement['source_id'] : 0;
+        $key = $type !== '' && $source_id > 0 ? $type . ':' . $source_id : '';
+
+        if ($key !== '' && isset($seen_keys[$key])) {
+            $existing_index = $seen_keys[$key];
+            $existing = $movements[$existing_index];
+            $existing_is_adjustment = (isset($existing['type']) && (string) $existing['type'] === 'adjustment');
+            $incoming_is_adjustment = $type === 'adjustment';
+
+            if ($incoming_is_adjustment && $existing_is_adjustment) {
+                $existing_stock = isset($existing['system_stock']) ? $existing['system_stock'] : NULL;
+                $incoming_stock = isset($movement['system_stock']) ? $movement['system_stock'] : NULL;
+                $existing_actual = isset($existing['actual_stock']) ? $existing['actual_stock'] : NULL;
+                $incoming_actual = isset($movement['actual_stock']) ? $movement['actual_stock'] : NULL;
+                $existing_reason = isset($existing['remarks']) ? trim((string) $existing['remarks']) : '';
+                $incoming_reason = isset($movement['remarks']) ? trim((string) $movement['remarks']) : '';
+
+                $should_replace = (
+                    ($incoming_stock !== NULL && $existing_stock === NULL) ||
+                    ($incoming_actual !== NULL && $existing_actual === NULL) ||
+                    (($incoming_reason !== '') && ($existing_reason === '')) ||
+                    ($incoming['difference'] !== NULL && $existing['difference'] === NULL)
+                );
+
+                if ($should_replace) {
+                    $movements[$existing_index] = $movement;
+                }
+
+                return;
+            }
+
+            return;
+        }
+
+        if ($key !== '') {
+            $seen_keys[$key] = count($movements);
+        }
+
+        $movements[] = $movement;
+    };
+
+    // Build Stock In / Stock Out rows.
+    foreach ($this->CI->Stock_model->get_product_transaction_movements($id) as $row) {
+        $type = isset($row['type']) ? (string) $row['type'] : '';
+        $quantity = isset($row['quantity']) ? (int) $row['quantity'] : 0;
+        $difference = isset($row['difference']) ? (int) $row['difference'] : $quantity;
+        $signed_quantity = $quantity;
+
+        if ($type === 'stock_out') {
+            $signed_quantity = -$quantity;
+        } elseif ($type === 'adjustment') {
+            $signed_quantity = $difference;
+        }
+
+        $add_movement(array(
+            'source_id' => isset($row['source_id']) ? (int) $row['source_id'] : 0,
+            'type' => $type,
+            'type_label' => $type === 'stock_in'
+                ? 'Stock In'
+                : ($type === 'stock_out' ? 'Stock Out' : 'Adjustment'),
+            'transaction_no' => isset($row['transaction_no']) ? (string) $row['transaction_no'] : '',
+            'quantity' => $quantity,
+            'signed_quantity' => $signed_quantity,
+            'cost_price' => isset($row['cost_price']) ? (float) $row['cost_price'] : 0.0,
+            'supplier_name' => isset($row['supplier_name'])
+                ? (string) $row['supplier_name']
+                : 'Unassigned Products',
+            'username' => isset($row['username']) ? (string) $row['username'] : '',
+            'remarks' => isset($row['remarks']) ? trim((string) $row['remarks']) : '',
+            'system_stock' => $type === 'adjustment' ? (isset($row['system_stock']) ? (int) $row['system_stock'] : NULL) : NULL,
+            'actual_stock' => $type === 'adjustment' ? (isset($row['actual_stock']) ? (int) $row['actual_stock'] : NULL) : NULL,
+            'difference' => $type === 'adjustment' ? $signed_quantity : NULL,
+            'created_at' => isset($row['created_at']) ? (string) $row['created_at'] : ''
+        ));
+    }
+
+    // Build Adjustment rows separately from stock_adjustments.
+    foreach ($this->CI->Stock_model->get_product_adjustments($id) as $row) {
+        $difference = (int) $this->extract_row_value($row, 'difference', 0);
+        $source_id = (int) $this->extract_row_value($row, 'id', 0);
+
+        $add_movement(array(
+            'source_id' => $source_id,
+            'type' => 'adjustment',
+            'type_label' => 'Adjustment',
+            'transaction_no' => '',
+            'quantity' => abs($difference),
+            'signed_quantity' => $difference,
+            'cost_price' => 0.0,
+            'supplier_name' => '',
+            'username' => (string) $this->extract_row_value($row, 'username', ''),
+            'remarks' => trim((string) $this->extract_row_value($row, 'reason', '')),
+            'system_stock' => $this->extract_row_value($row, 'system_stock', NULL),
+            'actual_stock' => $this->extract_row_value($row, 'actual_stock', NULL),
+            'difference' => $difference,
+            'created_at' => (string) $this->extract_row_value($row, 'created_at', '')
+        ));
+    }
+
+    // Sort the merged timeline once.
+    $sort = strtolower((string) $sort) === 'asc' ? 'asc' : 'desc';
+
+    usort($movements, function ($left, $right) use ($sort) {
+        $left_time = strtotime(isset($left['created_at']) ? $left['created_at'] : '') ?: 0;
+        $right_time = strtotime(isset($right['created_at']) ? $right['created_at'] : '') ?: 0;
+
+        if ($left_time === $right_time) {
+            $left_id = isset($left['source_id']) ? (int) $left['source_id'] : 0;
+            $right_id = isset($right['source_id']) ? (int) $right['source_id'] : 0;
+            $comparison = $left_id <=> $right_id;
+        } else {
+            $comparison = $left_time <=> $right_time;
+        }
+
+        return $sort === 'asc' ? $comparison : -$comparison;
+    });
+
+    $summary = array(
+        'total' => count($movements),
+        'stock_in' => 0,
+        'stock_out' => 0,
+        'adjustment' => 0
+    );
+
+    foreach ($movements as $movement) {
+        if (isset($summary[$movement['type']])) {
+            $summary[$movement['type']]++;
+        }
+    }
+
+    return array(
+        'success' => TRUE,
+        'product' => $product,
+        'movements' => $movements,
+        'summary' => $summary,
+        'sort' => $sort
+    );
+      }
+
+    private function extract_row_value($row, $key, $default = NULL) {
+        if (is_array($row) && array_key_exists($key, $row)) {
+            return $row[$key];
+        }
+
+        if (is_object($row) && property_exists($row, $key)) {
+            return $row->$key;
+        }
+
+        return $default;
+    }
+
+
 
     // Search option builder ni para categories; application/controllers/Products.php ang caller para controller dili na mag-format lookup data.
     public function category_options($query, $limit = 20) {

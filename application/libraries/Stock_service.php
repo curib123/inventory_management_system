@@ -166,11 +166,8 @@ class Stock_service {
             return array('success' => FALSE, 'message' => 'The selected product is invalid or inactive.');
         }
 
-        $scope_result = $this->validate_adjustment_scope($supplier_scope, $product);
-
-        if (!$scope_result['success']) {
-            return $scope_result;
-        }
+        $scope_result = $this->validate_adjustment_scope($supplier_scope, $product); if (!$scope_result['success']) { return $scope_result; } 
+        $transaction_supplier_id = $scope_result['supplier_id'];
 
         if ($reason === '') {
             return array('success' => FALSE, 'message' => 'A reason is required for the stock adjustment.');
@@ -195,7 +192,7 @@ class Stock_service {
         $transaction_id = $this->CI->Stock_model->insert_transaction(array(
             'transaction_no' => $transaction_no,
             'type' => 'adjustment',
-            'supplier_id' => $supplier_scope,
+            'supplier_id' => $transaction_supplier_id,
             'remarks' => $reason,
             'created_by' => (int) $user_id
         ));
@@ -327,28 +324,47 @@ class Stock_service {
     }
 
     // Internal helper ni para adjustment supplier scope; tawagon ra sulod Stock_service para selected product sakto jud sa chosen supplier scope.
-    private function validate_adjustment_scope($supplier_scope, $product) {
-        $supplier_scope = trim((string) $supplier_scope);
 
-        if ($supplier_scope === 'unassigned') {
-            return $product->supplier_id === NULL
-                ? array('success' => TRUE)
-                : array('success' => FALSE, 'message' => 'The selected product is not an unassigned product.');
+     private function validate_adjustment_scope($supplier_scope, $product) {
+    $supplier_scope = trim((string) $supplier_scope);
+
+    if ($supplier_scope === 'unassigned') {
+        if ($product->supplier_id !== NULL) {
+            return array(
+                'success' => FALSE,
+                'message' => 'The selected product is not an unassigned product.'
+            );
         }
 
-        if (!ctype_digit($supplier_scope) || (int) $supplier_scope <= 0) {
-            return array('success' => FALSE, 'message' => 'Select a valid supplier before choosing a product.');
-        }
-
-        $supplier_id = (int) $supplier_scope;
-        $supplier = $this->CI->Supplier_model->get_by_id($supplier_id);
-
-        if (!$supplier || !(int) $supplier->status || (int) $product->supplier_id !== $supplier_id) {
-            return array('success' => FALSE, 'message' => 'The selected product does not belong to the selected supplier.');
-        }
-
-        return array('success' => TRUE);
+        return array(
+            'success' => TRUE,
+            'supplier_id' => NULL
+        );
     }
+
+    if (!ctype_digit($supplier_scope) || (int) $supplier_scope <= 0) {
+        return array(
+            'success' => FALSE,
+            'message' => 'Select a valid supplier before choosing a product.'
+        );
+    }
+
+    $supplier_id = (int) $supplier_scope;
+    $supplier = $this->CI->Supplier_model->get_by_id($supplier_id);
+
+    if (!$supplier || !(int) $supplier->status || (int) $product->supplier_id !== $supplier_id) {
+        return array(
+            'success' => FALSE,
+            'message' => 'The selected product does not belong to the selected supplier.'
+        );
+    }
+
+    return array(
+        'success' => TRUE,
+        'supplier_id' => $supplier_id
+    );
+}
+
 
     // Internal helper ni para normalize transaction items; tawagon ra sulod Stock_service para duplicate products ma-combine ug quantities ma-validate safely.
     private function normalize_items($items) {
