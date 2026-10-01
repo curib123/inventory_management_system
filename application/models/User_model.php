@@ -281,4 +281,5 @@ class User_model extends CI_Model {
         $this->db->group_end();
     }
 }
+
 }

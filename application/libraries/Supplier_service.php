@@ -9,7 +9,7 @@ class Supplier_service {
     // Setup ni sa Supplier_service; gi-load ni sa application/controllers/Suppliers.php ug Stock.php para supplier business rules naa ra diri.
     public function __construct() {
         $this->CI =& get_instance();
-        $this->CI->load->model('Supplier_model');
+        $this->CI->load->model(array('Supplier_model','Activity_log_model'));
     }
 
     // Business flow ni para save supplier; application/controllers/Suppliers.php ang caller, while Supplier_model persistence/query ra.
@@ -29,6 +29,26 @@ class Supplier_service {
         if (!$this->CI->Supplier_model->save($payload, $id === NULL ? NULL : (int) $id)) {
             return array('success' => FALSE, 'message' => 'The supplier could not be saved.');
         }
+
+         // Get logged-in user's ID
+    $user_id = (int) $this->CI->session->userdata('user_id');
+
+    // Determine action
+    $action = $id === NULL
+        ? 'supplier_created'
+        : 'supplier_updated';
+
+    $description = $id === NULL
+        ? 'Created supplier: ' . $payload['supplier_name']
+        : 'Updated supplier: ' . $payload['supplier_name'];
+
+    // Activity log
+    $this->CI->Activity_log_model->insert_activity_log(array(
+        'user_id'     => $user_id,
+        'action'      => $action,
+        'description' => $description,
+        'ip_address'  => $this->CI->input->ip_address()
+    ));
 
         return array('success' => TRUE);
     }
@@ -56,6 +76,19 @@ class Supplier_service {
         if (!$this->CI->Supplier_model->delete($id)) {
             return array('success' => FALSE, 'message' => 'The supplier could not be deleted.');
         }
+
+        
+         // Get logged-in user's ID
+    $user_id = (int) $this->CI->session->userdata('user_id');
+
+    // Activity log
+    $this->CI->Activity_log_model->insert_activity_log(array(
+        'user_id'     => $user_id,
+        'action'      => 'supplier_deleted',
+        'description' => 'Deleted Supplier  : ' . $supplier->supplier_name ,
+        'ip_address'  => $this->CI->input->ip_address()
+    ));
+
 
         return array('success' => TRUE, 'supplier' => $supplier);
     }

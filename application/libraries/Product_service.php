@@ -9,62 +9,262 @@ class Product_service {
     // Setup ni sa Product_service; gi-load ni sa application/controllers/Products.php para diri tanan product business rules.
     public function __construct() {
         $this->CI =& get_instance();
-        $this->CI->load->model(array('Product_model', 'Category_model', 'Supplier_model', 'Stock_model'));
+        $this->CI->load->model(array('Product_model', 'Category_model', 'Supplier_model', 'Stock_model','Activity_log_model'));
     }
 
     // Business flow ni para save product; application/controllers/Products.php ang caller, while models query/persistence ra ang role.
-    public function save($id, $input, $current_product = NULL) {
-        $id = $id === NULL ? NULL : (int) $id;
-        $code = trim((string) (isset($input['product_code']) ? $input['product_code'] : ''));
-        $category_id = (int) (isset($input['category_id']) ? $input['category_id'] : 0);
-        $supplier_raw = isset($input['supplier_id']) ? $input['supplier_id'] : NULL;
-        $supplier_id = ($supplier_raw === '' || $supplier_raw === NULL) ? NULL : (int) $supplier_raw;
+  
+// Business flow ni para create product.
+public function create($input) {
 
-        if ($this->CI->Product_model->code_exists($code, $id)) {
-            return array('success' => FALSE, 'message' => 'That product code already exists.');
-        }
+    $code = trim((string) (
+        isset($input['product_code'])
+            ? $input['product_code']
+            : ''
+    ));
 
-        $category = $this->CI->Category_model->get_by_id($category_id);
-        $uses_existing_category =
-            $id !== NULL &&
-            $current_product &&
-            (int) $current_product->category_id === $category_id;
+    $category_id = (int) (
+        isset($input['category_id'])
+            ? $input['category_id']
+            : 0
+    );
 
-        if (!$category || (!(int) $category->status && !$uses_existing_category)) {
-            return array('success' => FALSE, 'message' => 'The selected category is invalid or inactive.');
-        }
+    $supplier_raw = isset($input['supplier_id'])
+        ? $input['supplier_id']
+        : NULL;
 
-        if ($supplier_id !== NULL) {
-            $supplier = $this->CI->Supplier_model->get_by_id($supplier_id);
-            $uses_existing_supplier =
-                $id !== NULL &&
-                $current_product &&
-                $current_product->supplier_id !== NULL &&
-                (int) $current_product->supplier_id === $supplier_id;
+    $supplier_id = (
+        $supplier_raw === '' ||
+        $supplier_raw === NULL
+    )
+        ? NULL
+        : (int) $supplier_raw;
 
-            if (!$supplier || (!(int) $supplier->status && !$uses_existing_supplier)) {
-                return array('success' => FALSE, 'message' => 'The selected supplier is invalid or inactive.');
-            }
-        }
 
-        $data = array(
-            'supplier_id' => $supplier_id,
-            'category_id' => $category_id,
-            'product_code' => $code,
-            'product_name' => trim((string) $input['product_name']),
-            'unit' => trim((string) $input['unit']),
-            'cost_price' => (float) $input['cost_price'],
-            'selling_price' => (float) $input['selling_price'],
-            'reorder_level' => (int) $input['reorder_level'],
-            'status' => isset($input['status']) && (int) $input['status'] === 0 ? 0 : 1
+    // Check duplicate product code
+    if ($this->CI->Product_model->code_exists($code, NULL)) {
+        return array(
+            'success' => FALSE,
+            'message' => 'That product code already exists.'
         );
-
-        if (!$this->CI->Product_model->save($data, $id)) {
-            return array('success' => FALSE, 'message' => 'The product could not be saved.');
-        }
-
-        return array('success' => TRUE);
     }
+
+
+    // Validate category
+    $category = $this->CI->Category_model->get_by_id($category_id);
+
+    if (!$category || !(int) $category->status) {
+        return array(
+            'success' => FALSE,
+            'message' => 'The selected category is invalid or inactive.'
+        );
+    }
+
+
+    // Validate supplier
+    if ($supplier_id !== NULL) {
+
+        $supplier = $this->CI->Supplier_model->get_by_id($supplier_id);
+
+        if (!$supplier || !(int) $supplier->status) {
+            return array(
+                'success' => FALSE,
+                'message' => 'The selected supplier is invalid or inactive.'
+            );
+        }
+    }
+
+
+    $data = array(
+        'supplier_id'   => $supplier_id,
+        'category_id'   => $category_id,
+        'product_code'  => $code,
+        'product_name'  => trim((string) $input['product_name']),
+        'unit'          => trim((string) $input['unit']),
+        'cost_price'    => (float) $input['cost_price'],
+        'selling_price' => (float) $input['selling_price'],
+        'reorder_level' => (int) $input['reorder_level'],
+        'status'        => isset($input['status']) &&
+                           (int) $input['status'] === 0
+                           ? 0
+                           : 1
+    );
+
+
+    // Create product
+    if (!$this->CI->Product_model->save($data, NULL)) {
+        return array(
+            'success' => FALSE,
+            'message' => 'The product could not be created.'
+        );
+    }
+
+
+    // Activity log
+    $this->CI->Activity_log_model->insert_activity_log(array(
+        'user_id'     => (int) $this->CI->session->userdata('user_id'),
+        'action'      => 'product_created',
+        'description' => 'Created product: ' . $data['product_name'],
+        'ip_address'  => $this->CI->input->ip_address()
+    ));
+
+
+    return array(
+        'success' => TRUE
+    );
+}
+
+// Business flow ni para update product.
+public function update($id, $input, $current_product = NULL) {
+
+    $id = (int) $id;
+
+    if ($id <= 0) {
+        return array(
+            'success' => FALSE,
+            'message' => 'Invalid product.'
+        );
+    }
+
+
+    // Get current product if controller did not provide it
+    if (!$current_product) {
+        $current_product = $this->CI->Product_model->get_by_id($id);
+    }
+
+    if (!$current_product) {
+        return array(
+            'success' => FALSE,
+            'message' => 'Product not found.'
+        );
+    }
+
+
+    $code = trim((string) (
+        isset($input['product_code'])
+            ? $input['product_code']
+            : ''
+    ));
+
+    $category_id = (int) (
+        isset($input['category_id'])
+            ? $input['category_id']
+            : 0
+    );
+
+    $supplier_raw = isset($input['supplier_id'])
+        ? $input['supplier_id']
+        : NULL;
+
+    $supplier_id = (
+        $supplier_raw === '' ||
+        $supplier_raw === NULL
+    )
+        ? NULL
+        : (int) $supplier_raw;
+
+
+    // Check duplicate product code
+    if ($this->CI->Product_model->code_exists($code, $id)) {
+        return array(
+            'success' => FALSE,
+            'message' => 'That product code already exists.'
+        );
+    }
+
+
+    // Validate category
+    $uses_existing_category =
+        (int) $current_product->category_id === $category_id;
+
+    $category = $this->CI->Category_model->get_by_id($category_id);
+
+    if (
+        !$category ||
+        (
+            !(int) $category->status &&
+            !$uses_existing_category
+        )
+    ) {
+        return array(
+            'success' => FALSE,
+            'message' => 'The selected category is invalid or inactive.'
+        );
+    }
+
+
+    // Validate supplier
+    if ($supplier_id !== NULL) {
+
+        $supplier = $this->CI->Supplier_model->get_by_id($supplier_id);
+
+        $uses_existing_supplier =
+            $current_product->supplier_id !== NULL &&
+            (int) $current_product->supplier_id === $supplier_id;
+
+        if (
+            !$supplier ||
+            (
+                !(int) $supplier->status &&
+                !$uses_existing_supplier
+            )
+        ) {
+            return array(
+                'success' => FALSE,
+                'message' => 'The selected supplier is invalid or inactive.'
+            );
+        }
+    }
+
+
+    $data = array(
+        'supplier_id'   => $supplier_id,
+        'category_id'   => $category_id,
+        'product_code'  => $code,
+        'product_name'  => trim((string) $input['product_name']),
+        'unit'          => trim((string) $input['unit']),
+        'cost_price'    => (float) $input['cost_price'],
+        'selling_price' => (float) $input['selling_price'],
+        'reorder_level' => (int) $input['reorder_level'],
+        'status'        => isset($input['status']) &&
+                           (int) $input['status'] === 0
+                           ? 0
+                           : 1
+    );
+
+
+    // Update product
+    if (!$this->CI->Product_model->save($data, $id)) {
+        return array(
+            'success' => FALSE,
+            'message' => 'The product could not be updated.'
+        );
+    }
+
+
+    // Activity log
+    $this->CI->Activity_log_model->insert_activity_log(array(
+        'user_id'     => (int) $this->CI->session->userdata('user_id'),
+        'action'      => 'product_updated',
+        'description' => 'Updated product: ' . $data['product_name'],
+        'ip_address'  => $this->CI->input->ip_address()
+    ));
+
+
+    return array(
+        'success' => TRUE
+    );
+}
+
+public function save($id, $input, $current_product = NULL) {
+
+    if ($id === NULL) {
+        return $this->create($input);
+    }
+
+    return $this->update($id, $input, $current_product);
+}
+
 
     // Business flow ni para delete product; application/controllers/Products.php ang caller, then transaction-history rule diri gi-enforce.
     public function delete($id, $execute = TRUE) {
@@ -89,6 +289,14 @@ class Product_service {
         if (!$this->CI->Product_model->delete($id)) {
             return array('success' => FALSE, 'message' => 'The product could not be deleted.');
         }
+
+          // Activity log
+    $this->CI->Activity_log_model->insert_activity_log(array(
+        'user_id'     => (int) $this->CI->session->userdata('user_id'),
+        'action'      => 'product_deleted',
+        'description' => 'Deleted product: ' . $product->product_name,
+        'ip_address'  => $this->CI->input->ip_address()
+    ));
 
         return array('success' => TRUE, 'product' => $product);
     }

@@ -9,73 +9,142 @@ class User_service {
     // Setup ni sa User_service; gi-load ni sa application/controllers/Users.php ug Auth.php para account business rules naa ra diri.
     public function __construct() {
         $this->CI =& get_instance();
-        $this->CI->load->model('User_model');
+        $this->CI->load->model(array('User_model','Activity_log_model'));
+
+
     }
 
-    // Business flow ni para create or update user; application/controllers/Users.php ang caller, including role validity ug temporary-password rules.
-    public function save($id, $input, $current_user = NULL, $current_session_user_id = 0) {
-        $id = $id === NULL ? NULL : (int) $id;
-        $role_id = (int) (isset($input['role_id']) ? $input['role_id'] : 0);
-        $username = trim((string) (isset($input['username']) ? $input['username'] : ''));
-        $requested_status = isset($input['status']) && (int) $input['status'] === 0 ? 0 : 1;
-        $role = $this->CI->User_model->get_role_by_id($role_id);
-        $preserves_existing_role =
-            $id !== NULL &&
-            $current_user &&
-            (int) $current_user->role_id === $role_id;
+   
+// Business flow ni para create or update user; application/controllers/Users.php ang caller,
+// including role validity ug temporary-password rules.
+public function save($id, $input, $current_user = NULL, $current_session_user_id = 0) {
 
-        if (
-            !$role ||
-            (!(int) $role->status && (!$preserves_existing_role || $requested_status === 1))
-        ) {
-            return array(
-                'success' => FALSE,
-                'message' => 'The selected role is invalid or inactive. Active user accounts require an active role.'
-            );
-        }
+    $id = $id === NULL ? NULL : (int) $id;
 
-        if ($this->CI->User_model->username_exists($username, $id)) {
-            return array('success' => FALSE, 'message' => 'That username is already in use.');
-        }
+    $role_id = (int) (isset($input['role_id']) ? $input['role_id'] : 0);
 
-        $middle_name = trim((string) (isset($input['middle_name']) ? $input['middle_name'] : ''));
-        $data = array(
-            'first_name' => trim((string) $input['first_name']),
-            'middle_name' => $middle_name === '' ? NULL : $middle_name,
-            'last_name' => trim((string) $input['last_name']),
-            'username' => $username,
-            'role_id' => $role_id,
-            'status' => $requested_status
-        );
-        $temporary_password = NULL;
+    $username = trim(
+        (string) (isset($input['username']) ? $input['username'] : '')
+    );
 
-        if ($id === NULL) {
-            $temporary_password = $this->generate_temporary_password();
-            $data['password'] = password_hash($temporary_password, PASSWORD_DEFAULT);
-            $data['must_change_password'] = 1;
-        } else {
-            $password = isset($input['password']) ? (string) $input['password'] : '';
+    $requested_status =
+        isset($input['status']) && (int) $input['status'] === 0
+            ? 0
+            : 1;
 
-            if ($password !== '') {
-                $data['password'] = password_hash($password, PASSWORD_DEFAULT);
-                $data['must_change_password'] = 1;
-            }
-        }
+    // Determine whether this is CREATE or UPDATE
+    $is_new_user = ($id === NULL);
 
-        if (!$this->CI->User_model->save($data, $id)) {
-            return array('success' => FALSE, 'message' => 'The user could not be saved.');
-        }
+    $role = $this->CI->User_model->get_role_by_id($role_id);
 
+    $preserves_existing_role =
+        $id !== NULL &&
+        $current_user &&
+        (int) $current_user->role_id === $role_id;
+
+    if (
+        !$role ||
+        (
+            !(int) $role->status &&
+            (!$preserves_existing_role || $requested_status === 1)
+        )
+    ) {
         return array(
-            'success' => TRUE,
-            'username' => $username,
-            'temporary_password' => $temporary_password,
-            'self_deactivated' =>
-                $id !== NULL &&
-                $id === (int) $current_session_user_id &&
-                $requested_status === 0
+            'success' => FALSE,
+            'message' => 'The selected role is invalid or inactive. Active user accounts require an active role.'
         );
     }
+
+    if ($this->CI->User_model->username_exists($username, $id)) {
+        return array(
+            'success' => FALSE,
+            'message' => 'That username is already in use.'
+        );
+    }
+
+    $middle_name = trim(
+        (string) (
+            isset($input['middle_name'])
+                ? $input['middle_name']
+                : ''
+        )
+    );
+
+    $data = array(
+        'first_name' => trim((string) $input['first_name']),
+        'middle_name' => $middle_name === '' ? NULL : $middle_name,
+        'last_name' => trim((string) $input['last_name']),
+        'username' => $username,
+        'role_id' => $role_id,
+        'status' => $requested_status
+    );
+
+    $temporary_password = NULL;
+
+    if ($is_new_user) {
+
+        // CREATE
+        $temporary_password = $this->generate_temporary_password();
+
+        $data['password'] = password_hash(
+            $temporary_password,
+            PASSWORD_DEFAULT
+        );
+
+        $data['must_change_password'] = 1;
+
+    } else {
+
+        // UPDATE
+        $password = isset($input['password'])
+            ? (string) $input['password']
+            : '';
+
+        if ($password !== '') {
+            $data['password'] = password_hash(
+                $password,
+                PASSWORD_DEFAULT
+            );
+
+            $data['must_change_password'] = 1;
+        }
+    }
+
+    // Save user
+    if (!$this->CI->User_model->save($data, $id)) {
+        return array(
+            'success' => FALSE,
+            'message' => 'The user could not be saved.'
+        );
+    }
+
+
+    $action = $is_new_user
+        ? 'user_created'
+        : 'user_updated';
+
+    $description = $is_new_user
+        ? 'Created user: ' . $username
+        : 'Updated user: ' . $username;
+
+    $this->CI->Activity_log_model->insert_activity_log(array(
+        'user_id'     => (int) $current_session_user_id,
+        'action'      => $action,
+        'description' => $description,
+        'ip_address'  => $this->CI->input->ip_address()
+    ));
+
+    return array(
+        'success' => TRUE,
+        'username' => $username,
+        'temporary_password' => $temporary_password,
+        'self_deactivated' =>
+            !$is_new_user &&
+            $id === (int) $current_session_user_id &&
+            $requested_status === 0
+    );
+}
+
 
     // Business flow ni para delete user; application/controllers/Users.php ang caller, then self-delete ug history rules diri gi-check.
     public function delete($id, $current_session_user_id, $execute = TRUE) {
@@ -104,6 +173,8 @@ class User_service {
         if (!$this->CI->User_model->delete($id)) {
             return array('success' => FALSE, 'message' => 'The user could not be deleted.');
         }
+
+        $this->CI->Activity_log_model->insert_activity_log(array( 'user_id' => (int) $current_session_user_id, 'action' => 'user_deleted', 'description' => 'Deleted user: ' . $user->username, 'ip_address' => $this->CI->input->ip_address() ));
 
         return array('success' => TRUE, 'user' => $user);
     }
@@ -134,6 +205,9 @@ class User_service {
         )) {
             return array('success' => FALSE, 'message' => 'The password could not be updated. Please try again.');
         }
+
+         $this->CI->Activity_log_model->insert_activity_log(array( 'user_id' => (int) $user_id, 'action' => 'password_updated', 'description' => 'Updated password ', 'ip_address' => $this->CI->input->ip_address() ));
+
 
         return array('success' => TRUE);
     }
@@ -182,4 +256,6 @@ class User_service {
 
         return implode('', $characters);
     }
+
+    
 }

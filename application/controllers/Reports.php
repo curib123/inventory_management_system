@@ -15,8 +15,7 @@ class Reports extends CI_Controller {
             redirect('login');
         }
         $this->require_permission('reports.view');
-        $this->load->model('Category_model');
-        $this->load->model('Supplier_model');
+        $this->load->model(array('Category_model','Supplier_model','Activity_log_model'));
     }
 
     // Mao ni ang index flow sa Reports; route mapping naa sa application/config/routes.php, then related UI/data usage makita sa application/views/.
@@ -105,6 +104,12 @@ class Reports extends CI_Controller {
             $columns = $payload['columns'];
             $meta = $payload['meta'];
 
+            $this->Activity_log_model->insert_activity_log(array(
+                'user_id' => $this->session->userdata('user_id'),
+                'action' => $format !== 'pdf' ? 'export_created' : 'print_created',
+                'description' => $format !== 'pdf' ? 'Exported ' . $format  : 'Print PDF',
+                'ip_address' => $this->input->ip_address()
+            ));
             if ($format === 'csv') {
                 $this->export_csv($definition['title'], $columns, $rows, $meta);
                 return;

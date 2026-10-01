@@ -9,7 +9,7 @@ class Category_service {
     // Setup ni sa Category_service; gi-load ni sa application/controllers/Categories.php para diri ma-centralize ang category business rules.
     public function __construct() {
         $this->CI =& get_instance();
-        $this->CI->load->model('Category_model');
+        $this->CI->load->model(array('Category_model','Activity_log_model'));
     }
 
     // Business flow ni para save category; application/controllers/Categories.php ang caller, while Category_model query/persistence ra ang trabaho.
@@ -17,6 +17,7 @@ class Category_service {
         $id = $id === NULL ? NULL : (int) $id;
         $name = trim((string) $name);
 
+    
         if ($name === '') {
             return array('success' => FALSE, 'message' => 'Category name is required.');
         }
@@ -29,6 +30,19 @@ class Category_service {
             'category_name' => $name,
             'status' => (int) $status === 0 ? 0 : 1
         ), $id);
+
+        $action = $id !== null ? 'category_updated' : 'category_created';
+
+       $description = $id !== NULL ? 'Updated category: ' . $name : 'Created category: ' . $name;
+
+       
+
+        $this->CI->Activity_log_model->insert_activity_log(array(
+            'user_id' => $this->CI->session->userdata('user_id'),
+            'action' =>  $action,
+            'description' => $description,
+            'ip_address'  => $this->CI->input->ip_address()
+        ));
 
         return $saved
             ? array('success' => TRUE)
@@ -58,6 +72,13 @@ class Category_service {
         if (!$this->CI->Category_model->delete($id)) {
             return array('success' => FALSE, 'message' => 'The category could not be deleted.');
         }
+
+        $this->CI->Activity_log_model->insert_activity_log(array(
+            'user_id' => $this->CI->session->userdata('user_id'),
+            'action' => 'category_deleted',
+            'description' => 'Deleted Category : ' . $category->category_name,
+            'ip_address'  => $this->CI->input->ip_address()
+        ));
 
         return array('success' => TRUE, 'category' => $category);
     }

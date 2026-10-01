@@ -9,7 +9,7 @@ class Stock_service {
     // Setup ni sa Stock_service; gi-load ni sa application/controllers/Stock.php para stock business rules, calculations, ug transaction orchestration naa ra diri.
     public function __construct() {
         $this->CI =& get_instance();
-        $this->CI->load->model(array('Stock_model', 'Product_model', 'Supplier_model'));
+        $this->CI->load->model(array('Stock_model', 'Product_model', 'Supplier_model','Activity_log_model'));
         $this->CI->load->library(array('Stock_rules', 'Supplier_service'));
     }
 
@@ -123,7 +123,8 @@ class Stock_service {
             }
         }
 
-        $this->CI->Stock_model->insert_activity_log(array(
+        //mag create ug log aring dapita para sa stock in/out transaction
+        $this->CI->Activity_log_model->insert_activity_log(array(
             'user_id' => (int) $user_id,
             'action' => $type,
             'description' => 'Processed ' . $transaction_no,
@@ -221,7 +222,9 @@ class Stock_service {
         ));
 
         $this->CI->Stock_model->update_product_stock($product_id, $actual_stock);
-        $this->CI->Stock_model->insert_activity_log(array(
+
+        //mag create ug adjustment log diring dapita
+        $this->CI->Activity_log_model->insert_activity_log(array(
             'user_id' => (int) $user_id,
             'action' => 'stock_adjustment',
             'description' => 'Processed ' . $transaction_no,

@@ -45,11 +45,7 @@ class Stock_model extends CI_Model {
             ->row();
     }
 
-    // Persistence helper ni para activity log; application/libraries/Stock_service.php ang caller after successful stock action.
-    public function insert_activity_log($data) {
-        return $this->db->insert('activity_logs', $data);
-    }
-
+  
     // Data helper ni para get transactions; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_transactions($limit = NULL, $offset = 0) {
         $this->db->select("t.*, u.username, COALESCE(s.supplier_name, 'Unassigned Products') AS supplier_name", FALSE);
@@ -107,21 +103,6 @@ class Stock_model extends CI_Model {
 
         return $this->db->get()->result_array();
     }
-
-    // Data helper ni para product adjustment movements; Product_service ang caller para apil ang physical-count corrections sa timeline.
-    // public function get_product_adjustment_movements($product_id) {
-    //     $this->db->select(
-    //         'a.id AS source_id, a.system_stock, a.actual_stock, a.difference, ' .
-    //         'a.reason, a.created_at, u.username'
-    //     );
-    //     $this->db->from('stock_adjustments a');
-    //     $this->db->join('users u', 'u.id = a.created_by');
-    //     $this->db->where('a.product_id', (int) $product_id);
-    //     $this->db->order_by('a.created_at', 'DESC');
-    //     $this->db->order_by('a.id', 'DESC');
-
-    //     return $this->db->get()->result_array();
-    // }
 
     // Data helper ni para get adjustments; main caller/integration pangitaa sa application/controllers/Stock.php, application/controllers/Dashboard.php, ug application/controllers/Reports.php, so didto tan-awa ang business flow if mag-trace ka.
     public function get_adjustments($limit = NULL, $offset = 0) {

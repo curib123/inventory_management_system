@@ -10,6 +10,13 @@ class Activity_log_model extends CI_Model {
         $this->load->database();
     }
 
+    
+    // Persistence helper ni para activity log; application/libraries/Stock_service.php ang caller after successful stock action.
+    public function insert_activity_log($data) {
+        return $this->db->insert('activity_logs', $data);
+    }
+
+
     // Data helper ni para activity log table rows; filtering stays server-side para scalable ang audit history.
     public function get_datatable($start, $length, $search, $order_column, $order_dir, $filters = array()) {
         $this->build_datatable_query($search, $filters);

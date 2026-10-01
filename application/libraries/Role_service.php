@@ -9,7 +9,7 @@ class Role_service {
     // Setup ni sa Role_service; gi-load ni sa application/controllers/Roles.php para role ug permission business rules naa ra diri.
     public function __construct() {
         $this->CI =& get_instance();
-        $this->CI->load->model('Role_model');
+        $this->CI->load->model(array('Role_model','Activity_log_model'));
         $this->CI->config->load('permissions');
     }
 
@@ -73,40 +73,68 @@ class Role_service {
 
         $this->CI->db->trans_commit();
 
-        if (!$can_edit_role && $can_manage_permissions) {
-            $message = 'Role permissions updated successfully.';
-        } elseif ($id === NULL) {
-            $message = 'Role created successfully.';
-        } else {
-            $message = 'Role changes saved successfully.';
-        }
-
+           if (!$can_edit_role && $can_manage_permissions) { $message = 'Role permissions updated successfully.'; $action = 'role_permissions_updated'; $description = 'Updated permissions for role: ' . $role_name; } elseif ($id === NULL) { $message = 'Role created successfully.'; $action = 'role_created'; $description = 'Created role: ' . $role_name; } else { $message = 'Role changes saved successfully.'; $action = 'role_updated'; $description = 'Updated role: ' . $role_name; } 
+  
+          $user_id = (int) $this->CI->session->userdata('user_id'); 
+          
+          $this->CI->Activity_log_model->insert_activity_log(array( 'user_id' => $user_id, 'action' => $action, 'description' => $description, 'ip_address' => $this->CI->input->ip_address() ));
         return array('success' => TRUE, 'role_id' => (int) $role_id, 'message' => $message);
     }
 
     // Business flow ni para delete role; application/controllers/Roles.php ang caller, while assigned-user rule diri gi-enforce.
+    
     public function delete($id, $execute = TRUE) {
-        $id = (int) $id;
-        $role = $this->CI->Role_model->get_by_id($id);
+    $id = (int) $id;
 
-        if (!$role) {
-            return array('success' => FALSE, 'not_found' => TRUE, 'message' => 'Role not found.');
-        }
+    $role = $this->CI->Role_model->get_by_id($id);
 
-        if ($this->CI->Role_model->has_users($id)) {
-            return array('success' => FALSE, 'message' => 'This role cannot be deleted while users are assigned to it.');
-        }
-
-        if (!$execute) {
-            return array('success' => TRUE, 'role' => $role);
-        }
-
-        if (!$this->CI->Role_model->delete($id)) {
-            return array('success' => FALSE, 'message' => 'The role could not be deleted.');
-        }
-
-        return array('success' => TRUE, 'role' => $role);
+    if (!$role) {
+        return array(
+            'success' => FALSE,
+            'not_found' => TRUE,
+            'message' => 'Role not found.'
+        );
     }
+
+    if ($this->CI->Role_model->has_users($id)) {
+        return array(
+            'success' => FALSE,
+            'message' => 'This role cannot be deleted while users are assigned to it.'
+        );
+    }
+
+    // Used for confirmation/preview before actually deleting
+    if (!$execute) {
+        return array(
+            'success' => TRUE,
+            'role' => $role
+        );
+    }
+
+    // Delete role
+    if (!$this->CI->Role_model->delete($id)) {
+        return array(
+            'success' => FALSE,
+            'message' => 'The role could not be deleted.'
+        );
+    }
+
+    // Get logged-in user
+    $user_id = (int) $this->CI->session->userdata('user_id');
+
+    // Activity log
+    $this->CI->Activity_log_model->insert_activity_log(array(
+        'user_id'     => $user_id,
+        'action'      => 'role_deleted',
+        'description' => 'Deleted role: ' . $role->role_name,
+        'ip_address'  => $this->CI->input->ip_address()
+    ));
+
+    return array(
+        'success' => TRUE,
+        'role' => $role
+    );
+   }
 
     // Internal helper ni para normalize permissions; tawagon ra sulod application/libraries/Role_service.php para validate IDs ug auto-add required dependencies.
     private function normalize_permissions($permission_ids) {
@@ -168,4 +196,4 @@ class Role_service {
 
         return array_values(array_unique($normalized));
     }
-}
+    }
