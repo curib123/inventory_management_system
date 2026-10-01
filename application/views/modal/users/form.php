@@ -51,7 +51,7 @@ $this->load->view('components/modal/header', array(
                         class="form-control"
                         accept="image/jpeg,image/png,image/gif,image/webp"
                     >
-                    <div class="form-text">JPEG, PNG, GIF, or WebP. Maximum 2 MB and 2000 × 2000 pixels.</div>
+                    <div class="form-text">JPEG, PNG, GIF, or WebP. Maximum 2 MB. Images are center-cropped to a square avatar.</div>
                 </div>
             </div>
         </div>

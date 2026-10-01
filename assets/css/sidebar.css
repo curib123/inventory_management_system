@@ -202,13 +202,14 @@ body {
 }
 
 .sidebar-avatar {
-    width: 34px;
-    height: 34px;
+    width: 30px;
+    height: 30px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    flex: 0 0 34px;
-    border-radius: 11px;
+    flex: 0 0 30px;
+    overflow: hidden;
+    border-radius: 50%;
     background: rgba(120, 169, 255, 0.17);
     color: #cfe0ff;
     font-size: 0.75rem;

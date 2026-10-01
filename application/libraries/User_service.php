@@ -238,8 +238,6 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
             'upload_path' => $upload_directory,
             'allowed_types' => 'jpg|jpeg|png|gif|webp',
             'max_size' => 2048,
-            'max_width' => 2000,
-            'max_height' => 2000,
             'file_ext_tolower' => TRUE,
             'encrypt_name' => TRUE,
             'detect_mime' => TRUE,
@@ -261,7 +259,99 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
             return array('success' => FALSE, 'message' => 'The uploaded profile image has an invalid filename.');
         }
 
+        if (empty($upload_data['full_path']) || !$this->crop_profile_image($upload_data['full_path'])) {
+            $this->delete_profile_image($filename);
+            return array('success' => FALSE, 'message' => 'The image could not be cropped. Please choose another image.');
+        }
+
         return array('success' => TRUE, 'filename' => $filename);
+    }
+
+    private function crop_profile_image($image_path) {
+        if (!function_exists('imagecreatefromstring') || !function_exists('imagecopyresampled')) {
+            return FALSE;
+        }
+
+        $image_info = @getimagesize($image_path);
+        $allowed_mimes = array('image/jpeg', 'image/png', 'image/gif', 'image/webp');
+
+        if (!$image_info || !in_array($image_info['mime'], $allowed_mimes, TRUE)) {
+            return FALSE;
+        }
+
+        $source = @imagecreatefromstring(@file_get_contents($image_path));
+
+        if (!$source) {
+            return FALSE;
+        }
+
+        if ($image_info['mime'] === 'image/jpeg' && function_exists('exif_read_data')) {
+            $exif = @exif_read_data($image_path);
+            $orientation = isset($exif['Orientation']) ? (int) $exif['Orientation'] : 1;
+            $rotation = $orientation === 3 ? 180 : ($orientation === 6 ? -90 : ($orientation === 8 ? 90 : 0));
+
+            if ($rotation !== 0) {
+                $oriented = @imagerotate($source, $rotation, 0);
+
+                if ($oriented !== FALSE) {
+                    imagedestroy($source);
+                    $source = $oriented;
+                }
+            }
+        }
+
+        $source_width = imagesx($source);
+        $source_height = imagesy($source);
+        $crop_size = min($source_width, $source_height);
+        $source_x = (int) floor(($source_width - $crop_size) / 2);
+        $source_y = (int) floor(($source_height - $crop_size) / 2);
+        $canvas = imagecreatetruecolor(512, 512);
+
+        if ($image_info['mime'] === 'image/jpeg') {
+            $background = imagecolorallocate($canvas, 255, 255, 255);
+            imagefill($canvas, 0, 0, $background);
+        } else {
+            imagealphablending($canvas, FALSE);
+            imagesavealpha($canvas, TRUE);
+            $transparent = imagecolorallocatealpha($canvas, 0, 0, 0, 127);
+            imagefill($canvas, 0, 0, $transparent);
+        }
+
+        $copied = imagecopyresampled(
+            $canvas,
+            $source,
+            0,
+            0,
+            $source_x,
+            $source_y,
+            512,
+            512,
+            $crop_size,
+            $crop_size
+        );
+        $written = FALSE;
+
+        if ($copied) {
+            switch ($image_info['mime']) {
+                case 'image/jpeg':
+                    $written = imagejpeg($canvas, $image_path, 85);
+                    break;
+                case 'image/png':
+                    $written = imagepng($canvas, $image_path, 6);
+                    break;
+                case 'image/gif':
+                    $written = imagegif($canvas, $image_path);
+                    break;
+                case 'image/webp':
+                    $written = function_exists('imagewebp') && imagewebp($canvas, $image_path, 85);
+                    break;
+            }
+        }
+
+        imagedestroy($source);
+        imagedestroy($canvas);
+
+        return (bool) $written;
     }
 
     private function delete_profile_image($filename) {
