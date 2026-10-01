@@ -223,6 +223,16 @@ class Users extends CI_Controller {
             return;
         }
 
+        if (
+            $id !== NULL &&
+            (int) $id === $current_session_user_id &&
+            !empty($result['password_reset'])
+        ) {
+            $this->session->sess_destroy();
+            redirect('login');
+            return;
+        }
+
         if ($id !== NULL && (int) $id === $current_session_user_id) {
             $session_identity = $this->user_service->session_identity($current_session_user_id);
 

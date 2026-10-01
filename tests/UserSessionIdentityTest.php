@@ -33,6 +33,7 @@ class UserSessionIdentityTest extends TestCase {
             'username' => 'new-admin',
             'role_id' => 3,
             'role_name' => 'manager',
+            'auth_version' => 6,
             'status' => 1,
             'role_status' => 1,
             'must_change_password' => 0
@@ -48,6 +49,7 @@ class UserSessionIdentityTest extends TestCase {
             'username' => 'new-admin',
             'role_id' => 3,
             'role_name' => 'manager',
+            'auth_version' => 6,
             'must_change_password' => FALSE
         ), $identity);
     }

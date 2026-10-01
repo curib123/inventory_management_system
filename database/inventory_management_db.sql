@@ -132,6 +132,7 @@ CREATE TABLE users (
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
     must_change_password TINYINT(1) NOT NULL DEFAULT 0,
+    auth_version INT UNSIGNED NOT NULL DEFAULT 1,
     role_id INT NOT NULL,
     status TINYINT(1) NOT NULL DEFAULT 1,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

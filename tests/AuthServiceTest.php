@@ -45,6 +45,7 @@ class AuthServiceTest extends TestCase {
             'username' => 'admin',
             'role_id' => 1,
             'role_name' => 'admin',
+            'auth_version' => 4,
             'password' => password_hash('StrongPass123!', PASSWORD_DEFAULT),
             'must_change_password' => 0
         );
@@ -86,6 +87,7 @@ class AuthServiceTest extends TestCase {
         $this->assertSame($user->id, $session_data['user_id']);
         $this->assertSame('admin', $session_data['username']);
         $this->assertSame('admin', $session_data['role_name']);
+        $this->assertSame(4, $session_data['auth_version']);
         $this->assertTrue($session_data['logged_in']);
     }
 
@@ -227,7 +229,8 @@ class AuthServiceTest extends TestCase {
             'last_name' => 'Curib',
             'username' => 'staff-user',
             'role_id' => 2,
-            'role_name' => 'staff'
+            'role_name' => 'staff',
+            'auth_version' => 2
         );
 
         $session_data = (new Auth_service())->session_data($user);
@@ -239,6 +242,7 @@ class AuthServiceTest extends TestCase {
             'username' => 'staff-user',
             'role_id' => 2,
             'role_name' => 'staff',
+            'auth_version' => 2,
             'must_change_password' => FALSE,
             'password_change_deferred' => FALSE,
             'logged_in' => TRUE

@@ -145,7 +145,8 @@ class Auth extends CI_Controller {
 
         $this->session->set_userdata(array(
             'must_change_password' => FALSE,
-            'password_change_deferred' => FALSE
+            'password_change_deferred' => FALSE,
+            'auth_version' => (int) $result['auth_version']
         ));
         $this->session->set_flashdata('success', 'Password changed successfully.');
 

@@ -79,6 +79,7 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
     );
 
     $temporary_password = NULL;
+    $password_reset = FALSE;
 
     if ($is_new_user) {
 
@@ -100,6 +101,7 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
             : '';
 
         if ($password !== '') {
+            $password_reset = TRUE;
             $data['password'] = password_hash(
                 $password,
                 PASSWORD_DEFAULT
@@ -137,6 +139,7 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
         'success' => TRUE,
         'username' => $username,
         'temporary_password' => $temporary_password,
+        'password_reset' => $password_reset,
         'self_deactivated' =>
             !$is_new_user &&
             $id === (int) $current_session_user_id &&
@@ -156,6 +159,7 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
                 'username' => (string) $user->username,
                 'role_id' => (int) $user->role_id,
                 'role_name' => (string) $user->role_name,
+                'auth_version' => (int) $user->auth_version,
                 'must_change_password' => !empty($user->must_change_password)
             );
         }
@@ -225,7 +229,10 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
          $this->CI->Activity_log_model->insert_activity_log(array( 'user_id' => (int) $user_id, 'action' => 'password_updated', 'description' => 'Updated password ', 'ip_address' => $this->CI->input->ip_address() ));
 
 
-        return array('success' => TRUE);
+        return array(
+            'success' => TRUE,
+            'auth_version' => $this->CI->User_model->get_auth_version($user_id)
+        );
     }
 
     // Search option builder ni para roles; application/controllers/Users.php ang caller para controller dili na mag-format role lookup data.

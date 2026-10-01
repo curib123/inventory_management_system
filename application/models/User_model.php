@@ -36,7 +36,7 @@ class User_model extends CI_Model {
 
     // Data helper ni para get by id; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function get_by_id($id) {
-        $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.role_id, u.status, u.must_change_password, u.created_at, u.updated_at, r.role_name, r.status AS role_status');
+        $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.role_id, u.status, u.must_change_password, u.auth_version, u.created_at, u.updated_at, r.role_name, r.status AS role_status');
         $this->db->from('users u');
         $this->db->join('roles r', 'r.id = u.role_id', 'left');
         $this->db->where('u.id', (int) $id);
@@ -91,6 +91,10 @@ class User_model extends CI_Model {
     // Data helper ni para save; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function save($data, $id = NULL) {
         if ($id !== NULL) {
+            if (array_key_exists('password', $data)) {
+                $this->db->set('auth_version', 'auth_version + 1', FALSE);
+            }
+
             $this->db->where('id', (int) $id);
             $saved = $this->db->update('users', $data);
 
@@ -192,6 +196,8 @@ class User_model extends CI_Model {
     public function update_password_hash($user_id, $password_hash, $require_change = FALSE) {
         unset($this->permission_key_cache[(int) $user_id]);
 
+        $this->db->set('auth_version', 'auth_version + 1', FALSE);
+
         return $this->db->update(
             'users',
             array(
@@ -200,6 +206,20 @@ class User_model extends CI_Model {
             ),
             array('id' => (int) $user_id)
         );
+    }
+
+    public function get_auth_version($user_id) {
+        $row = $this->db
+            ->select('u.auth_version')
+            ->from('users u')
+            ->join('roles r', 'r.id = u.role_id')
+            ->where('u.id', (int) $user_id)
+            ->where('u.status', 1)
+            ->where('r.status', 1)
+            ->get()
+            ->row();
+
+        return $row ? (int) $row->auth_version : NULL;
     }
 
     // Data helper ni para password change required; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.

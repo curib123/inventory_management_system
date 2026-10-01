@@ -449,6 +449,9 @@ INSERT INTO `users` VALUES (1,'System',NULL,'Administrator','admin','$2y$12$rKP9
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 
+ALTER TABLE `users`
+  ADD COLUMN `auth_version` int(10) unsigned NOT NULL DEFAULT 1;
+
 --
 -- Dumping routines for database 'inventory_management_db'
 --
