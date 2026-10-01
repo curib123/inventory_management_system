@@ -10,9 +10,9 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 
     <link rel="stylesheet" href="https://cdn.datatables.net/v/bs5/dt-3.1.1/datatables.min.css">
-    <link rel="stylesheet" href="<?php echo base_url('assets/css/app.css'); ?>">
+    <link rel="stylesheet" href="<?php echo base_url('assets/css/app.css?v=' . (@filemtime(FCPATH . 'assets/css/app.css') ?: '1')); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/table.css'); ?>">
-    <link rel="stylesheet" href="<?php echo base_url('assets/css/sidebar.css'); ?>">
+    <link rel="stylesheet" href="<?php echo base_url('assets/css/sidebar.css?v=' . (@filemtime(FCPATH . 'assets/css/sidebar.css') ?: '1')); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/modal.css'); ?>">
     <link rel="stylesheet" href="<?php echo base_url('assets/css/plain-mode.css'); ?>">
 
@@ -64,6 +64,7 @@ if ($current_avatar_initials === '') {
 
 $current_profile_image = basename((string) $this->session->userdata('profile_image'));
 $current_profile_image_url = preg_match('/\A[a-f0-9]{32}\.(?:jpg|jpeg|png|gif|webp)\z/i', $current_profile_image)
+    && is_file(FCPATH . 'assets/image/profiles/' . $current_profile_image)
     ? base_url('assets/image/profiles/' . rawurlencode($current_profile_image))
     : '';
 
@@ -198,10 +199,9 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
         <div class="sidebar-footer">
             <div class="sidebar-account">
                 <div class="sidebar-avatar" aria-hidden="true">
+                    <span data-avatar-initials><?php echo html_escape($current_avatar_initials); ?></span>
                     <?php if ($current_profile_image_url !== ''): ?>
-                        <img src="<?php echo html_escape($current_profile_image_url); ?>" alt="">
-                    <?php else: ?>
-                        <?php echo html_escape($current_avatar_initials); ?>
+                        <img src="<?php echo html_escape($current_profile_image_url); ?>" alt="" class="app-avatar-image" data-avatar-image hidden>
                     <?php endif; ?>
                 </div>
 
@@ -262,10 +262,9 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
 
                 <div class="app-user-profile" title="Signed in as <?php echo html_escape($current_display_name); ?>">
                     <div class="app-user-avatar" aria-hidden="true">
+                        <span data-avatar-initials><?php echo html_escape($current_avatar_initials); ?></span>
                         <?php if ($current_profile_image_url !== ''): ?>
-                            <img src="<?php echo html_escape($current_profile_image_url); ?>" alt="">
-                        <?php else: ?>
-                            <?php echo html_escape($current_avatar_initials); ?>
+                            <img src="<?php echo html_escape($current_profile_image_url); ?>" alt="" class="app-avatar-image" data-avatar-image hidden>
                         <?php endif; ?>
                     </div>
 

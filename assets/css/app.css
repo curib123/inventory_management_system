@@ -1564,6 +1564,8 @@ body {
 
 .topbar-actions {
     min-width: 0;
+    flex: 0 0 auto;
+    max-width: 50%;
 }
 
 .app-topbar-icon-button {
@@ -1609,6 +1611,7 @@ body {
     gap: 0.58rem;
     min-height: 2.8rem;
     min-width: 0;
+    max-width: 100%;
     padding: 0.35rem 0.62rem 0.35rem 0.4rem;
     border: 1px solid rgba(148, 163, 184, 0.2);
     border-radius: 0.9rem;
@@ -1617,12 +1620,13 @@ body {
 }
 
 .app-user-avatar {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 1.875rem;
     height: 1.875rem;
-    flex: 0 0 auto;
+    flex: 0 0 1.875rem;
     overflow: hidden;
     border: 1px solid rgba(96, 165, 250, 0.28);
     border-radius: 50%;
@@ -1643,6 +1647,17 @@ body {
     height: 100%;
     border-radius: inherit;
     object-fit: cover;
+    display: block;
+}
+
+.app-avatar-image {
+    position: absolute;
+    inset: 0;
+}
+
+.app-avatar-image[hidden],
+[data-avatar-initials][hidden] {
+    display: none !important;
 }
 
 .user-profile-image-preview,
@@ -1668,6 +1683,8 @@ body {
 
 .app-user-profile-copy {
     min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
     flex-direction: column;
     justify-content: center;
     line-height: 1.18;
@@ -1745,6 +1762,7 @@ body {
     .app-user-avatar {
         width: 1.75rem;
         height: 1.75rem;
+        flex-basis: 1.75rem;
     }
 
     .topbar-user-status {

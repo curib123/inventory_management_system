@@ -2,6 +2,30 @@ document.addEventListener('DOMContentLoaded', function () {
     var sidebar = document.getElementById('sidebar');
     var sidebarToggle = document.getElementById('sidebar-toggle');
     var sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+    // Keep initials visible until the photo loads, including cached image requests.
+    document.querySelectorAll('[data-avatar-image]').forEach(function (image) {
+        var initials = image.parentElement.querySelector('[data-avatar-initials]');
+
+        function showPhoto(loaded) {
+            image.hidden = !loaded;
+            if (initials) {
+                initials.hidden = loaded;
+            }
+        }
+
+        image.addEventListener('load', function () {
+            showPhoto(image.naturalWidth > 0);
+        });
+        image.addEventListener('error', function () {
+            showPhoto(false);
+        });
+
+        if (image.complete) {
+            showPhoto(image.naturalWidth > 0);
+        }
+    });
+
     var modalElement = document.getElementById('action-modal');
     var modalContent = document.getElementById('action-modal-content');
     var modalState = {
