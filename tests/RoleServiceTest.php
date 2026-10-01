@@ -4,10 +4,6 @@ use PHPUnit\Framework\TestCase;
 
 require_once dirname(__DIR__) . '/application/libraries/Role_service.php';
 
-function &get_instance() {
-    return $GLOBALS['ci_role_service_test'];
-}
-
 class RoleServiceTest extends TestCase {
     protected function setUp(): void {
         $GLOBALS['ci_role_service_test'] = new class {
@@ -110,7 +106,7 @@ class RoleServiceTest extends TestCase {
     }
 
     public function testPermissionOnlyUpdateUsesExistingRoleNameInAuditLog() {
-        $service = new Role_service();
+        $service = new Role_service($GLOBALS['ci_role_service_test']);
 
         $result = $service->save(
             7,
@@ -128,7 +124,7 @@ class RoleServiceTest extends TestCase {
     public function testRemovingLastRoleCapableAdminIsRejectedAndRolledBack() {
         $ci = $GLOBALS['ci_role_service_test'];
         $ci->Role_model->capable_users = 0;
-        $service = new Role_service();
+        $service = new Role_service($GLOBALS['ci_role_service_test']);
 
         $result = $service->save(7, NULL, array(), FALSE, TRUE);
 
@@ -142,7 +138,7 @@ class RoleServiceTest extends TestCase {
     public function testRoleChangeIsAllowedWhenAnotherRoleCapableAdminRemains() {
         $ci = $GLOBALS['ci_role_service_test'];
         $ci->Role_model->capable_users = 1;
-        $service = new Role_service();
+        $service = new Role_service($GLOBALS['ci_role_service_test']);
 
         $result = $service->save(7, NULL, array(), FALSE, TRUE);
 

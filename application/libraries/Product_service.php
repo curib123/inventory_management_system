@@ -7,8 +7,12 @@ class Product_service {
     private $CI;
 
     // Setup ni sa Product_service; gi-load ni sa application/controllers/Products.php para diri tanan product business rules.
-    public function __construct() {
-        $this->CI =& get_instance();
+    public function __construct($CI = NULL) {
+        if ($CI === NULL) {
+            $this->CI =& get_instance();
+        } else {
+            $this->CI = $CI;
+        }
         $this->CI->load->model(array('Product_model', 'Category_model', 'Supplier_model', 'Stock_model','Activity_log_model'));
     }
 

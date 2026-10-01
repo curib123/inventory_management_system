@@ -4,10 +4,6 @@ use PHPUnit\Framework\TestCase;
 
 require_once dirname(__DIR__) . '/application/libraries/Product_service.php';
 
-function &get_instance() {
-    return $GLOBALS['ci'];
-}
-
 class ProductMovementHistoryTest extends TestCase {
     protected function setUp(): void {
         $GLOBALS['ci'] = new class {
@@ -98,7 +94,7 @@ class ProductMovementHistoryTest extends TestCase {
     }
 
     public function testMovementHistoryLabelsAdjustmentsAndSkipsDuplicateAdjustmentRows() {
-        $service = new Product_service();
+        $service = new Product_service($GLOBALS['ci']);
 
         $result = $service->movement_history(1, 'desc');
 

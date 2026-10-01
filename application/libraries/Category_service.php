@@ -7,8 +7,12 @@ class Category_service {
     private $CI;
 
     // Setup ni sa Category_service; gi-load ni sa application/controllers/Categories.php para diri ma-centralize ang category business rules.
-    public function __construct() {
-        $this->CI =& get_instance();
+    public function __construct($CI = NULL) {
+        if ($CI === NULL) {
+            $this->CI =& get_instance();
+        } else {
+            $this->CI = $CI;
+        }
         $this->CI->load->model(array('Category_model','Activity_log_model'));
     }
 

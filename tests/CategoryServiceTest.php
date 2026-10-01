@@ -4,10 +4,6 @@ use PHPUnit\Framework\TestCase;
 
 require_once dirname(__DIR__) . '/application/libraries/Category_service.php';
 
-function &get_instance() {
-    return $GLOBALS['ci_category_service_test'];
-}
-
 class CategoryServiceTest extends TestCase {
     protected function setUp(): void {
         $GLOBALS['ci_category_service_test'] = new class {
@@ -63,7 +59,7 @@ class CategoryServiceTest extends TestCase {
         $this->resetGlobalStub();
         $GLOBALS['ci_category_service_test']->Category_model->save_result = FALSE;
 
-        $service = new Category_service();
+        $service = new Category_service($GLOBALS['ci_category_service_test']);
         $result = $service->save(NULL, 'Hardware', 1);
 
         $this->assertFalse($result['success']);
@@ -74,7 +70,7 @@ class CategoryServiceTest extends TestCase {
         $this->resetGlobalStub();
         $GLOBALS['ci_category_service_test']->Category_model->save_result = TRUE;
 
-        $service = new Category_service();
+        $service = new Category_service($GLOBALS['ci_category_service_test']);
         $result = $service->save(NULL, 'Hardware', 1);
 
         $this->assertTrue($result['success']);

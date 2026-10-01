@@ -7,8 +7,12 @@ class Role_service {
     private $CI;
 
     // Setup ni sa Role_service; gi-load ni sa application/controllers/Roles.php para role ug permission business rules naa ra diri.
-    public function __construct() {
-        $this->CI =& get_instance();
+    public function __construct($CI = NULL) {
+        if ($CI === NULL) {
+            $this->CI =& get_instance();
+        } else {
+            $this->CI = $CI;
+        }
         $this->CI->load->model(array('Role_model','Activity_log_model'));
         $this->CI->config->load('permissions');
     }
