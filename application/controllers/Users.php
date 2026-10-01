@@ -196,6 +196,7 @@ class Users extends CI_Controller {
             return;
         }
 
+        $current_session_user_id = (int) $this->session->userdata('user_id');
         $result = $this->user_service->save(
             $id,
             array(
@@ -208,7 +209,7 @@ class Users extends CI_Controller {
                 'password' => $id !== NULL ? $this->input->post('password', FALSE) : ''
             ),
             $user,
-            (int) $this->session->userdata('user_id')
+            $current_session_user_id
         );
 
         if (!$result['success']) {
@@ -219,6 +220,38 @@ class Users extends CI_Controller {
         if (!empty($result['self_deactivated'])) {
             $this->session->sess_destroy();
             redirect('login');
+            return;
+        }
+
+        if ($id !== NULL && (int) $id === $current_session_user_id) {
+            $session_identity = $this->user_service->session_identity($current_session_user_id);
+
+            if ($session_identity === FALSE) {
+                $this->session->sess_destroy();
+                redirect('login');
+                return;
+            }
+
+            $this->session->set_userdata($session_identity);
+
+            if ($session_identity['must_change_password']) {
+                $this->session->set_userdata('password_change_deferred', FALSE);
+            }
+
+            $authorized_route = $this->authorization_service->first_authorized_route($current_session_user_id);
+
+            if ($authorized_route === NULL) {
+                $this->session->sess_destroy();
+                show_error(
+                    'Your account no longer has access to any application page. Contact an administrator.',
+                    403,
+                    'No Access Assigned'
+                );
+                return;
+            }
+
+            $this->session->set_flashdata('success', 'User changes saved successfully.');
+            redirect($authorized_route);
             return;
         }
 

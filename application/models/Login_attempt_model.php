@@ -33,6 +33,31 @@ class Login_attempt_model extends CI_Model {
         return $query->num_rows() > 0;
     }
 
+    public function lockout_status($username, $ip_address) {
+        $keys = $this->attempt_keys($username, $ip_address);
+        $conditions = array();
+        $bindings = array();
+
+        foreach ($keys as $key) {
+            $conditions[] = '(scope_type = ? AND identifier_hash = ?)';
+            $bindings[] = $key['scope_type'];
+            $bindings[] = $key['identifier_hash'];
+        }
+
+        $row = $this->db->query(
+            'SELECT MAX(locked_until) AS locked_until, ' .
+            'COALESCE(MAX(TIMESTAMPDIFF(SECOND, NOW(), locked_until)), 0) AS remaining_seconds ' .
+            'FROM login_attempts WHERE locked_until > NOW() AND (' .
+            implode(' OR ', $conditions) . ')',
+            $bindings
+        )->row_array();
+
+        return array(
+            'locked_until' => !empty($row['locked_until']) ? $row['locked_until'] : NULL,
+            'remaining_seconds' => max(0, (int) (isset($row['remaining_seconds']) ? $row['remaining_seconds'] : 0))
+        );
+    }
+
     public function record_failure($username, $ip_address) {
         $keys = $this->attempt_keys($username, $ip_address);
 

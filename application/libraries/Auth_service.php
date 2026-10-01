@@ -148,6 +148,30 @@ class Auth_service {
         return $this->session_data($user);
     }
 
+    public function login_lockout_status($username) {
+        if (!$this->login_attempt_model || !method_exists($this->login_attempt_model, 'lockout_status')) {
+            return array('locked_until' => NULL, 'remaining_seconds' => 0);
+        }
+
+        try {
+            $status = $this->login_attempt_model->lockout_status(
+                strtolower(trim((string) $username)),
+                $this->ip_address
+            );
+        } catch (Throwable $exception) {
+            if (function_exists('log_message')) {
+                log_message('error', 'Unable to retrieve login lockout status.');
+            }
+
+            return array('locked_until' => NULL, 'remaining_seconds' => 0);
+        }
+
+        return array(
+            'locked_until' => isset($status['locked_until']) ? $status['locked_until'] : NULL,
+            'remaining_seconds' => max(0, (int) (isset($status['remaining_seconds']) ? $status['remaining_seconds'] : 0))
+        );
+    }
+
     // Audit an explicit logout before the controller destroys the session.
     public function logout($user_id) {
         $user_id = (int) $user_id;

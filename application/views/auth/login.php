@@ -39,7 +39,30 @@
                     </div>
                 <?php endif; ?>
 
-                <?php echo form_open('login'); ?>
+                <?php if (!empty($lockout_seconds) && !empty($lockout_until)): ?>
+                    <?php $lockout_timestamp = strtotime($lockout_until); ?>
+                    <div
+                        class="alert alert-warning"
+                        role="status"
+                        aria-live="polite"
+                        data-login-lockout
+                        data-remaining-seconds="<?php echo (int) $lockout_seconds; ?>"
+                    >
+                        <div>
+                            Sign-in is temporarily locked. Try again in
+                            <strong data-lockout-countdown>00:00</strong>.
+                        </div>
+                        <small>
+                            Available after
+                            <time datetime="<?php echo html_escape(date(DATE_ATOM, $lockout_timestamp)); ?>">
+                                <?php echo html_escape(date('M j, Y g:i:s A T', $lockout_timestamp)); ?>
+                            </time>
+                        </small>
+                        <div class="mt-2" data-lockout-ready hidden>You can try again now.</div>
+                    </div>
+                <?php endif; ?>
+
+                <?php echo form_open('login', array('data-login-form' => 'true')); ?>
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>
                         <div class="input-group">
@@ -80,7 +103,7 @@
                     </div>
 
                     <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
+                        <button type="submit" class="btn btn-primary" data-login-submit>
                             <i class="bi bi-box-arrow-in-right me-1"></i>
                             Sign In
                         </button>
@@ -89,5 +112,6 @@
             </div>
         </div>
     </main>
+    <script src="<?php echo html_escape(base_url('assets/js/auth/login-lockout.js')); ?>" defer></script>
 </body>
 </html>

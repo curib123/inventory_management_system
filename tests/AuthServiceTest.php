@@ -30,6 +30,10 @@ class AuthLoginAttemptModelStub {
 
     public function clear_attempts($username, $ip_address) {
     }
+
+    public function lockout_status($username, $ip_address) {
+        return array('locked_until' => NULL, 'remaining_seconds' => 0);
+    }
 }
 
 class AuthServiceTest extends TestCase {
@@ -159,6 +163,27 @@ class AuthServiceTest extends TestCase {
         ));
 
         $this->assertFalse($service->authenticate(' Admin ', 'not-logged'));
+    }
+
+    public function testLoginLockoutStatusUsesNormalizedUsernameAndClientIp() {
+        $login_attempt_model = $this->createMock(AuthLoginAttemptModelStub::class);
+        $login_attempt_model->expects($this->once())
+            ->method('lockout_status')
+            ->with('admin', '192.0.2.10')
+            ->willReturn(array(
+                'locked_until' => '2026-10-01 12:15:00',
+                'remaining_seconds' => 900
+            ));
+
+        $service = new Auth_service(array(
+            'login_attempt_model' => $login_attempt_model,
+            'ip_address' => '192.0.2.10'
+        ));
+
+        $this->assertSame(array(
+            'locked_until' => '2026-10-01 12:15:00',
+            'remaining_seconds' => 900
+        ), $service->login_lockout_status(' Admin '));
     }
 
     public function testLogoutWritesOneAuditRecordForAuthenticatedUser() {

@@ -36,7 +36,7 @@ class User_model extends CI_Model {
 
     // Data helper ni para get by id; main caller/integration pangitaa sa application/controllers/Auth.php ug permission checks across application/controllers/, so didto tan-awa ang business flow if mag-trace ka.
     public function get_by_id($id) {
-        $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.role_id, u.status, u.created_at, u.updated_at, r.role_name');
+        $this->db->select('u.id, u.first_name, u.middle_name, u.last_name, u.username, u.role_id, u.status, u.must_change_password, u.created_at, u.updated_at, r.role_name, r.status AS role_status');
         $this->db->from('users u');
         $this->db->join('roles r', 'r.id = u.role_id', 'left');
         $this->db->where('u.id', (int) $id);

@@ -22,7 +22,6 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
     $id = $id === NULL ? NULL : (int) $id;
 
     $role_id = (int) (isset($input['role_id']) ? $input['role_id'] : 0);
-
     $username = trim(
         (string) (isset($input['username']) ? $input['username'] : '')
     );
@@ -144,6 +143,23 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
             $requested_status === 0
     );
 }
+        public function session_identity($user_id) {
+            $user = $this->CI->User_model->get_by_id((int) $user_id);
+
+            if (!$user || !(int) $user->status || !(int) $user->role_status) {
+                return FALSE;
+            }
+
+            return array(
+                'first_name' => (string) $user->first_name,
+                'last_name' => (string) $user->last_name,
+                'username' => (string) $user->username,
+                'role_id' => (int) $user->role_id,
+                'role_name' => (string) $user->role_name,
+                'must_change_password' => !empty($user->must_change_password)
+            );
+        }
+
 
 
     // Business flow ni para delete user; application/controllers/Users.php ang caller, then self-delete ug history rules diri gi-check.

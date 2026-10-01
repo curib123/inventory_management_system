@@ -51,8 +51,9 @@ class Auth extends CI_Controller {
                 return;
             }
 
+            $username = trim($this->input->post('username', TRUE));
             $session_data = $this->auth_service->authenticate(
-                trim($this->input->post('username', TRUE)),
+                $username,
                 (string) $this->input->post('password', FALSE)
             );
 
@@ -63,7 +64,12 @@ class Auth extends CI_Controller {
                 return;
             }
 
-            $data['error'] = 'Invalid username or password.';
+            $lockout = $this->auth_service->login_lockout_status($username);
+            $data['error'] = $lockout['remaining_seconds'] > 0
+                ? 'Sign-in is temporarily locked after recent attempts.'
+                : 'Invalid username or password.';
+            $data['lockout_until'] = $lockout['locked_until'];
+            $data['lockout_seconds'] = $lockout['remaining_seconds'];
             $this->load->view('auth/login', $data);
             return;
         }

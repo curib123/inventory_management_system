@@ -7,13 +7,24 @@ require_once dirname(__DIR__) . '/application/models/Login_attempt_model.php';
 
 class LoginAttemptDatabaseStub {
     public $queries = array();
+    public $next_row = array('locked_until' => '2026-10-01 12:15:00', 'remaining_seconds' => 900);
 
     public function query($sql, $bindings = array()) {
         $this->queries[] = array('sql' => $sql, 'bindings' => $bindings);
 
-        return new class {
+        return new class($this->next_row) {
+            private $row;
+
+            public function __construct($row) {
+                $this->row = $row;
+            }
+
             public function num_rows() {
                 return 0;
+            }
+
+            public function row_array() {
+                return $this->row;
             }
         };
     }
@@ -42,6 +53,18 @@ class LoginAttemptModelTest extends TestCase {
             hash('sha256', '192.0.2.10')
         ), $query['bindings']);
         $this->assertStringNotContainsString('Admin', $query['sql'] . implode('', $query['bindings']));
+    }
+
+    public function testLockoutStatusReturnsExpiryAndRemainingSeconds() {
+        $database = new LoginAttemptDatabaseStub();
+        $model = $this->createModel($database);
+
+        $status = $model->lockout_status('admin', '192.0.2.10');
+
+        $this->assertSame('2026-10-01 12:15:00', $status['locked_until']);
+        $this->assertSame(900, $status['remaining_seconds']);
+        $this->assertStringContainsString('MAX(locked_until) AS locked_until', $database->queries[0]['sql']);
+        $this->assertStringContainsString('TIMESTAMPDIFF(SECOND, NOW(), locked_until)', $database->queries[0]['sql']);
     }
 
     public function testDifferentUsernamesHaveIndependentAccountBuckets() {
