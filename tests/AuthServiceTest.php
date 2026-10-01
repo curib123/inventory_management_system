@@ -43,6 +43,7 @@ class AuthServiceTest extends TestCase {
         $user = (object) array(
             'id' => 7,
             'username' => 'admin',
+            'profile_image' => '0123456789abcdef0123456789abcdef.png',
             'role_id' => 1,
             'role_name' => 'admin',
             'auth_version' => 4,
@@ -86,6 +87,7 @@ class AuthServiceTest extends TestCase {
 
         $this->assertSame($user->id, $session_data['user_id']);
         $this->assertSame('admin', $session_data['username']);
+        $this->assertSame('0123456789abcdef0123456789abcdef.png', $session_data['profile_image']);
         $this->assertSame('admin', $session_data['role_name']);
         $this->assertSame(4, $session_data['auth_version']);
         $this->assertTrue($session_data['logged_in']);
@@ -228,6 +230,7 @@ class AuthServiceTest extends TestCase {
             'first_name' => 'John Paul',
             'last_name' => 'Curib',
             'username' => 'staff-user',
+            'profile_image' => '',
             'role_id' => 2,
             'role_name' => 'staff',
             'auth_version' => 2
@@ -240,6 +243,7 @@ class AuthServiceTest extends TestCase {
             'first_name' => 'John Paul',
             'last_name' => 'Curib',
             'username' => 'staff-user',
+            'profile_image' => '',
             'role_id' => 2,
             'role_name' => 'staff',
             'auth_version' => 2,

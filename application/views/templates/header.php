@@ -62,6 +62,11 @@ if ($current_avatar_initials === '') {
     $current_avatar_initials = 'U';
 }
 
+$current_profile_image = basename((string) $this->session->userdata('profile_image'));
+$current_profile_image_url = preg_match('/\A[a-f0-9]{32}\.(?:jpg|jpeg|png|gif|webp)\z/i', $current_profile_image)
+    ? base_url('assets/image/profiles/' . rawurlencode($current_profile_image))
+    : '';
+
 $current_role_label = $current_role_name !== ''
     ? ucwords(str_replace('_', ' ', $current_role_name))
     : 'User';
@@ -193,7 +198,11 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
         <div class="sidebar-footer">
             <div class="sidebar-account">
                 <div class="sidebar-avatar" aria-hidden="true">
-                    <?php echo html_escape($current_avatar_initials); ?>
+                    <?php if ($current_profile_image_url !== ''): ?>
+                        <img src="<?php echo html_escape($current_profile_image_url); ?>" alt="">
+                    <?php else: ?>
+                        <?php echo html_escape($current_avatar_initials); ?>
+                    <?php endif; ?>
                 </div>
 
                 <div class="sidebar-account-copy">
@@ -253,7 +262,11 @@ $sidebar_aria_current = function ($key) use ($sidebar_active) {
 
                 <div class="app-user-profile" title="Signed in as <?php echo html_escape($current_display_name); ?>">
                     <div class="app-user-avatar" aria-hidden="true">
-                        <?php echo html_escape($current_avatar_initials); ?>
+                        <?php if ($current_profile_image_url !== ''): ?>
+                            <img src="<?php echo html_escape($current_profile_image_url); ?>" alt="">
+                        <?php else: ?>
+                            <?php echo html_escape($current_avatar_initials); ?>
+                        <?php endif; ?>
                     </div>
 
                     <div class="app-user-profile-copy d-none d-sm-flex">

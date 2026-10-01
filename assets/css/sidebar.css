@@ -215,6 +215,13 @@ body {
     font-weight: 800;
 }
 
+.sidebar-avatar img {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+}
+
 .sidebar-account-copy {
     min-width: 0;
     display: flex;

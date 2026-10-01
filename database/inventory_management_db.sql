@@ -131,6 +131,7 @@ CREATE TABLE users (
     last_name VARCHAR(100) NOT NULL,
     username VARCHAR(50) NOT NULL,
     password VARCHAR(255) NOT NULL,
+    profile_image VARCHAR(255) DEFAULT NULL,
     must_change_password TINYINT(1) NOT NULL DEFAULT 0,
     auth_version INT UNSIGNED NOT NULL DEFAULT 1,
     role_id INT NOT NULL,

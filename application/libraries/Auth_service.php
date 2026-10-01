@@ -213,6 +213,7 @@ class Auth_service {
                 ? $user->last_name
                 : '',
             'username' => $user->username,
+            'profile_image' => isset($user->profile_image) ? (string) $user->profile_image : '',
             'role_id' => $user->role_id,
             'role_name' => $user->role_name,
             'auth_version' => isset($user->auth_version) ? (int) $user->auth_version : 1,

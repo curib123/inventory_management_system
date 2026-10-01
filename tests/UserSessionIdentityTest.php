@@ -31,6 +31,7 @@ class UserSessionIdentityTest extends TestCase {
             'first_name' => 'Updated',
             'last_name' => 'Administrator',
             'username' => 'new-admin',
+            'profile_image' => 'fedcba9876543210fedcba9876543210.webp',
             'role_id' => 3,
             'role_name' => 'manager',
             'auth_version' => 6,
@@ -50,6 +51,7 @@ class UserSessionIdentityTest extends TestCase {
             'role_id' => 3,
             'role_name' => 'manager',
             'auth_version' => 6,
+            'profile_image' => 'fedcba9876543210fedcba9876543210.webp',
             'must_change_password' => FALSE
         ), $identity);
     }

@@ -26,6 +26,7 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
         (string) (isset($input['username']) ? $input['username'] : '')
     );
 
+
     $requested_status =
         isset($input['status']) && (int) $input['status'] === 0
             ? 0
@@ -78,6 +79,19 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
         'status' => $requested_status
     );
 
+    $old_profile_image = $current_user && isset($current_user->profile_image)
+        ? (string) $current_user->profile_image
+        : '';
+    $image_upload = $this->upload_profile_image();
+
+    if (!$image_upload['success']) {
+        return array('success' => FALSE, 'message' => $image_upload['message']);
+    }
+
+    if ($image_upload['filename'] !== NULL) {
+        $data['profile_image'] = $image_upload['filename'];
+    }
+
     $temporary_password = NULL;
     $password_reset = FALSE;
 
@@ -123,6 +137,10 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
     }
 
     if (!$this->CI->User_model->save($data, $id)) {
+        if ($image_upload['filename'] !== NULL) {
+            $this->delete_profile_image($image_upload['filename']);
+        }
+
         if ($guard_admin_capability) {
             $this->CI->db->trans_rollback();
         }
@@ -136,6 +154,9 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
     if ($guard_admin_capability) {
         if ($this->CI->Role_model->count_admin_capable_users() < 1) {
             $this->CI->db->trans_rollback();
+            if ($image_upload['filename'] !== NULL) {
+                $this->delete_profile_image($image_upload['filename']);
+            }
             return array(
                 'success' => FALSE,
                 'message' => 'This change would leave no active administrator able to view and manage roles. Keep at least one active administrator with both role-management permissions.'
@@ -144,10 +165,17 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
 
         if ($this->CI->db->trans_status() === FALSE) {
             $this->CI->db->trans_rollback();
+            if ($image_upload['filename'] !== NULL) {
+                $this->delete_profile_image($image_upload['filename']);
+            }
             return array('success' => FALSE, 'message' => 'The user could not be saved.');
         }
 
         $this->CI->db->trans_commit();
+    }
+
+    if ($image_upload['filename'] !== NULL && $old_profile_image !== '') {
+        $this->delete_profile_image($old_profile_image);
     }
 
 
@@ -170,6 +198,7 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
         'success' => TRUE,
         'username' => $username,
         'temporary_password' => $temporary_password,
+        'profile_image' => $image_upload['filename'] !== NULL ? $image_upload['filename'] : $old_profile_image,
         'password_reset' => $password_reset,
         'self_deactivated' =>
             !$is_new_user &&
@@ -177,7 +206,79 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
             $requested_status === 0
     );
 }
-        public function session_identity($user_id) {
+    private function upload_profile_image() {
+        if (!isset($_FILES['profile_image']) || !is_array($_FILES['profile_image'])) {
+            return array('success' => TRUE, 'filename' => NULL);
+        }
+
+        $file_error = isset($_FILES['profile_image']['error'])
+            ? (int) $_FILES['profile_image']['error']
+            : UPLOAD_ERR_NO_FILE;
+
+        if ($file_error === UPLOAD_ERR_NO_FILE) {
+            return array('success' => TRUE, 'filename' => NULL);
+        }
+
+        if ($file_error !== UPLOAD_ERR_OK) {
+            return array('success' => FALSE, 'message' => 'The profile image upload failed. Please choose a smaller image and try again.');
+        }
+
+        $upload_directory = FCPATH . 'assets/image/profiles/';
+
+        if (!is_dir($upload_directory) && !@mkdir($upload_directory, 0755, TRUE) && !is_dir($upload_directory)) {
+            return array('success' => FALSE, 'message' => 'Profile image storage is unavailable.');
+        }
+
+        if (!is_writable($upload_directory)) {
+            return array('success' => FALSE, 'message' => 'Profile image storage is not writable.');
+        }
+
+        $this->CI->load->library('upload');
+        $this->CI->upload->initialize(array(
+            'upload_path' => $upload_directory,
+            'allowed_types' => 'jpg|jpeg|png|gif|webp',
+            'max_size' => 2048,
+            'max_width' => 2000,
+            'max_height' => 2000,
+            'file_ext_tolower' => TRUE,
+            'encrypt_name' => TRUE,
+            'detect_mime' => TRUE,
+            'mod_mime_fix' => TRUE
+        ), TRUE);
+
+        if (!$this->CI->upload->do_upload('profile_image')) {
+            return array(
+                'success' => FALSE,
+                'message' => trim(strip_tags($this->CI->upload->display_errors('', '')))
+            );
+        }
+
+        $upload_data = $this->CI->upload->data();
+        $filename = isset($upload_data['file_name']) ? basename((string) $upload_data['file_name']) : '';
+
+        if (!preg_match('/\A[a-f0-9]{32}\.(?:jpg|jpeg|png|gif|webp)\z/i', $filename)) {
+            $this->delete_profile_image($filename);
+            return array('success' => FALSE, 'message' => 'The uploaded profile image has an invalid filename.');
+        }
+
+        return array('success' => TRUE, 'filename' => $filename);
+    }
+
+    private function delete_profile_image($filename) {
+        $filename = basename((string) $filename);
+
+        if (!preg_match('/\A[a-f0-9]{32}\.(?:jpg|jpeg|png|gif|webp)\z/i', $filename)) {
+            return;
+        }
+
+        $image_path = FCPATH . 'assets/image/profiles/' . $filename;
+
+        if (is_file($image_path)) {
+            @unlink($image_path);
+        }
+    }
+
+    public function session_identity($user_id) {
             $user = $this->CI->User_model->get_by_id((int) $user_id);
 
             if (!$user || !(int) $user->status || !(int) $user->role_status) {
@@ -191,6 +292,7 @@ public function save($id, $input, $current_user = NULL, $current_session_user_id
                 'role_id' => (int) $user->role_id,
                 'role_name' => (string) $user->role_name,
                 'auth_version' => (int) $user->auth_version,
+                'profile_image' => isset($user->profile_image) ? (string) $user->profile_image : '',
                 'must_change_password' => !empty($user->must_change_password)
             );
         }

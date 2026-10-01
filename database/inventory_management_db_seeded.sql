@@ -471,6 +471,9 @@ UNLOCK TABLES;
 ALTER TABLE `users`
   ADD COLUMN `auth_version` int(10) unsigned NOT NULL DEFAULT 1;
 
+ALTER TABLE `users`
+  ADD COLUMN `profile_image` varchar(255) DEFAULT NULL;
+
 --
 -- Dumping routines for database 'inventory_management_db'
 --

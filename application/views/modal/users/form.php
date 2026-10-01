@@ -1,5 +1,11 @@
 <?php
 $user_is_edit = isset($user) && $user;
+$profile_image_name = $user_is_edit && !empty($user->profile_image)
+    ? basename((string) $user->profile_image)
+    : '';
+$profile_image_url = preg_match('/\A[a-f0-9]{32}\.(?:jpg|jpeg|png|gif|webp)\z/i', $profile_image_name)
+    ? base_url('assets/image/profiles/' . rawurlencode($profile_image_name))
+    : '';
 $user_confirmation = array(
     'title' => $user_is_edit ? 'Save user changes?' : 'Create this user account?',
     'label' => $user_is_edit ? 'Save User Changes' : 'Create User',
@@ -7,7 +13,7 @@ $user_confirmation = array(
     'icon' => 'bi-person-check'
 );
 
-echo form_open(current_url(), ui_modal_form_attributes($user_confirmation));
+echo form_open_multipart(current_url(), ui_modal_form_attributes($user_confirmation));
 ?>
 <?php
 $this->load->view('components/modal/header', array(
@@ -27,6 +33,29 @@ $this->load->view('components/modal/header', array(
     <?php endif; ?>
 
     <div class="row g-3">
+        <div class="col-12">
+            <div class="d-flex align-items-center gap-3">
+                <div class="user-profile-image-preview" aria-hidden="true">
+                    <?php if ($profile_image_url !== ''): ?>
+                        <img src="<?php echo html_escape($profile_image_url); ?>" alt="">
+                    <?php else: ?>
+                        <i class="bi bi-person-fill"></i>
+                    <?php endif; ?>
+                </div>
+                <div class="flex-grow-1">
+                    <label for="profile_image" class="form-label">Profile image</label>
+                    <input
+                        type="file"
+                        id="profile_image"
+                        name="profile_image"
+                        class="form-control"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                    >
+                    <div class="form-text">JPEG, PNG, GIF, or WebP. Maximum 2 MB and 2000 × 2000 pixels.</div>
+                </div>
+            </div>
+        </div>
+
         <div class="col-12 col-md-6">
             <label for="first_name" class="form-label">First Name</label>
             <input type="text" id="first_name" name="first_name" class="form-control" required maxlength="100" value="<?php echo html_escape(set_value('first_name', $user_is_edit ? $user->first_name : '')); ?>" autocomplete="off">

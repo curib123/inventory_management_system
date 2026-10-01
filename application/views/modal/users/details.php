@@ -7,6 +7,19 @@ $this->load->view('components/modal/header', array(
 ?>
 
 <div class="app-modal-body">
+    <?php
+    $profile_image_name = !empty($user->profile_image) ? basename((string) $user->profile_image) : '';
+    $profile_image_url = preg_match('/\A[a-f0-9]{32}\.(?:jpg|jpeg|png|gif|webp)\z/i', $profile_image_name)
+        ? base_url('assets/image/profiles/' . rawurlencode($profile_image_name))
+        : '';
+    ?>
+    <div class="user-details-profile-image" aria-hidden="true">
+        <?php if ($profile_image_url !== ''): ?>
+            <img src="<?php echo html_escape($profile_image_url); ?>" alt="">
+        <?php else: ?>
+            <i class="bi bi-person-fill"></i>
+        <?php endif; ?>
+    </div>
     <dl class="row app-detail-list mb-0">
         <dt class="col-sm-4">First Name</dt><dd class="col-sm-8"><?php echo html_escape($user->first_name); ?></dd>
         <dt class="col-sm-4">Middle Name</dt><dd class="col-sm-8"><?php echo html_escape($user->middle_name ?: 'N/A'); ?></dd>
